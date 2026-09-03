@@ -1,0 +1,25 @@
+{
+  "name": "@nexus/example-restricted-plugin",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rspack build --mode production",
+    "dev": "rspack serve --mode development",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@rspack/cli": "catalog:",
+    "@rspack/core": "catalog:",
+    "@rspack/dev-server": "catalog:",
+    "@rspack/plugin-react-refresh": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react-refresh": "catalog:",
+    "typescript": "catalog:"
+  }
+}
+
