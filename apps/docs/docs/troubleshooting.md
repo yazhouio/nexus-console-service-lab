@@ -84,7 +84,7 @@ Surface failure 只影响当前 Surface Instance。若 Plugin 仍为 `ACTIVE` �
 | `TIMEOUT` | Provider 是否响应 AbortSignal |
 | `BRIDGE_SESSION_INACTIVE` | Session 是否已 Unmount / dispose |
 
-默认 Bridge 限制见 [README.md](../README.md#bridge-sessions)：64 KiB 消息、16 并发、100 requests/s、10 秒超时、32 个订阅。
+默认 Bridge 限制为：64 KiB 消息、16 并发、100 requests/s、10 秒超时、32 个订阅；完整配置见仓库根目录 `README.md` 的 Bridge sessions 章节。
 
 ## 6. 订阅没有更新
 

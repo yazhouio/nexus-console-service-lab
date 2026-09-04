@@ -6,12 +6,13 @@ V1 frontend plugin runtime workspace described by the normative documents in `sp
 
 - `apps/host`: React 19 host application built with Rsbuild.
 - `apps/example-restricted-plugin`: React 19 restricted-plugin fixture built directly with Rspack.
+- `apps/docs`: independent Rspress 2 documentation workspace.
 - `packages/plugin-runtime`: build-tool-independent TypeScript runtime model.
 
 ## Documentation
 
 The documentation is organized by delivery priority in
-[docs/README.md](docs/README.md). P0 covers authoring, public APIs, contracts,
+[apps/docs/docs/README.md](apps/docs/docs/README.md). P0 covers authoring, public APIs, contracts,
 architecture, and the current capability catalog; P1 covers compatibility,
 security, troubleshooting, and examples; P2 covers internal implementation
 design.
@@ -22,16 +23,20 @@ design.
 pnpm install
 pnpm dev:host
 pnpm dev:plugin
+pnpm dev:docs
 pnpm test
 pnpm typecheck
 pnpm build
+pnpm build:docs
+pnpm preview:docs
 ```
 
 Run `dev:host` and `dev:plugin` in separate terminals, then open
 `http://localhost:3000`. The Host proxies `/plugins/kubeeye/1.0.0/` to the
 Rspack dev server. Opening KubeEye mounts its Surface on demand; **Read current
 cluster** calls the Host's `kubesphere.cluster@2/getCurrentCluster` action over
-the Surface's dedicated MessagePort.
+the Surface's dedicated MessagePort. Run `pnpm dev:docs` separately and open
+`http://localhost:3003` for the Rspress documentation site.
 
 ## Browser regression tests
 

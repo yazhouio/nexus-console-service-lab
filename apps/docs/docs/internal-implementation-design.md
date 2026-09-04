@@ -1,6 +1,6 @@
 # Internal Implementation Design
 
-本文是 P2 内部设计说明。对外行为仍以 [spec/技术落地方案.md](../spec/技术落地方案.md) 和 P0 Contract 文档为准。
+本文是 P2 内部设计说明。对外行为仍以仓库中的 `spec/技术落地方案.md` 和 P0 Contract 文档为准。
 
 ## 1. Module 划分
 
@@ -107,4 +107,4 @@ Resolver、Registry 和 Bridge 使用纯输入输出测试；Wujie 的同源 coo
 - `pnpm test:e2e`：8 browser cases passed；
 - `git diff --check`：passed。
 
-详细记录见 [.scratch/frontend-plugin-runtime-v1/review.md](../.scratch/frontend-plugin-runtime-v1/review.md)。
+详细记录见仓库中的 `.scratch/frontend-plugin-runtime-v1/review.md`。

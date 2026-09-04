@@ -3,4 +3,5 @@ dist/
 coverage/
 test-results/
 playwright-report/
+doc_build/
 .DS_Store

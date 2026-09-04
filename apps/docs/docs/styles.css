@@ -1,0 +1,39 @@
+:root {
+  --rp-c-brand: #0f766e;
+  --rp-c-brand-light: #14b8a6;
+  --rp-c-brand-lighter: #ccfbf1;
+  --rp-c-brand-dark: #115e59;
+  --rp-c-brand-darker: #134e4a;
+  --rp-c-brand-tint: rgba(20, 184, 166, 0.12);
+  --rp-home-hero-title-color: #0f172a;
+  --rp-home-hero-secondary-color: #0f766e;
+  --rp-home-feature-bg: #f0fdfa;
+  --rp-radius: 12px;
+}
+
+.dark {
+  --rp-c-brand: #2dd4bf;
+  --rp-c-brand-light: #5eead4;
+  --rp-c-brand-lighter: #99f6e4;
+  --rp-c-brand-dark: #14b8a6;
+  --rp-c-brand-darker: #0d9488;
+  --rp-c-brand-tint: rgba(45, 212, 191, 0.14);
+  --rp-home-hero-title-color: #f8fafc;
+  --rp-home-hero-secondary-color: #5eead4;
+  --rp-home-feature-bg: rgba(15, 118, 110, 0.16);
+}
+
+body {
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+.rspress-doc h1,
+.rspress-doc h2,
+.rspress-doc h3 {
+  letter-spacing: -0.02em;
+}
+
+.rspress-doc table {
+  border-radius: var(--rp-radius);
+  overflow: hidden;
+}

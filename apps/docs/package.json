@@ -1,0 +1,16 @@
+{
+  "name": "@nexus/docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "rspress dev --port 3003",
+    "build": "rspress build",
+    "preview": "rspress preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@rspress/core": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

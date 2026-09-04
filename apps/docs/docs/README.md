@@ -19,7 +19,7 @@
 
 ## 规范来源与优先级
 
-V1 的规范性来源是 [spec/技术落地方案.md](../spec/技术落地方案.md)。本目录是面向读者的拆分版：
+V1 的规范性来源是仓库中的 `spec/技术落地方案.md`。本目录是面向读者的拆分版：
 
 1. 如果本目录与 V1 规范冲突，以 V1 规范为准。
 2. 如果实现与规范冲突，应修复实现或明确记录偏差，不通过文档默默改变 Contract。
@@ -27,7 +27,7 @@ V1 的规范性来源是 [spec/技术落地方案.md](../spec/技术落地方案
 
 ## 当前状态
 
-V1 tickets 01–12 已完成，最近一次 Standards / Spec Review 没有遗留问题；验证记录见 [.scratch/frontend-plugin-runtime-v1/review.md](../.scratch/frontend-plugin-runtime-v1/review.md)。
+V1 tickets 01–12 已完成，最近一次 Standards / Spec Review 没有遗留问题；验证记录保存在仓库的 `.scratch/frontend-plugin-runtime-v1/review.md`。
 
 当前仓库的示例 Host 使用：
 
