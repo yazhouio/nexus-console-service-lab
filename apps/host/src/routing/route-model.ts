@@ -5,13 +5,8 @@ import type {
 } from '@nexus/plugin-runtime';
 import { makePath, matchSpace, parsePath, relationship, type PathSpace } from './path-space';
 
-export interface ContributionPolicyRequest {
-  readonly contributorId: string;
-  readonly ownerPluginId: string;
-  readonly kind: 'route' | 'navigation';
-  readonly targetId: string;
-}
-export type HostContributionPolicy = (request: ContributionPolicyRequest) => boolean;
+export type { HostContributionPolicyRequest as ContributionPolicyRequest, HostContributionPolicy } from '@nexus/plugin-runtime';
+import type { HostContributionPolicy } from '@nexus/plugin-runtime';
 export interface ResolvedRoute extends OwnedContribution<RouteContribution> {
   state: ContributionState;
   diagnostics: ContributionDiagnostic[];

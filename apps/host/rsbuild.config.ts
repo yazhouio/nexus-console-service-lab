@@ -21,6 +21,7 @@ export default defineConfig({
     port: Number(process.env.HOST_PORT ?? 3000),
     strictPort: true,
     proxy: {
+      '/plugins/ui-': { target: 'http://localhost:3003', changeOrigin: false },
       '/api': { target: 'http://127.0.0.1:3002' },
       '/plugins/kubeeye/2.0.0': {
         target: 'http://localhost:3001', changeOrigin: false,

@@ -1,3 +1,4 @@
+import { assertPoint, assertSurfaceContribution, uiKey, type ExtensionPointDefinition, type SurfaceContributionDefinition, type UiSurfaceDefinition } from './ui/definitions';
 import { frozenCopy } from './immutable';
 import type { PluginId } from './identifiers';
 import { PluginRuntimeContractError } from './runtime-state';
@@ -65,21 +66,8 @@ export interface NavigationContribution {
   readonly order?: number;
 }
 
-export interface UiExtensionContribution {
-  readonly id: string;
-  readonly slot: string;
-  readonly order?: number;
-  readonly target: HostRenderTarget;
-}
-
-export interface RestrictedUiExtensionContribution {
-  readonly id: string;
-  readonly slot: string;
-  readonly surfaceId: string;
-  readonly order?: number;
-  readonly layout?: JsonValue;
-  readonly initialParameters?: JsonValue;
-}
+export type UiExtensionContribution = SurfaceContributionDefinition;
+export type RestrictedUiExtensionContribution = SurfaceContributionDefinition;
 
 export interface RestrictedContributions {
   readonly routes?: readonly RestrictedRouteContribution[];
@@ -93,11 +81,12 @@ export interface OwnedContribution<T> {
 }
 
 export interface ContributionRegistry {
-  listExtensionSlots(): readonly string[];
+  listExtensionPoints(): readonly OwnedContribution<ExtensionPointDefinition>[];
+  listUiSurfaces(): readonly OwnedContribution<UiSurfaceDefinition>[];
   listRoutes(): readonly OwnedContribution<RouteContribution>[];
   listNavigation(): readonly OwnedContribution<NavigationContribution>[];
   listExtensions(
-    slot: string,
+    point?: { readonly ownerPluginId: string; readonly id: string },
   ): readonly OwnedContribution<UiExtensionContribution>[];
 }
 
@@ -105,6 +94,8 @@ export interface PluginContributionContext {
   registerRoute(contribution: RouteContribution): void;
   registerNavigation(contribution: NavigationContribution): void;
   registerExtension(contribution: UiExtensionContribution): void;
+  registerExtensionPoint(definition: ExtensionPointDefinition): void;
+  registerSurface(definition: UiSurfaceDefinition): void;
 }
 
 export interface ContributionActivation {
@@ -249,17 +240,17 @@ export function createContributionRegistry(): ContributionRegistryController {
     string,
     OwnedContribution<NavigationContribution>
   >();
-  const extensions = new Map<
-    string,
-    Map<string, OwnedContribution<UiExtensionContribution>>
-  >();
-
+  const extensions = new Map<string, OwnedContribution<UiExtensionContribution>>();
+  const points = new Map<string, OwnedContribution<ExtensionPointDefinition>>();
+  const surfaces = new Map<string, OwnedContribution<UiSurfaceDefinition>>();
   const registry: ContributionRegistry = Object.freeze({
-    listExtensionSlots: () => Object.freeze([...extensions.keys()].sort()),
+    listExtensionPoints: () => stableOwned(points.values()),
+    listUiSurfaces: () => stableOwned(surfaces.values()),
     listRoutes: () => stableOwned(routes.values()),
     listNavigation: () => visualOwned(navigation.values()),
-    listExtensions: (slot: string) =>
-      visualOwned(extensions.get(slot)?.values() ?? []),
+    listExtensions: (point?: { ownerPluginId: string; id: string }) => Object.freeze([...extensions.values()]
+      .filter(e => !point || e.contribution.point.ownerPluginId === point.ownerPluginId && e.contribution.point.id === point.id)
+      .sort((a, b) => (a.contribution.order ?? 0) - (b.contribution.order ?? 0) || (uiKey(a.ownerPluginId, a.contribution.id) < uiKey(b.ownerPluginId, b.contribution.id) ? -1 : 1))),
   });
 
   return {
@@ -272,6 +263,8 @@ export function createContributionRegistry(): ContributionRegistryController {
       const stagedRoutes: RouteContribution[] = [];
       const stagedNavigation: NavigationContribution[] = [];
       const stagedExtensions: UiExtensionContribution[] = [];
+      const stagedPoints: ExtensionPointDefinition[] = [];
+      const stagedSurfaces: UiSurfaceDefinition[] = [];
       let active = true;
       let validated = false;
 
@@ -297,6 +290,8 @@ export function createContributionRegistry(): ContributionRegistryController {
           stagedNavigation.push(contribution);
           validated = false;
         },
+        registerExtensionPoint(definition: ExtensionPointDefinition) { assertActive(); stagedPoints.push(definition); validated = false; },
+        registerSurface(definition: UiSurfaceDefinition) { assertActive(); stagedSurfaces.push(definition); validated = false; },
         registerExtension(contribution: UiExtensionContribution) {
           assertActive();
           stagedExtensions.push(contribution);
@@ -371,27 +366,18 @@ export function createContributionRegistry(): ContributionRegistryController {
           }
         }
 
-        const extensionIdsBySlot = new Map<string, Set<string>>();
-        for (const [slot, records] of extensions) {
-          extensionIdsBySlot.set(slot, new Set(records.keys()));
-        }
-        for (const extension of stagedExtensions) {
-          const ids = extensionIdsBySlot.get(extension.slot) ?? new Set<string>();
-          if (
-            !isNonEmptyString(extension.id) ||
-            !isNonEmptyString(extension.slot) ||
-            ids.has(extension.id) ||
-            (extension.order !== undefined && !Number.isFinite(extension.order))
-          ) {
-            invalidContribution(
-              ownerPluginId,
-              `Extension ${extension.id} from ${ownerPluginId} is invalid or duplicated in slot ${extension.slot}.`,
-            );
+        try {
+          for (const [staged, stored] of [[stagedExtensions, extensions], [stagedPoints, points], [stagedSurfaces, surfaces]] as const) {
+            const ids = new Set<string>();
+            for (const entry of staged) {
+              if (!isNonEmptyString(entry.id) || ids.has(entry.id) || stored.has(uiKey(ownerPluginId, entry.id))) throw Error('Duplicate UI definition.');
+              ids.add(entry.id);
+            }
           }
-          validateRenderTarget(ownerPluginId, extension.target);
-          ids.add(extension.id);
-          extensionIdsBySlot.set(extension.slot, ids);
-        }
+          stagedExtensions.forEach(assertSurfaceContribution);
+          stagedPoints.forEach(assertPoint);
+          stagedSurfaces.forEach(s => validateRenderTarget(ownerPluginId, s.target));
+        } catch (error) { invalidContribution(ownerPluginId, error instanceof Error ? error.message : 'Invalid UI declaration.'); }
 
         validated = true;
       };
@@ -413,11 +399,9 @@ export function createContributionRegistry(): ContributionRegistryController {
         for (const item of stagedNavigation) {
           navigation.set(item.id, owned(ownerPluginId, item));
         }
-        for (const extension of stagedExtensions) {
-          const records = extensions.get(extension.slot) ?? new Map();
-          records.set(extension.id, owned(ownerPluginId, extension));
-          extensions.set(extension.slot, records);
-        }
+        for (const extension of stagedExtensions) extensions.set(uiKey(ownerPluginId, extension.id), owned(ownerPluginId, extension));
+        for (const point of stagedPoints) points.set(uiKey(ownerPluginId, point.id), owned(ownerPluginId, point));
+        for (const surface of stagedSurfaces) surfaces.set(uiKey(ownerPluginId, surface.id), owned(ownerPluginId, surface));
         active = false;
       };
 

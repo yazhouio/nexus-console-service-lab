@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { HostContext } from './HostContext';
 import { inspect, type BootstrapFailure, type PluginRuntime, type InspectionSource } from '@nexus/plugin-runtime';
 import type { BridgeAuditEntry, WujiePluginAdapter } from '@nexus/plugin-runtime/browser';
 
@@ -8,14 +9,16 @@ export function RuntimeInspector({ runtime, adapter, audit, hostSource }: {
   readonly audit: readonly BridgeAuditEntry[];
   readonly hostSource?: InspectionSource;
 }) {
+  const ui = useContext(HostContext)?.ui;
   const read = () => inspect(runtime, { listInstances: () => adapter?.listInstances() ?? [],
+    ...(ui ? { inspectUi: () => ui.core.inspect() } : {}),
     ...(hostSource ? { listHostContributions: () => hostSource.listHostContributions?.() ?? [] } : {}) });
   const [snapshot, setSnapshot] = useState(read);
   useEffect(() => {
     setSnapshot(read());
     const timer = window.setInterval(() => setSnapshot(read()), 250);
     return () => window.clearInterval(timer);
-  }, [runtime, adapter, hostSource]);
+  }, [runtime, adapter, hostSource, ui]);
   return <section aria-label="Runtime Inspector" style={{ marginTop: 32 }}>
     <h2>Runtime Inspector</h2>
     {snapshot.bootstrapError && <p role="alert">{snapshot.bootstrapError.code}: {snapshot.bootstrapError.message}</p>}
@@ -34,6 +37,7 @@ export function RuntimeInspector({ runtime, adapter, audit, hostSource }: {
         <td>{plugin.executionMode}</td><td>{plugin.core ? 'Yes' : 'No'}</td>
       </tr>)}</tbody>
     </table>
+    {snapshot.ui && <details><summary>UI scopes and relations</summary><pre>{JSON.stringify(snapshot.ui, null, 2)}</pre></details>}
     {snapshot.plugins.flatMap(plugin => (plugin.surfaces ?? []).map(surface => <div key={`${plugin.id}/${surface.id}`}>
       <p>{plugin.id}/{surface.id}: {surface.instances.length === 0 ? 'UNMOUNTED' : `${surface.instances.length} instances`}</p>
       <ul>{surface.instances.map(instance => <li key={instance.surfaceInstanceId}>

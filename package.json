@@ -19,7 +19,7 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "check:node": "node scripts/check-node-version.mjs",
     "check:plugin-contract": "node scripts/check-plugin-contract.mjs",
-    "build:routing-validation": "pnpm --filter @nexus/plugin-runtime build && pnpm --filter @nexus/example-restricted-plugin build && NEXUS_ROUTING_VALIDATION=true NEXUS_TEST_FIXTURES=true NEXUS_BUILD_VERSION=routing-validation pnpm --filter @nexus/host build",
+    "build:routing-validation": "pnpm --filter @nexus/plugin-runtime build && pnpm --filter @nexus/example-restricted-plugin build && pnpm --filter @nexus/ui-composition-fixtures build && NEXUS_ROUTING_VALIDATION=true NEXUS_TEST_FIXTURES=true NEXUS_BUILD_VERSION=routing-validation pnpm --filter @nexus/host build",
     "test:e2e:preview": "playwright test --config playwright.preview.config.ts",
     "routing:measure": "node scripts/measure-routing.mjs",
     "routing:smoke": "node scripts/routing-smoke.mjs",

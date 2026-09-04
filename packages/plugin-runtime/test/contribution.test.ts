@@ -103,24 +103,16 @@ describe('ContributionRegistry', () => {
     expect(controller.registry.listNavigation()).toEqual([]);
   });
 
-  it('scopes Extension id collisions to a Slot', () => {
+  it('scopes contribution identity to its owner, not its target point', () => {
     const controller = createContributionRegistry();
-    const activation = controller.beginActivation('cluster');
-    activation.context.registerExtension({
-      id: 'overview',
-      slot: 'cluster.cards',
-      target: { kind: 'builtin', render },
-    });
-    activation.context.registerExtension({
-      id: 'overview',
-      slot: 'workspace.cards',
-      target: { kind: 'builtin', render },
-    });
-    activation.commit();
-
-    expect(controller.registry.listExtensions('cluster.cards')).toHaveLength(1);
-    expect(controller.registry.listExtensions('workspace.cards')).toHaveLength(1);
-    expect(controller.registry.listExtensions('missing.slot')).toEqual([]);
+    for (const owner of ['cluster', 'workspace']) {
+      const activation = controller.beginActivation(owner);
+      activation.context.registerExtension({ id: 'overview', kind: 'surface', point: { ownerPluginId: 'shell', id: 'cards', contractMajor: 1 }, surfaceId: 'card' });
+      activation.commit();
+    }
+    expect(controller.registry.listExtensions({ ownerPluginId: 'shell', id: 'cards' })).toHaveLength(2);
+    const duplicate = controller.beginActivation('cluster');
+    duplicate.context.registerExtension({ id: 'overview', kind: 'surface', point: { ownerPluginId: 'shell', id: 'other', contractMajor: 1 }, surfaceId: 'card' });
+    expect(() => duplicate.commit()).toThrow();
   });
 });
-

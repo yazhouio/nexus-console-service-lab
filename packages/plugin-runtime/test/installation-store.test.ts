@@ -93,3 +93,18 @@ it('keeps contract v2 readable while routing is disabled and requires removing n
   store.uninstall('example'); store.install(record());
   expect(oldValidator().list()[0].manifest.version).toBe('1.0.0');
 });
+
+it('freezes an owner point schema across package versions and requires a new contractMajor', () => {
+  const version = (packageVersion: string, contractMajor: number, contextSchema: Record<string, unknown>) => ({
+    ...record(packageVersion), manifest: { ...record(packageVersion).manifest, extensionPoints: [{ id: 'details', kind: 'surface', contractMajor, contextSchema }] },
+  });
+  const schema = { type: 'object', properties: { node: { type: 'string' } } };
+  const store = createInstallationStore({ isEntryAllowed: () => true, supportedHostApis: ['host.console@1'], bridgeContracts: [] });
+  store.install(version('1.0.0', 1, schema));
+  store.install(version('1.1.0', 1, { properties: schema.properties, type: 'object' }));
+  const changed = { ...schema, properties: { ...schema.properties, optional: { type: 'string' } } };
+  expect(() => store.install(version('1.2.0', 1, changed))).toThrow('CONTEXT_MAJOR_FROZEN');
+  expect(store.list()[0].manifest.version).toBe('1.1.0');
+  store.install(version('1.2.0', 2, changed));
+  expect(store.list()[0].manifest.extensionPoints?.[0].contractMajor).toBe(2);
+});

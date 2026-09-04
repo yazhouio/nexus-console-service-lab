@@ -68,12 +68,8 @@ export const cluster: PluginDefinition = {
     context.contributions.registerRoute({ id: 'node-events', parentRouteId: 'node-detail', path: 'events', target: { kind: 'builtin', render: NodeEvents } });
     context.contributions.registerNavigation({ id: 'node-navigation', label: 'Node', routeId: 'node-detail', acceptsChildren: true, order: 150 });
     context.contributions.registerNavigation({ id: 'node-events-navigation', label: 'Events', parentId: 'node-navigation', routeId: 'node-events' });
-    context.contributions.registerExtension({
-      id: 'cluster-overview-card',
-      slot: 'console.home.cards',
-      order: 100,
-      target: { kind: 'builtin', render: ClusterOverview },
-    });
+    context.contributions.registerSurface({ id: 'cluster-overview-card', target: { kind: 'builtin', render: ClusterOverview } });
+    context.contributions.registerExtension({ id: 'cluster-overview-card', kind: 'surface', point: { ownerPluginId: 'console-shell', id: 'home.cards', contractMajor: 1 }, order: 100, surfaceId: 'cluster-overview-card' });
   },
 };
 

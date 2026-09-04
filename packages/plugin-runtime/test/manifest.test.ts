@@ -36,7 +36,7 @@ function validRecord() {
         extensions: [
           {
             id: 'workload-detail-tab',
-            slot: 'workload.detail.tabs',
+            kind: 'surface', point: { ownerPluginId: 'workload', id: 'detail', contractMajor: 1 },
             surfaceId: 'workload-detail',
             order: 200,
           },
@@ -154,31 +154,30 @@ describe('validateRestrictedInstallRecord', () => {
     expectInvalid(input, 'references unknown surface missing');
   });
 
-  it('rejects Extension references to unknown Surfaces', () => {
+  it('defers well-formed Surface references to contribution relation validation', () => {
     const input = validRecord();
     input.manifest.contributions.extensions[0].surfaceId = 'missing';
-    expectInvalid(input, 'references unknown surface missing');
+    expect(validateRestrictedInstallRecord(input, validationOptions).manifest.contributions.extensions?.[0].surfaceId).toBe('missing');
   });
 
-  it('allows the same Extension ID in different Slots', () => {
+  it('rejects duplicate contribution IDs even across different points', () => {
     const input = validRecord();
     input.manifest.contributions.extensions.push({
       id: 'workload-detail-tab',
-      slot: 'pod.detail.tabs',
+      kind: 'surface', point: { ownerPluginId: 'pod', id: 'detail', contractMajor: 1 },
       surfaceId: 'workload-detail',
       order: 200,
     });
 
-    const result = validateRestrictedInstallRecord(input, validationOptions);
-    expect(result.manifest.contributions.extensions).toHaveLength(2);
+    expectInvalid(input, 'Duplicate Surface contribution id');
   });
 
-  it('rejects duplicate Extension IDs in the same Slot', () => {
+  it('rejects duplicate contribution IDs', () => {
     const input = validRecord();
     input.manifest.contributions.extensions.push({
       ...input.manifest.contributions.extensions[0],
     });
-    expectInvalid(input, 'duplicated in slot workload.detail.tabs');
+    expectInvalid(input, 'Duplicate Surface contribution id');
   });
 
   it('rejects non-serializable mount parameters', () => {

@@ -4,14 +4,26 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "noEmit": true,
     "paths": {
-      "@nexus/plugin-runtime": ["./packages/plugin-runtime/src/index.ts"],
+      "@nexus/plugin-runtime": [
+        "./packages/plugin-runtime/src/index.ts"
+      ],
       "@nexus/plugin-runtime/browser": [
         "./packages/plugin-runtime/src/browser/index.ts"
+      ],
+      "@nexus/plugin-runtime/client": [
+        "./packages/plugin-runtime/src/ui-client.ts"
+      ],
+      "@nexus/plugin-runtime/react": [
+        "./packages/plugin-runtime/src/ui-react.tsx"
       ]
     },
     "resolveJsonModule": true,

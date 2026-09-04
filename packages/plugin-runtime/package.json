@@ -11,9 +11,19 @@
     "./browser": {
       "types": "./dist/browser/index.d.ts",
       "import": "./dist/browser/index.js"
+    },
+    "./client": {
+      "types": "./dist/ui-client.d.ts",
+      "import": "./dist/ui-client.js"
+    },
+    "./react": {
+      "types": "./dist/ui-react.d.ts",
+      "import": "./dist/ui-react.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
@@ -24,6 +34,11 @@
   },
   "devDependencies": {
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "react": "catalog:",
+    "@types/react": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
   }
 }

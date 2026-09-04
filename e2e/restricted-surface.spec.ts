@@ -114,8 +114,8 @@ test('mounts Route and Extension independently, isolates failure, and unmounts i
     return child.$wujie?.props;
   }));
   expect(new Set(props.map(props => props?.bridge.surfaceInstanceId)).size).toBe(2);
-  expect(props.map(props => props?.surface.initialParameters)).toEqual([{ view: 'route' }, { view: 'card' }]);
-  expect(props.map(props => props?.surface.layout)).toEqual([{ width: 'full' }, { width: 'compact' }]);
+  expect(props.map(props => props?.surface.initialParameters)).toEqual([{ view: 'route' }, undefined]);
+  expect(props.map(props => props?.surface.layout)).toEqual([{ width: 'full' }, undefined]);
 
   await page.evaluate(() => document.querySelector('iframe')?.contentWindow?.dispatchEvent(new ErrorEvent('error', { message: 'route failed' })));
   await expect(page.getByTestId('surface-state')).toHaveText('ERROR');
@@ -154,7 +154,9 @@ test('streams Host cluster changes to independent sessions and exposes safe Runt
   await expect(route.getByTestId('watched-cluster')).toHaveText('second-cluster');
   await page.evaluate(() => document.querySelector('iframe')?.contentWindow?.dispatchEvent(new ErrorEvent('error', { message: 'Bearer secret-token' })));
   await expect(page.getByTestId('surface-state')).toHaveText('ERROR');
-  await expect.poll(async () => (await snapshot()).plugins.find((plugin: { id: string }) => plugin.id === 'kubeeye').surfaces[0].instances.find((instance: { state: string }) => instance.state === 'FAILED')?.bridgeSession.state).toBe('DISPOSED');
+  await expect.poll(async () => (await snapshot()).plugins.find((plugin: { id: string }) => plugin.id === 'kubeeye').surfaces[0].instances.length).toBe(1);
+  await expect.poll(async () => (await snapshot()).ui.scopes.find((scope: { owner: string; kind: string }) => scope.owner === 'kubeeye' && scope.kind === 'root')?.execution.phase).toBe('failed');
+  await expect(page.locator('iframe')).toHaveCount(1);
   expect(JSON.stringify(await snapshot())).not.toContain('secret-token');
   const audit = await page.getByTestId('bridge-audit').textContent();
   expect(audit).toContain('unsubscribe');

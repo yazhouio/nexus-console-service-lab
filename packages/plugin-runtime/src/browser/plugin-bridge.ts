@@ -1,3 +1,4 @@
+import type { CreateUiControl } from './ui-control';
 import type { PluginRuntime } from '../bootstrap';
 import type { BridgeSubscriptionActionContract, OpenedBridgeSubscription } from '../bridge-contract';
 import { isJsonValue, type JsonValue } from '../contribution';
@@ -101,6 +102,8 @@ export interface PluginBridgeSession {
   /** Host ingress; disposed sessions return INACTIVE locally after the port closes. */
   dispatch(value: unknown): Promise<BridgeResponse>;
   dispose(): void;
+  /** Host cleanup barrier, including subscriptions that finish opening after invalidation. */
+  settled(): Promise<void>;
 }
 
 export interface CreatePluginBridgeSessionOptions {
@@ -110,6 +113,7 @@ export interface CreatePluginBridgeSessionOptions {
   readonly limits?: Partial<BridgeLimits>;
   readonly onHostError?: (issue: BridgeHostError) => void;
   readonly onAudit?: (entry: BridgeAuditEntry) => void;
+  readonly createUiControl?: CreateUiControl;
   readonly onSessionFailure?: (code: BridgeErrorCode) => void;
 }
 
@@ -196,6 +200,12 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
   const requestTimes: number[] = [];
   const eventTimes: number[] = [];
   const subscriptions = new Set<Subscription>();
+  const resourceTasks = new Set<Promise<unknown>>();
+  const trackResource = <T>(task: Promise<T>): Promise<T> => {
+    resourceTasks.add(task);
+    void task.then(() => resourceTasks.delete(task), () => resourceTasks.delete(task));
+    return task;
+  };
   let nextSubscriptionId = 0;
   let violations = 0;
 
@@ -233,7 +243,7 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     subscription.disposer = undefined;
     if (!disposer) return;
     try {
-      void Promise.resolve(disposer()).catch(cause => recordHostError(subscription.request, 'ACTION_FAILED', cause));
+      void trackResource(Promise.resolve(disposer()).catch(cause => recordHostError(subscription.request, 'ACTION_FAILED', cause)));
     } catch (cause) { recordHostError(subscription.request, 'ACTION_FAILED', cause); }
   };
   const closeSubscription = (subscription: Subscription, code: BridgeErrorCode = 'BRIDGE_SESSION_INACTIVE'): void => {
@@ -374,8 +384,7 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     try {
       let rawResult: unknown;
       try {
-        rawResult = await Promise.race([
-          Promise.resolve().then(async () => {
+        const invocation = Promise.resolve().then(async () => {
             if (controller.signal.aborted) throw controller.signal.reason;
             const context = {
               pluginId: identity.pluginId, surfaceId: identity.surfaceId,
@@ -390,8 +399,8 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
             if (subscription!.closed) disposeProvider(subscription!);
             return opened;
 
-          }), cancelled,
-        ]);
+          });
+        rawResult = await Promise.race([subscription ? trackResource(invocation) : invocation, cancelled]);
       } catch (cause) {
         const code = controller.signal.aborted
           ? controller.signal.reason as BridgeErrorCode
@@ -429,7 +438,12 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     }
   };
 
+  const uiControl = options.createUiControl?.(value => { if (state === 'ACTIVE') port.postMessage(value); });
   const onMessage = (event: MessageEvent): void => {
+    if (uiControl && event.data?.type === 'ui:request') {
+      try { uiControl.dispatch(event.data); } catch { failSession('BRIDGE_SESSION_INACTIVE'); }
+      return;
+    }
     void dispatch(event.data).catch(() => failSession('BRIDGE_SESSION_INACTIVE'));
   };
   const session: PluginBridgeSession = Object.freeze({
@@ -440,9 +454,11 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     get hostErrors() { return Object.freeze([...hostErrors]); },
     get audit() { return Object.freeze([...audit]); },
     dispatch,
+    async settled() { while (resourceTasks.size) await Promise.allSettled([...resourceTasks]); },
     dispose() {
       if (state === 'DISPOSED') return;
       state = 'DISPOSED';
+      uiControl?.dispose();
       for (const controller of pending) controller.abort('BRIDGE_SESSION_INACTIVE');
       pending.clear();
       for (const subscription of subscriptions) closeSubscription(subscription);

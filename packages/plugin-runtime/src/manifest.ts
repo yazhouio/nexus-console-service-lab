@@ -1,3 +1,4 @@
+import { assertPoint, assertSurfaceContribution, type ExtensionPointDefinition } from './ui/definitions';
 import { assertContributionContractCompatible } from './contribution-compatibility';
 import { frozenCopy } from './immutable';
 import { isCapabilityId, isHostApiId } from './identifiers';
@@ -25,6 +26,7 @@ export interface RestrictedPluginManifest extends PluginDescriptor {
   readonly hostApi: HostApiId;
   readonly permissions: readonly PermissionId[];
   readonly surfaces: readonly SandboxSurfaceDefinition[];
+  readonly extensionPoints?: readonly ExtensionPointDefinition[];
   readonly contributions: RestrictedContributions;
 }
 
@@ -332,83 +334,16 @@ function parseNavigation(
   );
 }
 
-function parseExtensions(
-  value: unknown,
-  surfaceIds: ReadonlySet<string>,
-  pluginId: PluginId,
-): readonly RestrictedUiExtensionContribution[] {
-  if (value === undefined) {
-    return Object.freeze([]);
+function parseUiDefinitions<T extends { readonly id: string }>(value: unknown, validate: (v: T) => void, label: string, pluginId: string): readonly T[] {
+  if (value === undefined) return Object.freeze([]);
+  if (!Array.isArray(value)) invalid(`${label} must be an array.`, pluginId);
+  const ids = new Set<string>();
+  for (const entry of value) {
+    try { validate(entry as T); } catch { invalid(`Invalid ${label} declaration.`, pluginId); }
+    if (ids.has(entry.id)) invalid(`Duplicate ${label} id.`, pluginId);
+    ids.add(entry.id);
   }
-  if (!Array.isArray(value)) {
-    invalid('Manifest contributions.extensions must be an array.', pluginId);
-  }
-
-  const seen = new Set<string>();
-  return Object.freeze(
-    value.map((extensionValue, index) => {
-      const extension = record(extensionValue, `Extension ${index}`, pluginId);
-      assertClosed(
-        extension,
-        ['id', 'slot', 'surfaceId', 'order', 'layout', 'initialParameters'],
-        `Extension ${index}`,
-        pluginId,
-      );
-      const id = nonEmptyString(
-        extension.id,
-        `Extension ${index} id`,
-        pluginId,
-      );
-      const slot = nonEmptyString(
-        extension.slot,
-        `Extension ${id} slot`,
-        pluginId,
-      );
-      const surfaceId = nonEmptyString(
-        extension.surfaceId,
-        `Extension ${id} surfaceId`,
-        pluginId,
-      );
-      const scopedId = `${slot}\u0000${id}`;
-      if (seen.has(scopedId)) {
-        invalid(`Extension id ${id} is duplicated in slot ${slot}.`, pluginId);
-      }
-      if (!surfaceIds.has(surfaceId)) {
-        invalid(
-          `Extension ${id} references unknown surface ${surfaceId}.`,
-          pluginId,
-        );
-      }
-      seen.add(scopedId);
-
-      const order = optionalOrder(
-        extension.order,
-        `Extension ${id} order`,
-        pluginId,
-      );
-      const layout = optionalJsonValue(
-        extension,
-        'layout',
-        `Extension ${id} layout`,
-        pluginId,
-      );
-      const initialParameters = optionalJsonValue(
-        extension,
-        'initialParameters',
-        `Extension ${id} initialParameters`,
-        pluginId,
-      );
-
-      return Object.freeze({
-        id,
-        slot,
-        surfaceId,
-        ...(order === undefined ? {} : { order }),
-        ...(layout === undefined ? {} : { layout }),
-        ...(initialParameters === undefined ? {} : { initialParameters }),
-      });
-    }),
-  );
+  return frozenCopy(value);
 }
 
 function parseContributions(
@@ -427,7 +362,7 @@ function parseContributions(
   return Object.freeze({
     routes: parseRoutes(contributions.routes, surfaceIds, pluginId),
     navigation: parseNavigation(contributions.navigation, pluginId),
-    extensions: parseExtensions(contributions.extensions, surfaceIds, pluginId),
+    extensions: parseUiDefinitions(contributions.extensions, assertSurfaceContribution, 'Surface contribution', pluginId),
   });
 }
 
@@ -451,6 +386,7 @@ function parseManifest(
       'hostApi',
       'permissions',
       'surfaces',
+      'extensionPoints',
       'contributions',
     ],
     'Manifest',
@@ -506,6 +442,7 @@ function parseManifest(
     hostApi,
     permissions,
     surfaces,
+    extensionPoints: parseUiDefinitions(manifest.extensionPoints, assertPoint, 'Extension Point', id),
     contributions,
   });
 }

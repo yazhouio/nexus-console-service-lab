@@ -203,8 +203,7 @@ function normalizeRestrictedContributions(
 ): NormalizedRestrictedDeclarations {
   const normalizeTarget = (
     contribution:
-      | RestrictedRouteContribution
-      | RestrictedUiExtensionContribution,
+      RestrictedRouteContribution,
   ) =>
     Object.freeze({
       kind: 'sandbox-surface' as const,
@@ -233,16 +232,7 @@ function normalizeRestrictedContributions(
     navigation: Object.freeze(
       [...(record.manifest.contributions.navigation ?? [])],
     ),
-    extensions: Object.freeze(
-      (record.manifest.contributions.extensions ?? []).map(extension =>
-        Object.freeze({
-          id: extension.id,
-          slot: extension.slot,
-          ...(extension.order === undefined ? {} : { order: extension.order }),
-          target: normalizeTarget(extension),
-        }),
-      ),
-    ),
+    extensions: Object.freeze([...(record.manifest.contributions.extensions ?? [])]),
   };
 }
 
@@ -276,7 +266,6 @@ function validateRestrictedContributionSet(
 
   const routeOwners = new Map<string, Set<PluginId>>();
   const navigationOwners = new Map<string, Set<PluginId>>();
-  const extensionOwners = new Map<string, Set<PluginId>>();
   const addOwner = (
     index: Map<string, Set<PluginId>>,
     id: string,
@@ -293,21 +282,6 @@ function validateRestrictedContributionSet(
   for (const item of contributionRegistry.listNavigation()) {
     addOwner(navigationOwners, item.contribution.id, item.ownerPluginId);
   }
-  const restrictedSlots = new Set(
-    declarations.flatMap(declaration =>
-      declaration.extensions.map(extension => extension.slot),
-    ),
-  );
-  for (const slot of restrictedSlots) {
-    for (const extension of contributionRegistry.listExtensions(slot)) {
-      addOwner(
-        extensionOwners,
-        `${slot}\u0000${extension.contribution.id}`,
-        extension.ownerPluginId,
-      );
-    }
-  }
-
   for (const declaration of declarations) {
     const pluginId = declaration.record.manifest.id;
     for (const route of declaration.routes) {
@@ -316,9 +290,7 @@ function validateRestrictedContributionSet(
     for (const item of declaration.navigation) {
       addOwner(navigationOwners, item.id, pluginId);
     }
-    for (const extension of declaration.extensions) {
-      addOwner(extensionOwners, `${extension.slot}\u0000${extension.id}`, pluginId);
-    }
+
   }
 
   for (const [id, owners] of routeOwners) {
@@ -335,19 +307,6 @@ function validateRestrictedContributionSet(
       for (const owner of owners) {
         if (restrictedIds.has(owner)) {
           markCollision(owner, `Navigation id ${id} conflicts in the Runtime.`);
-        }
-      }
-    }
-  }
-  for (const [scopedId, owners] of extensionOwners) {
-    if (owners.size > 1) {
-      for (const owner of owners) {
-        if (restrictedIds.has(owner)) {
-          const [slot, id] = scopedId.split('\u0000');
-          markCollision(
-            owner,
-            `Extension id ${id} conflicts in slot ${slot}.`,
-          );
         }
       }
     }
@@ -658,6 +617,8 @@ export async function bootstrapPluginRuntime(
     for (const item of declaration.navigation) {
       contributionActivation.context.registerNavigation(item);
     }
+    for (const point of manifest.extensionPoints ?? []) contributionActivation.context.registerExtensionPoint(point);
+    for (const surface of manifest.surfaces) contributionActivation.context.registerSurface({ id: surface.id, target: { kind: 'sandbox-surface', surfaceId: surface.id } });
     for (const extension of declaration.extensions) {
       contributionActivation.context.registerExtension(extension);
     }

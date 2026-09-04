@@ -9,6 +9,8 @@
 | P0 | [Plugin Author Guide](./plugin-author-guide.md) | 如何编写、声明和调试 Restricted Plugin |
 | P0 | [Plugin API Reference](./plugin-api-reference.md) | Runtime、Manifest、Bridge 和 Adapter 的公开 API |
 | P0 | [Manifest / Contract Spec](./manifest-contract-spec.md) | Manifest、Config、Contribution、Bridge Contract 的规范 |
+| P0 | [跨插件 UI 组合契约](./cross-plugin-ui-composition-contract.md) | owner-scoped 声明、Context、Scope / Attempt 与 Overlay |
+| P0 | [UI 组合实现与作者 API](./cross-plugin-ui-composition-implementation.md) | SDK、Schema 子集、adapter 限制与真实浏览器验收 |
 | P0 | [Lifecycle & Architecture](./lifecycle-architecture.md) | Bootstrap、依赖解析、挂载和失败边界 |
 | P0 | [Capability Catalog](./capability-catalog.md) | 当前 Host 暴露的 Capability 与 Action 清单 |
 | P1 | [Compatibility & Versioning](./compatibility-versioning.md) | Major、Host API、Bridge Protocol 和 Reload 规则 |
@@ -20,6 +22,8 @@
 ## 规范来源与优先级
 
 V1 的规范性来源是仓库中的 `spec/技术落地方案.md`。本目录是面向读者的拆分版：
+
+跨插件 UI 容器协议是 2026-09-04 后续确认的设计，按 [首期 UI 契约](./cross-plugin-ui-composition-contract.md) 与 ADR 0007–0015 执行；它取代早期 UI Extension 的全局 slot string、局部唯一性和直接挂载假设，其他既有 V1 约束继续有效。
 
 1. 如果本目录与 V1 规范冲突，以 V1 规范为准。
 2. 如果实现与规范冲突，应修复实现或明确记录偏差，不通过文档默默改变 Contract。

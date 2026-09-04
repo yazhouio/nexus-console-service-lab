@@ -1,3 +1,4 @@
+import type { CreateUiControl } from './ui-control';
 import {
   validateBridgeBootstrapDescriptor,
   type BridgeBootstrapDescriptor,
@@ -94,6 +95,8 @@ export interface MountRestrictedSurfaceInput {
   readonly layout?: JsonValue;
   readonly initialParameters?: JsonValue;
   readonly routeContext?: RouteContext;
+  readonly createUiControl?: CreateUiControl;
+  readonly onExecutionFailure?: (issue: SurfaceMountIssue) => void;
   readonly signal?: AbortSignal;
 }
 
@@ -237,6 +240,7 @@ export function createWujiePluginAdapter(
         }
       } finally {
         instance.destroyWujie = undefined;
+        await instance.session?.settled();
         lifecycle('cleanup-complete', instance.identity);
       }
     })();
@@ -332,6 +336,7 @@ export function createWujiePluginAdapter(
           message: 'Restricted Surface execution failed.', cause,
         });
         instance.state = Object.freeze({ state: 'FAILED', stage, error });
+        try { input.onExecutionFailure?.(error.issue); } catch { /* Host observers cannot prevent cleanup. */ }
         rejectInterrupted(error);
         void cleanup(instance).catch(() => undefined);
         try { options.onSurfaceError?.(error); } catch { /* Host diagnostics only. */ }
@@ -369,6 +374,7 @@ export function createWujiePluginAdapter(
               grantedPermissions: record.config.grantedPermissions,
             },
             port,
+            createUiControl: input.createUiControl,
             onHostError: options.onHostError,
             limits: options.bridgeLimits,
             onAudit: options.onAudit,

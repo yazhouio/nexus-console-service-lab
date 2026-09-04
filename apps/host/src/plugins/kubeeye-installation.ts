@@ -27,10 +27,9 @@ export const kubeeyeInstallation = validateRestrictedInstallRecord(
           },
         ],
         extensions: [{
-          id: 'kubeeye-overview-card', slot: 'console.home.cards', surfaceId: 'overview',
-          layout: { width: 'compact' }, initialParameters: { view: 'card' },
+          id: 'kubeeye-overview-card', kind: 'surface', point: { ownerPluginId: 'console-shell', id: 'home.cards', contractMajor: 1 }, surfaceId: 'overview',
         }, {
-          id: 'kubeeye-unused', slot: 'unavailable.slot', surfaceId: 'overview',
+          id: 'kubeeye-unused', kind: 'surface', point: { ownerPluginId: 'console-shell', id: 'unavailable', contractMajor: 1 }, surfaceId: 'overview',
         }],
         navigation: [
           {

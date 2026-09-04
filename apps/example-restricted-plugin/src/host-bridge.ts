@@ -1,3 +1,5 @@
+import { createUiClient } from '@nexus/plugin-runtime/client';
+
 const CONNECT_MESSAGE = 'nexus:bridge:connect';
 const CONNECTED_MESSAGE = 'nexus:bridge:connected';
 
@@ -96,6 +98,9 @@ export function connectHostBridge(): Promise<HostConnection> {
       window.removeEventListener('message', onMessage);
       const port = event.ports[0];
       port.start();
+      const ui = createUiClient(port);
+      void ui.refresh().catch(reject);
+      window.addEventListener('pagehide', () => ui.dispose(), { once: true });
       resolve(
         Object.freeze({
           state: 'CONNECTED',

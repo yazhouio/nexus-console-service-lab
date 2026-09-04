@@ -1,3 +1,6 @@
+import { useContext } from 'react';
+import { HostContext } from './HostContext';
+import type { UiHost } from '@nexus/plugin-runtime/browser';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { RouteContext, SandboxRenderTarget } from '@nexus/plugin-runtime';
 import type { SurfaceMountIssue, WujiePluginAdapter } from '@nexus/plugin-runtime/browser';
@@ -17,6 +20,8 @@ export function SurfaceMount({ adapter, pluginId, target, mountPointId, label, t
   readonly routeContext?: RouteContext;
   readonly autoMount?: boolean;
 }) {
+  const ui = useContext(HostContext)?.ui;
+  const uiRootRef = useRef<ReturnType<UiHost['mountRoot']> | undefined>(undefined);
   const [opened, setOpened] = useState(autoMount);
   const [attempt, setAttempt] = useState(0);
   const [presentation, setPresentation] = useState<Presentation>({ state: 'MOUNTING' });
@@ -28,6 +33,13 @@ export function SurfaceMount({ adapter, pluginId, target, mountPointId, label, t
 
   useLayoutEffect(() => {
     if (!opened || !containerRef.current) return;
+    if (ui) {
+      const root = ui.mountRoot(pluginId, target.surfaceId, target, containerRef.current, mountPointId, routeContext);
+      uiRootRef.current = root;
+      const update = () => { const execution = root.execution; setPresentation(execution.phase === 'failed' ? { state: 'ERROR', stage: execution.stage } : { state: execution.phase === 'ready' ? 'MOUNTED' : 'MOUNTING' }); };
+      update(); const stop = ui.core.subscribe(update);
+      return () => { stop(); root.dispose(); uiRootRef.current = undefined; };
+    }
     let current = true;
     const abort = new AbortController();
     const container = containerRef.current;
@@ -60,9 +72,10 @@ export function SurfaceMount({ adapter, pluginId, target, mountPointId, label, t
       cleanups.set(mountPointId, cleanup);
       void cleanup.then(() => { if (cleanups.get(mountPointId) === cleanup) cleanups.delete(mountPointId); });
     };
-  }, [adapter, pluginId, mountPointId, opened, attempt, contextKey, targetKey]);
+  }, [adapter, ui, pluginId, mountPointId, opened, attempt, contextKey, targetKey]);
 
   useEffect(() => {
+    if (failure && uiRootRef.current?.execution.phase === 'failed') setPresentation({ state: 'ERROR', stage: failure.stage });
     if (failure && failure.surfaceInstanceId === instanceRef.current) setPresentation({ state: 'ERROR', stage: failure.stage });
   }, [failure]);
 
@@ -71,7 +84,7 @@ export function SurfaceMount({ adapter, pluginId, target, mountPointId, label, t
     <p>{label}: <strong data-testid={`${testId}-state`}>{state}</strong></p>
     {opened && presentation.state === 'MOUNTING' && <p role="status">Loading {label}…</p>}
     {opened && presentation.state === 'ERROR' && <p role="alert">Surface failed{presentation.stage && <> at <span data-testid={testId === 'surface' ? 'failure-stage' : `${testId}-failure-stage`}>{presentation.stage}</span></>}.</p>}
-    {opened && presentation.state === 'ERROR' && <button onClick={() => setAttempt(n => n + 1)}>Retry {label}</button>}
+    {opened && presentation.state === 'ERROR' && <button onClick={() => { if (uiRootRef.current) uiRootRef.current.retry(); else setAttempt(n => n + 1); }}>Retry {label}</button>}
     {!autoMount && <button onClick={() => setOpened(value => !value)}>{opened ? 'Close' : 'Open'} {label}</button>}
     <div data-testid={`${testId}-container`} ref={containerRef} style={{ marginTop: 24 }} />
   </section>;

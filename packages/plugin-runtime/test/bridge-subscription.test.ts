@@ -150,3 +150,25 @@ it('allows unsubscribe to release resources even when the action request rate is
   expect(dispose).toHaveBeenCalledTimes(1);
   expect(await send({ type: 'unsubscribe', requestId: 'stop-again', subscriptionId })).toMatchObject({ ok: true, result: null });
 });
+
+it('keeps the Host cleanup barrier pending for a late subscription and its asynchronous disposer', async () => {
+  let finishOpen!: () => void;
+  let finishDispose!: () => void;
+  const dispose = vi.fn(() => new Promise<void>(resolve => { finishDispose = resolve; }));
+  const { session } = await fixture({ async open() {
+    await new Promise<void>(resolve => { finishOpen = resolve; });
+    return { snapshot: 'late', dispose };
+  } });
+  const requestResult = session.dispatch(request);
+  await vi.waitFor(() => expect(finishOpen).toBeTypeOf('function'));
+  session.dispose();
+  expect(await requestResult).toMatchObject({ ok: false, error: { code: 'BRIDGE_SESSION_INACTIVE' } });
+  let settled = false;
+  const barrier = session.settled().then(() => { settled = true; });
+  finishOpen();
+  await vi.waitFor(() => expect(dispose).toHaveBeenCalledOnce());
+  expect(settled).toBe(false);
+  finishDispose(); await barrier;
+  expect(settled).toBe(true);
+  session.dispose(); expect(dispose).toHaveBeenCalledOnce();
+});

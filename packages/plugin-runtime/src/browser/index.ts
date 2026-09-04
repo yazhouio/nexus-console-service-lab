@@ -34,3 +34,5 @@ export type {
   BridgeRequest,
   BridgeResponse,
 } from './plugin-bridge';
+export { createUiHost } from './ui-host';
+export type { UiHost, UiHostOptions } from './ui-host';

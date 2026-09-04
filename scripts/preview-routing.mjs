@@ -4,6 +4,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 const hostRoot = resolve('apps/host/dist-validation');
 const pluginRoot = resolve('apps/example-restricted-plugin/dist');
+const uiFixtureRoot = resolve('apps/ui-composition-fixtures/dist');
 const contentTypes = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.map': 'application/json' };
 createServer(async (request, response) => {
   try {
@@ -14,8 +15,9 @@ createServer(async (request, response) => {
       response.end(Buffer.from(await upstream.arrayBuffer())); return;
     }
     const plugin = /^\/plugins\/kubeeye\/(?:1|2)\.0\.0\/(.*)$/.exec(url.pathname);
-    const root = plugin ? pluginRoot : hostRoot;
-    const resource = plugin ? plugin[1] || 'index.html' : decodeURIComponent(url.pathname).replace(/^\//, '') || 'index.html';
+    const uiFixture = /^\/plugins\/ui-[abc]\/1\.0\.0\//.test(url.pathname);
+    const root = plugin ? pluginRoot : uiFixture ? uiFixtureRoot : hostRoot;
+    const resource = plugin ? plugin[1] || 'index.html' : decodeURIComponent(url.pathname).replace(/^\//, '') + (uiFixture && url.pathname.endsWith('/') ? 'index.html' : '') || 'index.html';
     let file = resolve(root, resource);
     if (!file.startsWith(root + '/')) { response.writeHead(400); response.end(); return; }
     let exists = await stat(file).then(s => s.isFile(), () => false);

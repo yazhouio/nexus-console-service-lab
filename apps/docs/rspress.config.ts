@@ -35,6 +35,8 @@ export default defineConfig({
           items: [
             { text: 'Plugin API Reference', link: '/plugin-api-reference' },
             { text: 'Manifest / Contract Spec', link: '/manifest-contract-spec' },
+            { text: '跨插件 UI 组合契约', link: '/cross-plugin-ui-composition-contract' },
+            { text: 'UI 组合实现与作者 API', link: '/cross-plugin-ui-composition-implementation' },
             { text: 'Capability Catalog', link: '/capability-catalog' },
           ],
         },

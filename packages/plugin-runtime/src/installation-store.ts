@@ -1,3 +1,4 @@
+import { canonicalJson } from './ui/schema';
 import type { BridgeCapabilityContract } from './bridge-contract';
 import { validateRestrictedAgainstHost } from './bootstrap';
 import type { HostApiId, PluginId } from './identifiers';
@@ -81,11 +82,23 @@ export function createInstallationStore(options: InstallationStoreOptions): Inst
     }
   }
 
+  const checkContextContracts = (values: readonly InstalledPluginRecord[]) => {
+    const contracts = new Map<string, string>();
+    for (const record of values) for (const point of record.manifest.extensionPoints ?? []) {
+      const key = JSON.stringify([record.manifest.id, point.id, point.contractMajor]);
+      const schema = canonicalJson(point.contextSchema);
+      if (contracts.has(key) && contracts.get(key) !== schema) throw new PluginInstallationError('CONTEXT_MAJOR_FROZEN');
+      contracts.set(key, schema);
+    }
+  };
+  checkContextContracts([...records.values()]);
+
   const snapshot = (packages = records, versions = active): InstallationStoreSnapshot => Object.freeze({
     records: Object.freeze([...packages.values()].sort((a, b) => key(a.manifest.id, a.manifest.version).localeCompare(key(b.manifest.id, b.manifest.version)))),
     activeVersions: Object.freeze([...versions].sort(([a], [b]) => a.localeCompare(b)).map(([id, version]) => Object.freeze({ id, version }))),
   });
   const commit = (nextRecords: Map<string, InstalledPluginRecord>, nextActive: Map<PluginId, string>): ReloadRequired => {
+    checkContextContracts([...nextRecords.values()]);
     // Publish only after durable persistence succeeds; a storage failure changes nothing.
     options.storage?.write(snapshot(nextRecords, nextActive));
     records = nextRecords; active = nextActive;

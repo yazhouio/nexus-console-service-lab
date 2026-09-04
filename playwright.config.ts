@@ -11,6 +11,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: [
+    { command: 'pnpm --filter @nexus/ui-composition-fixtures dev', url: 'http://localhost:3003/plugins/ui-a/1.0.0/', reuseExistingServer: !process.env.CI, timeout: 60000 },
     { command: 'node e2e/authorization-server.mjs', url: 'http://127.0.0.1:3002/health', reuseExistingServer: !process.env.CI, timeout: 10_000 },
     {
       command: 'pnpm dev:plugin',

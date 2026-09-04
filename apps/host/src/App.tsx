@@ -1,3 +1,5 @@
+import { renderBuiltinUi } from './render-builtin-ui';
+import { bindUiOverlay } from './plugins/ui-overlay';
 import { useEffect, useState } from 'react';
 import { BrowserRouter } from 'react-router';
 import type { BootstrapFailure } from '@nexus/plugin-runtime';
@@ -32,9 +34,13 @@ export function App() {
         onAudit(entry) { if (!disposed) setStartup(s => s.state === 'READY' ? { ...s, services: { ...s.services, audit: [...s.services.audit.slice(-199), entry] } } : s); },
         onSurfaceError(error) { if (!disposed) setStartup(s => s.state === 'READY' ? { ...s, services: { ...s.services, failures: { ...s.services.failures, [error.issue.mountPointId]: error.issue } } } : s); },
       });
-      cleanup = () => { for (const instance of adapter.listInstances()) void adapter.unmount(instance.identity.surfaceInstanceId).catch(() => undefined); };
+      const ui = browser.createUiHost({ runtime, restrictedAdapter: adapter, policy: contributionPolicy, renderBuiltin: renderBuiltinUi });
+      bindUiOverlay(ui.overlayCapability);
+      cleanup = () => { void ui.dispose(); };
+      const cleanupUi = cleanup;
+      cleanup = () => { cleanupUi(); for (const instance of adapter.listInstances()) void adapter.unmount(instance.identity.surfaceInstanceId).catch(() => undefined); };
       const model = routingEnabled ? createRouteModel({ routes: runtime.contributions.listRoutes(), navigation: runtime.contributions.listNavigation(), policy: contributionPolicy }) : undefined;
-      setStartup({ state: 'READY', services: { runtime, store, adapter, model, audit: [], failures: {} } });
+      setStartup({ state: 'READY', services: { runtime, store, adapter, ui, model, audit: [], failures: {} } });
     }).catch(error => { if (!disposed) setStartup({ state: 'FAILED', failure: { ready: false, error } }); });
     return () => { disposed = true; cleanup?.(); };
   }, []);

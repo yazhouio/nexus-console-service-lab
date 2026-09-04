@@ -26,6 +26,7 @@ interface RestrictedPluginManifest extends PluginDescriptor {
   readonly permissions: readonly PermissionId[];
   readonly surfaces: readonly SandboxSurfaceDefinition[];
   readonly contributions: RestrictedContributions;
+  readonly extensionPoints?: readonly ExtensionPointDefinition[];
 }
 
 interface SandboxSurfaceDefinition {
@@ -107,25 +108,33 @@ interface NavigationContribution {
 ### UI Extension
 
 ```ts
+interface ExtensionPointDefinition {
+  readonly id: string;
+  readonly kind: 'surface';
+  readonly contractMajor: number;
+  readonly contextSchema: ContextSchema;
+}
 interface RestrictedUiExtensionContribution {
   readonly id: string;
-  readonly slot: string;
+  readonly kind: 'surface';
+  readonly point: { ownerPluginId: string; id: string; contractMajor: number };
   readonly surfaceId: string;
   readonly order?: number;
-  readonly layout?: JsonValue;
-  readonly initialParameters?: JsonValue;
 }
 ```
 
 约束：
 
 - Route ID 与 Navigation ID 在 Runtime 全局唯一；
-- Extension ID 只需在同一个 Slot 内唯一；
-- `surfaceId` 必须存在于同一 Manifest；
-- `layout` 与 `initialParameters` 只能是 `JsonValue`；
+- Extension Point、Contribution、Surface 的 local ID 分别按 owner 唯一；Contribution ID 跨 point 也不重复；
+- UI Surface、point、kind、Major 和授权引用错误按 contribution 隔离；Route 的本地 Surface 引用仍在 Manifest 阶段校验；
+- UI Context 使用声明的内联 JSON Schema 2020-12 子集，同一 Major 完全冻结，任何 Schema / semantic 变化都升 Major；
 - Contribution 不产生 Capability Dependency；
 - Contribution 使用显式 order、ownerPluginId、contributionId 稳定排序；
-- 未挂载的 Slot 不会触发 Surface 执行。
+- 未挂载的 Slot 不会触发 Surface 执行；Ready 后不能新增静态定义；
+- 新契约不接受原型的 `slot: string` 字段。
+
+精确白名单与校验落点见 [UI 组合实现](./cross-plugin-ui-composition-implementation.md)。
 
 ## 5. Bridge Contract
 
@@ -193,7 +202,7 @@ requestedPermissions are known by the required Bridge Contracts
 - `provides = []`；
 - HostApiId 与 Permission ID 格式；
 - Surface、Route、Navigation、Extension 的局部唯一性；
-- `surfaceId` 引用存在；
+- Route 的局部 `surfaceId` 引用存在；UI relation 引用由 Host 在独立 contribution 轴诊断；
 - Granted Permissions 是 Requested Permissions 的子集；
 - Entry 通过 Artifact Allowlist。
 

@@ -2,7 +2,7 @@ import { expect, it } from 'vitest';
 import { bootstrapPluginRuntime, inspect, type InstalledPluginRecord } from '../src';
 
 const record: InstalledPluginRecord = {
-  manifest: { id: 'external', version: '1', entry: '/plugins/external/1/', hostApi: 'host.console@1', requires: ['host.cluster@1'], provides: [], permissions: ['cluster.read'], surfaces: [{ id: 'page' }], contributions: { routes: [{ id: 'page', path: '/external', surfaceId: 'page', initialParameters: { token: 'private initial data' } }], extensions: [{ id: 'unused', slot: 'missing.slot', surfaceId: 'page' }] } },
+  manifest: { id: 'external', version: '1', entry: '/plugins/external/1/', hostApi: 'host.console@1', requires: ['host.cluster@1'], provides: [], permissions: ['cluster.read'], surfaces: [{ id: 'page' }], contributions: { routes: [{ id: 'page', path: '/external', surfaceId: 'page', initialParameters: { token: 'private initial data' } }], extensions: [{ id: 'unused', kind: 'surface', point: { ownerPluginId: 'host', id: 'missing', contractMajor: 1 }, surfaceId: 'page' }] } },
   config: { id: 'external', version: '1', enabled: true, grantedPermissions: [] },
 };
 
@@ -20,7 +20,7 @@ it('projects ownership and inactive surfaces without exposing providers, render 
   expect(() => Object.assign(runtime.resolution.dependencies[0], { provider: 'forged' })).toThrow();
   expect(snapshot.dependencies).toEqual([{ consumer: 'external', capability: 'host.cluster@1', provider: 'cluster' }]);
   expect(snapshot.capabilities).toEqual([{ id: 'host.cluster@1', providerPluginId: 'cluster' }]);
-  expect(snapshot.contributions.extensions).toContainEqual(expect.objectContaining({ id: 'unused', slot: 'missing.slot', ownerPluginId: 'external' }));
+  expect(snapshot.contributions.extensions).toContainEqual(expect.objectContaining({ id: 'unused', point: { ownerPluginId: 'host', id: 'missing', contractMajor: 1 }, ownerPluginId: 'external' }));
   expect(JSON.stringify(snapshot)).not.toContain('private');
   expect(inspect(runtime)).toEqual(snapshot);
   expect(() => (snapshot.plugins as unknown[]).pop()).toThrow();

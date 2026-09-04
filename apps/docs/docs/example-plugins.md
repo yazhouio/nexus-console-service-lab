@@ -45,7 +45,7 @@ provides: ['kubesphere.cluster@2']
 - `ClusterCapability`；
 - `/clusters/current` Route；
 - `Cluster Overview` Navigation；
-- `console.home.cards` Extension。
+- 指向 `console-shell / home.cards@1` 的 Surface Contribution。
 
 它的 `watchCurrentCluster` 返回当前 Snapshot 和 disposer，正好符合 Subscription Contract 的 Host 侧模型。
 
@@ -112,3 +112,9 @@ pnpm test:e2e
 ```
 
 E2E 覆盖 Lazy Mount、Unary Bridge、Subscription、Route / Extension 独立实例、Failure Isolation、Cleanup / Remount、Configuration Reload、Runtime Inspector 以及 Backend Authorization。
+
+## 8. 最小递归验收示例
+
+`apps/ui-composition-fixtures` 将 A 页面、B Card、C Chart 构建成三个独立入口。A/B 各自使用声明的 Slot，B/C 分别贡献自有 Surface；还包含一个走本地 adapter 的 Builtin Card。测试开关开启后访问 `/__fixtures__/ui-composition`。
+
+`pnpm test:e2e` 自动启动所有 fixture 服务，包含递归、Context、hidden / unmount、A → B → A、Scope / Attempt 和 Overlay 浏览器验收。详细命令与边界见 [UI 组合实现](./cross-plugin-ui-composition-implementation.md)。

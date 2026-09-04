@@ -50,11 +50,10 @@ V1 只有两条正式执行路径：
     }],
     "extensions": [{
       "id": "kubeeye-overview-card",
-      "slot": "console.home.cards",
+      "kind": "surface",
+      "point": { "ownerPluginId": "console-shell", "id": "home.cards", "contractMajor": 1 },
       "surfaceId": "overview",
-      "order": 200,
-      "layout": { "width": "compact" },
-      "initialParameters": { "view": "card" }
+      "order": 200
     }]
   }
 }
@@ -64,8 +63,8 @@ V1 只有两条正式执行路径：
 
 - `provides` 必须是空数组；Restricted Plugin 不能向 Runtime 注册 Global Capability。
 - `entry` 必须通过 Host Artifact Allowlist，并使用 Host 支持的同源 HTTP(S) 地址。
-- `surfaceId` 必须引用同一个 Manifest 中已声明的 Surface。
-- Route ID 和 Navigation ID 在 Runtime 内唯一；Extension ID 在同一个 Slot 内唯一。
+- UI Contribution 的 `surfaceId` 引用本 owner 已声明 Surface；引用错误隔离该 contribution，不执行它。Route 的局部 Surface 引用仍在 Manifest 阶段校验。
+- Route ID 和 Navigation ID 在 Runtime 内唯一；Extension Point / Contribution / Surface 的 local ID 分别在声明 owner 内唯一，Contribution ID 跨 point 也不能重复。
 - `grantedPermissions` 由安装配置决定，且必须是 Manifest `permissions` 的子集。
 
 ## 4. Surface 编写规则
@@ -74,7 +73,7 @@ Surface 是一个普通前端入口，但它运行在独立的 Surface Instance 
 
 - 不要从 Wujie props 中读取未声明的身份、权限或 Capability 信息。
 - `plugin`、`surface` 和 `bridge` 是 Host 传入的有限 Bootstrap 数据。
-- `layout` 与 `initialParameters` 只能使用 JSON 值，不能传递 Function、DOM Node、React Context、Token 或 Raw API Client。
+- Route 的 `layout` / `initialParameters` 保持 JSON；Slot 的业务输入使用结构化 Context，尺寸由 A 的 sizing policy 与真实 container 协调。不能跨边界传递 Function、DOM Node、React Context、Token 或 Raw API Client。
 - 组件卸载时停止订阅；即使不主动停止，Session dispose 也会清理所属 Subscription。
 - 每次打开 Surface 都可能产生新的 `surfaceInstanceId`，不要把它当作 Plugin 永久 ID。
 
@@ -144,3 +143,9 @@ V1 不提供：
 - [ ] Route 与 Extension 同时挂载时相互独立。
 - [ ] Surface 失败不会误报 Plugin FAILED。
 - [ ] 后端接口有独立授权测试。
+
+## 8. 跨插件页面组合
+
+A 静态声明 Extension Point，在自己的 Surface 中渲染 `<Slot id="details" contextKey={nodeId} context={{ nodeId }} />`。B 声明指向 A 的 point@major 的 Contribution 和自身 Surface，用 `useSurfaceContext()` 读取最新合法快照。Host 负责授权、选择、执行和清理；A 只管理 placement。
+
+Restricted 入口用 `connectUiHost()` 创建唯一控制连接，再用 `UiProvider` 包装 UI。Builtin 使用 Host 注入的同一 `UiClient`。Overlay 使用 `nexus.ui-overlay@1` Capability 并声明 `ui.overlay` 权限。完整可运行代码、Schema 白名单和 v1 限制见 [UI 组合实现与作者 API](./cross-plugin-ui-composition-implementation.md)。

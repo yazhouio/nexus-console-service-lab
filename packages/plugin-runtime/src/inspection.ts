@@ -7,6 +7,7 @@ import type { PluginRuntimeState } from './runtime-state';
 import type { SurfaceFailureStage, SurfaceInstanceRecord } from './browser/wujie-plugin-adapter';
 import { frozenCopy } from './immutable';
 import { isCapabilityId } from './identifiers';
+import type { UiInspection } from './ui/runtime';
 
 export interface RuntimeErrorSnapshot {
   readonly code: string;
@@ -46,13 +47,14 @@ export interface ContributionSnapshot {
   readonly ownerPluginId: string;
   readonly target?: Readonly<{ kind: HostRenderTarget['kind']; surfaceId?: string }>;
   readonly path?: string;
-  readonly slot?: string;
+  readonly point?: { readonly ownerPluginId: string; readonly id: string; readonly contractMajor: number };
   readonly routeId?: string;
   readonly parentId?: string;
   readonly parentRouteId?: string;
   readonly acceptsChildren?: boolean;
 }
 export interface RuntimeSnapshot {
+  readonly ui?: UiInspection;
   readonly ready: boolean;
   readonly bootstrapError?: RuntimeErrorSnapshot;
   readonly plugins: readonly PluginSnapshot[];
@@ -144,6 +146,7 @@ function projectHostFact(fact: HostContributionFact): HostContributionFact {
   };
 }
 export interface InspectionSource {
+  inspectUi?(): UiInspection;
   listInstances?(): readonly SurfaceInstanceRecord[];
   listHostContributions?(): readonly HostContributionFact[];
 }
@@ -194,12 +197,16 @@ export function inspect(
   });
   return frozenCopy({
     ready: true, plugins: plugins.sort((a, b) => a.id.localeCompare(b.id)),
+    ...(source?.inspectUi ? { ui: source.inspectUi() } : {}),
     coreClosure: [...runtime.resolution.coreClosure].sort(), dependencies: runtime.resolution.dependencies,
     capabilities: runtime.capabilities.list(),
     contributions: {
       routes: runtime.contributions.listRoutes().map(({ ownerPluginId, contribution }) => ({ ownerPluginId, ...host(ownerPluginId, 'route', contribution.id), id: contribution.id, path: contribution.path, ...(contribution.parentRouteId === undefined ? {} : { parentRouteId: contribution.parentRouteId }), ...(contribution.acceptsChildren === undefined ? {} : { acceptsChildren: contribution.acceptsChildren }), target: target(contribution.target) })),
       navigation: runtime.contributions.listNavigation().map(({ ownerPluginId, contribution }) => ({ ownerPluginId, ...host(ownerPluginId, 'navigation', contribution.id), id: contribution.id, ...(contribution.acceptsChildren === undefined ? {} : { acceptsChildren: contribution.acceptsChildren }), ...(contribution.routeId ? { routeId: contribution.routeId } : {}), ...(contribution.parentId ? { parentId: contribution.parentId } : {}) })),
-      extensions: runtime.contributions.listExtensionSlots().flatMap(slot => runtime.contributions.listExtensions(slot).map(({ ownerPluginId, contribution }) => ({ ownerPluginId, id: contribution.id, slot, target: target(contribution.target) }))),
+      extensions: runtime.contributions.listExtensions().map(({ ownerPluginId, contribution }) => {
+        const surface = runtime.contributions.listUiSurfaces().find(s => s.ownerPluginId === ownerPluginId && s.contribution.id === contribution.surfaceId);
+        return { ownerPluginId, id: contribution.id, point: contribution.point, ...(surface ? { target: target(surface.contribution.target) } : {}) };
+      }),
     },
   });
 }

@@ -95,3 +95,11 @@ export { inspect } from './inspection';
 export type { InspectionSource, ContributionSnapshot, BootstrapFailure, RuntimeSnapshot, PluginSnapshot, SurfaceInstanceSnapshot, RuntimeErrorSnapshot } from './inspection';
 export type { ContributionState, ContributionKind, ContributionIdentity, ContributionDiagnosticCode, ContributionDiagnostic, HostContributionFact } from './host-contribution';
 export { assertContributionContractCompatible } from './contribution-compatibility';
+
+export type { ExtensionPointRef, ExtensionPointDefinition, SurfaceContributionDefinition, UiSurfaceDefinition, ContributionRef, HostContributionPolicy, HostContributionPolicyRequest } from './ui/definitions';
+export { validateContextSchema } from './ui/schema';
+export type { ContextSchema } from './ui/schema';
+export { createUiRuntime, UiError } from './ui/runtime';
+export type { UiRuntime, UiRuntimeOptions, UiDriver, UiMounted, UiSizing, UiExecution, SlotInput, SlotObservation, ContextSnapshot, UiObservation, OverlaySnapshot, OverlayObservation, UiInspection } from './ui/runtime';
+export { UI_OVERLAY_CAPABILITY, UI_OVERLAY_PERMISSION, uiOverlayBridgeContract } from './ui/overlay-capability';
+export type { UiOverlayCapability } from './ui/overlay-capability';
