@@ -2,6 +2,10 @@ packages:
   - apps/*
   - packages/*
 
+# Dependency compatibility baseline; the accepted runtime range lives in package.json.
+nodeVersion: 24.14.1
+engineStrict: true
+
 catalog:
   '@playwright/test': 1.62.1
   '@rsbuild/core': 2.2.2

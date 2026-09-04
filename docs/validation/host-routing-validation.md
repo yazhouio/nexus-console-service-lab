@@ -15,7 +15,7 @@
 | `pnpm build:routing-release`（不提供 evidence） | 按预期以非零状态拒绝启用，错误为缺少 target config/evidence |
 | 普通生产 bundle 检查 | 不包含 `/__fixtures__/surfaces` 入口 |
 
-Node 实际版本为 24.14.1，满足 >=22.22.0；正反例及 CLI 非零退出路径有测试。新增 CI 将在安装前检查实际 22.22.0。此记录不表示 GitHub CI 或真实生产域名已经运行。
+Node 实际版本为 24.14.1，满足当时的 >=22.22.0；正反例及 CLI 非零退出路径有测试。此记录不表示 GitHub CI 或真实生产域名已经运行。
 
 ## 真实 Wujie 测量
 
@@ -45,3 +45,7 @@ Node 实际版本为 24.14.1，满足 >=22.22.0；正反例及 CLI 非零退出�
 审查发现的 Q20 参数覆盖问题已修复：诊断占位 Route 使用与模型参数不冲突的名称；CONFLICT 下父 Context 从独立父匹配提取参数，合法 sibling 仍可复用。真实 RR 测试先重现覆盖，再验证修复。审查者独立复跑 compatibility/navigation 两文件的 9 项测试通过，后续完整验证结果见上表。
 
 最终剩余发现：Standards 0，Spec 0；两轴均无未解决问题。
+
+## 2026-09-05 配置更新
+
+后续决策将运行时限制为 `Node >=24.14.1 <25`，并让普通生产构建默认启用 routing。上文“生产 routing 保持关闭”仅记录 2026-09-04 验证时的发布状态；当前行为以 ADR 0016 和实施文档为准。目标环境 smoke 与性能证据仍由专用 release workflow 验证。

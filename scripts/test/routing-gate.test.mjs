@@ -10,9 +10,11 @@ const config = { environment: 'production', origin: 'https://console.example.tes
 };
 const evidence = () => ({ schemaVersion: 1, passed: true, configDigest: configDigest(config), environment: config.environment, origin: config.origin, buildVersion: config.buildVersion, configRevision: config.configRevision, checkedAt: new Date().toISOString(), checks: [...config.deepLinks.flatMap(d => ['open', 'refresh'].map(action => ({ path: d.path, action, passed: true }))), ...config.resources.map(r => ({ path: r.path, kind: r.kind, missing: r.missing, passed: true }))], performance: { accepted: true, configDigest: configDigest(config) } });
 
-test('production routing stays disabled by default and cannot enable without matching target evidence', () => {
-  assert.equal(routingBuildSettings({ NODE_ENV: 'production' }).enabled, false);
-  assert.throws(() => routingBuildSettings({ NODE_ENV: 'production', NEXUS_ENABLE_ROUTING: 'true' }), /evidence|config/i);
+test('production routing is enabled by default while release evidence remains enforceable', () => {
+  const production = routingBuildSettings({ NODE_ENV: 'production' });
+  assert.equal(production.enabled, true);
+  assert.equal(production.buildVersion, 'production');
+  assert.throws(() => routingBuildSettings({ NODE_ENV: 'production', NEXUS_REQUIRE_ROUTING_EVIDENCE: 'true' }), /evidence|config/i);
   assert.doesNotThrow(() => assertReleaseEvidence(config, evidence()));
   for (const change of [{ passed: false }, { buildVersion: 'old-build' }, { configRevision: 'old-config' }, { configDigest: 'different' }, { checks: [] }, { performance: { accepted: false } }, { checkedAt: '2000-01-01' }]) {
     assert.throws(() => assertReleaseEvidence(config, { ...evidence(), ...change }));

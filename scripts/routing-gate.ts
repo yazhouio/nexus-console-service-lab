@@ -59,15 +59,15 @@ export function assertReleaseEvidence(config: RoutingReleaseConfig, evidence: Ro
 export function routingBuildSettings(env: Record<string, string | undefined>) {
   const development = env.NODE_ENV !== 'production';
   const validation = !development && env.NEXUS_ROUTING_VALIDATION === 'true';
-  let enabled = development || validation;
-  let buildVersion = env.NEXUS_BUILD_VERSION ?? (development ? 'development' : 'routing-disabled');
-  if (!development && !validation && env.NEXUS_ENABLE_ROUTING === 'true') {
+  const enabled = true;
+  let buildVersion = env.NEXUS_BUILD_VERSION ?? (development ? 'development' : 'production');
+  if (!development && !validation && env.NEXUS_REQUIRE_ROUTING_EVIDENCE === 'true') {
     requireGate(env.NEXUS_ROUTING_CONFIG && env.NEXUS_ROUTING_EVIDENCE, 'target config and evidence files are required');
     const config = JSON.parse(readFileSync(env.NEXUS_ROUTING_CONFIG, 'utf8')) as RoutingReleaseConfig;
     const evidence = JSON.parse(readFileSync(env.NEXUS_ROUTING_EVIDENCE, 'utf8')) as RoutingReleaseEvidence;
     assertReleaseEvidence(config, evidence);
     requireGate(env.NEXUS_BUILD_VERSION === config.buildVersion, 'release build version must match tested candidate');
-    enabled = true; buildVersion = config.buildVersion;
+    buildVersion = config.buildVersion;
   }
   return { enabled, validation, output: validation ? 'dist-validation' : 'dist', buildVersion,
     fixtures: (development || validation) && env.NEXUS_TEST_FIXTURES === 'true' };

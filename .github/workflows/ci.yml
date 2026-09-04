@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.22.0
+          node-version-file: package.json
       - name: Enforce actual Node version before dependency installation
         run: node scripts/check-node-version.mjs
       - name: Verify Node gate positive and negative cases

@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@12.3.1+sha512.3c14c15408d1489d350f8ed7f93361d26cc707054f6849a4eea3bb7407ff4fe4564b413a1c421a773a176ab1168a8df1c7d548f2cd0dc7d344f58c4e680a5b18",
   "engines": {
-    "node": ">=22.22.0",
+    "node": ">=24.14.1 <25",
     "pnpm": ">=12.0.0"
   },
   "scripts": {
@@ -23,7 +23,7 @@
     "test:e2e:preview": "playwright test --config playwright.preview.config.ts",
     "routing:measure": "node scripts/measure-routing.mjs",
     "routing:smoke": "node scripts/routing-smoke.mjs",
-    "build:routing-release": "node scripts/check-node-version.mjs && NEXUS_ENABLE_ROUTING=true pnpm --filter @nexus/host build"
+    "build:routing-release": "node scripts/check-node-version.mjs && NEXUS_REQUIRE_ROUTING_EVIDENCE=true pnpm --filter @nexus/host build"
   },
   "devDependencies": {
     "@playwright/test": "catalog:"

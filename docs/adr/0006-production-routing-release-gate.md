@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by 0016
 ---
 
 # 目标环境 SPA fallback 验证是路由生产启用门槛

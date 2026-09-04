@@ -1,6 +1,6 @@
 # Host 路由实施与启用
 
-本轮实现基于 `host-routing-design.md`，代码已接入 Declarative React Router 8.3.1。开发环境启用路由；普通生产构建保持路由关闭并保留原有手动 Surface 入口。目标环境尚未提供生产 fallback、部署配置和性能预算，不能将本地验证视为生产启用许可。
+本轮实现基于 `host-routing-design.md`，代码已接入 Declarative React Router 8.3.1。开发和生产构建均默认启用路由；正常生产构建不包含测试 fixture。目标环境 smoke、fallback 和性能预算检查仍由专用发布流程执行。
 
 ## Contract 与模型
 
@@ -27,7 +27,7 @@ Route 离开后不保活。params、pathname、search 按值变化时，在旧�
 兼容顺序：
 
 1. 发布接受新旧字段的 contract/validator/normalization/inspection；`inspect(runtime)` 和仅传 Surface source 的旧调用仍可使用。未执行 Host 解析时没有 `host` 轴，不假报 AVAILABLE。
-2. 发布 Host，生产能力保持关闭。当前实现的 contract version 为 2。
+2. 发布 Host；生产构建默认启用 routing。当前实现的 contract version 为 2。
 3. 插件发布前执行 `pnpm check:plugin-contract <manifest-or-installation.json> <target-contract-version>`。安装配置的 `contributionContractVersion` 明确标识目标支持版本；缺省为当前 contract 2，不存在自动协商。目标为 1 时，新字段在提交旧 validator 前被阻断。
 4. KubeEye v1 声明保留；示例配置页安装 v2 后才出现授权的 `node-alert-messages` child 和 Alerts 导航。旧插件仍可与新 Host 使用。
 5. 关闭 routing 时保留兼容 runtime。回退到旧 validator 前，必须移除持久化 snapshot 中所有含新字段的版本，包括未选中的版本；示例通过现有 uninstall/reinstall 旧版本入口完成。仅 selectVersion 不足以清除保存的新 schema。相关测试覆盖安装、读取、拒绝和回退路径。
@@ -57,11 +57,11 @@ pnpm routing:measure --local docs/validation/host-routing-performance-2026-09-04
 
 本地测量使用新浏览器 context、冷场景禁用浏览器缓存，后续场景启用缓存并保留 Wujie 脚本缓存。采样以 rAF 判断有效内容进入视口，不将 adapter.mount resolve 等同于用户可见完成。未配置生产预算，因此报告 `accepted: false` 是预期结果。快速取消和 Layout 本地状态保留另由浏览器测试验证。
 
-## 生产 gate
+## Node 版本与生产验证
 
-`engines.node >=22.22.0`，CI 在安装依赖前直接运行 `scripts/check-node-version.mjs`，并验证正反例；仅 setup-node 或 engines 声明不能绕过该检查。React Router 在 catalog/lockfile 中精确锁定 8.3.1，不启用 engine-strict。
+项目要求 `Node >=24.14.1 <25`。`.npmrc` 为 npm 开启 `engine-strict`；pnpm 12 使用 `pnpm-workspace.yaml` 中的 `nodeVersion: 24.14.1` 和 `engineStrict: true` 检查依赖兼容性。CI 在安装依赖前运行 `scripts/check-node-version.mjs`，并验证低版本及其他 major 会失败。React Router 在 catalog/lockfile 中精确锁定 8.3.1。
 
-生产启用需要平台填写 `scripts/routing-release.config.example.json`：真实 HTTPS origin、构建 commit、部署配置 revision、真实嵌套深链接及期望参数、API/plugin/JS/CSS 成功和缺失响应，以及明确的体验预算。示例预算为 null，不能直接用来通过 gate。最低样本数为 20；这仅是执行下限，不代表统计置信度。
+受控发布验证需要平台填写 `scripts/routing-release.config.example.json`：真实 HTTPS origin、构建 commit、部署配置 revision、真实嵌套深链接及期望参数、API/plugin/JS/CSS 成功和缺失响应，以及明确的体验预算。示例预算为 null，不能直接用来通过 gate。最低样本数为 20；这仅是执行下限，不代表统计置信度。
 
 先在目标环境受控验证入口提供相同 commit 的 routing candidate；validation 构建与 release 输出分开，本仓库不配置或部署该基础设施。`pnpm routing:smoke <config> <evidence>` 执行真实页面打开和刷新，核对 Route/params/build marker，检查非页面响应状态/内容类型和 Host HTML rewrite，再测量真实 Surface。需要登录时，可由执行环境设置 `ROUTING_STORAGE_STATE` 指向 Playwright storage state 文件；不会将凭据写入报告。
 
@@ -74,4 +74,4 @@ NEXUS_ROUTING_EVIDENCE=<evidence.json> \
 pnpm build:routing-release
 ```
 
-`.github/workflows/routing-release.yml` 从 GitHub 目标 environment 的 `ROUTING_RELEASE_CONFIG` 读取可信配置，要求候选版本等于 workflow commit，运行 smoke 后才允许生成并上传启用路由的 release artifact。它不执行部署。没有目标配置/真实证据时 workflow 和启用构建失败，普通 `pnpm build` 则保持能力关闭。开发服务器、此仓库的本地 preview 以及文字说明都不能替代目标 gate。
+`.github/workflows/routing-release.yml` 从 GitHub 目标 environment 的 `ROUTING_RELEASE_CONFIG` 读取可信配置，要求候选版本等于 workflow commit，运行 smoke 后才生成并上传验证过的 release artifact。它不执行部署。普通 `pnpm build` 会生成启用路由的生产产物；`pnpm build:routing-release` 额外要求目标配置和真实证据。
