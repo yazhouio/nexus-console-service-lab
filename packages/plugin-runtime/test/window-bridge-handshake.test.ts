@@ -58,6 +58,34 @@ const request = {
 } as const;
 
 describe('Window Bridge handshake', () => {
+  it('consumes a successful nonce once, even if the connect message is replayed', async () => {
+    const hostWindow = fakeHostWindow();
+    const postMessage = vi.fn();
+    const port = { close: vi.fn() };
+    const createChannel = vi.fn(() => ({ port1: port, port2: port }) as unknown as MessageChannel);
+    const attempt = createWindowBridgeHandshakeCoordinator(hostWindow, createChannel).begin(request);
+    const event = connectEvent({ type: BRIDGE_CONNECT_MESSAGE, ...request.descriptor }, postMessage);
+    hostWindow.dispatch(event);
+    hostWindow.dispatch(event);
+    await attempt.result;
+    expect(createChannel).toHaveBeenCalledOnce();
+    expect(postMessage).toHaveBeenCalledOnce();
+    attempt.cancel();
+    attempt.cancel();
+    expect(port.close).toHaveBeenCalledOnce();
+  });
+
+  it('rejects channel allocation failure and removes the handshake listener', async () => {
+    const hostWindow = fakeHostWindow();
+    const createChannel = vi.fn(() => { throw new Error('allocation failed'); });
+    const attempt = createWindowBridgeHandshakeCoordinator(hostWindow, createChannel).begin(request);
+    const event = connectEvent({ type: BRIDGE_CONNECT_MESSAGE, ...request.descriptor });
+    hostWindow.dispatch(event);
+    await expect(attempt.result).rejects.toMatchObject({ code: 'BRIDGE_BOOTSTRAP_FAILED' });
+    hostWindow.dispatch(event);
+    expect(createChannel).toHaveBeenCalledOnce();
+  });
+
   it('validates the bound descriptor and transfers one MessagePort', async () => {
     const hostWindow = fakeHostWindow();
     const hostPort = { start: vi.fn(), close: vi.fn() };
@@ -81,7 +109,7 @@ describe('Window Bridge handshake', () => {
     );
 
     await expect(attempt.result).resolves.toBe(hostPort);
-    expect(hostPort.start).toHaveBeenCalledOnce();
+    expect(hostPort.start).not.toHaveBeenCalled();
     expect(postMessage).toHaveBeenCalledWith(
       {
         type: BRIDGE_CONNECTED_MESSAGE,

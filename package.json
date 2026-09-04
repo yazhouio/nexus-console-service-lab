@@ -12,6 +12,10 @@
     "dev:host": "pnpm --filter @nexus/plugin-runtime build && pnpm --filter @nexus/host dev",
     "dev:plugin": "pnpm --filter @nexus/example-restricted-plugin dev",
     "test": "pnpm -r --if-present test",
+    "test:e2e": "playwright test",
     "typecheck": "pnpm -r --if-present typecheck"
+  },
+  "devDependencies": {
+    "@playwright/test": "catalog:"
   }
 }

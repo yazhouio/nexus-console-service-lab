@@ -7,6 +7,7 @@ import {
 } from '../src';
 import {
   createWujiePluginAdapter,
+  BridgeHandshakeError,
   type BridgeHandshakeAttempt,
   type BridgeHandshakeCoordinator,
   type WujieDriver,
@@ -96,6 +97,9 @@ function hostWindow(): Window {
 
 function fakePort(onClose?: () => void): MessagePort {
   return {
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    start: vi.fn(),
     close: vi.fn(onClose),
   } as unknown as MessagePort;
 }
@@ -117,6 +121,136 @@ function successfulHandshake(
 const container = {} as HTMLElement;
 
 describe('WujiePluginAdapter', () => {
+  it('cancels an in-flight start, disposes first, and destroys its late result once', async () => {
+    const start = deferred<Function | void>();
+    const order: string[] = [];
+    const port = fakePort(() => order.push('session'));
+    const destroy = vi.fn(() => { order.push('wujie'); });
+    const driver: WujieDriver = {
+      startApp: vi.fn(() => start.promise), destroyApp: vi.fn(async () => undefined),
+    };
+    const adapter = createWujiePluginAdapter({
+      runtime: await runtime(), driver, handshake: successfulHandshake([port]),
+      hostWindow: hostWindow(), createSurfaceInstanceId: () => 'cancelled',
+    });
+    const abort = new AbortController();
+    const mounting = adapter.mount({
+      pluginId: 'kubeeye', surfaceId: 'overview', mountPointId: 'route:cancelled',
+      container, signal: abort.signal,
+    });
+    const rejection = expect(mounting).rejects.toMatchObject({ issue: { code: 'SURFACE_MOUNT_CANCELLED' } });
+    await vi.waitFor(() => expect(driver.startApp).toHaveBeenCalledOnce());
+    abort.abort();
+    expect(order).toEqual(['session']);
+    start.resolve(destroy);
+    await rejection;
+    await vi.waitFor(() => expect(adapter.listInstances()).toEqual([]));
+    expect(order).toEqual(['session', 'wujie']);
+    await adapter.unmount('cancelled');
+    expect(destroy).toHaveBeenCalledOnce();
+  });
+
+  it('does not start Wujie when cancelled while its lazy import is resolving', async () => {
+    const loading = deferred<WujieDriver>();
+    const driver: WujieDriver = {
+      startApp: vi.fn(async () => undefined), destroyApp: vi.fn(async () => undefined),
+    };
+    const adapter = createWujiePluginAdapter({
+      runtime: await runtime(), driver: () => loading.promise,
+      handshake: successfulHandshake(), hostWindow: hostWindow(),
+      createSurfaceInstanceId: () => 'cancel-before-start',
+    });
+    const mounting = adapter.mount({ pluginId: 'kubeeye', surfaceId: 'overview', mountPointId: 'route:cancel', container });
+    const rejection = expect(mounting).rejects.toMatchObject({ issue: { code: 'SURFACE_MOUNT_CANCELLED' } });
+    const unmounting = adapter.unmount('cancel-before-start');
+    loading.resolve(driver);
+    await Promise.all([rejection, unmounting]);
+    expect(driver.startApp).not.toHaveBeenCalled();
+    expect(adapter.listInstances()).toEqual([]);
+  });
+
+  it('contains a render error after mount and cleans iframe listeners', async () => {
+    const iframe = new EventTarget();
+    const port = fakePort();
+    const destroy = vi.fn();
+    const onSurfaceError = vi.fn();
+    const pluginRuntime = await runtime();
+    const adapter = createWujiePluginAdapter({
+      runtime: pluginRuntime,
+      driver: {
+        async startApp(options) {
+          options.plugins?.[0]?.jsBeforeLoaders?.[0]?.callback?.(iframe as Window);
+          return destroy;
+        },
+        destroyApp: vi.fn(async () => undefined),
+      },
+      handshake: successfulHandshake([port]), hostWindow: hostWindow(),
+      createSurfaceInstanceId: () => 'render-failure', onSurfaceError,
+    });
+    const mounted = await adapter.mount({ pluginId: 'kubeeye', surfaceId: 'overview', mountPointId: 'route:render', container });
+    iframe.dispatchEvent(new Event('error'));
+    await vi.waitFor(() => expect(destroy).toHaveBeenCalledOnce());
+    expect(port.close).toHaveBeenCalledOnce();
+    expect(adapter.getInstance('render-failure')?.state).toMatchObject({ state: 'FAILED', stage: 'render' });
+    expect(pluginRuntime.plugins.get('kubeeye')).toEqual({ state: 'ACTIVE' });
+    iframe.dispatchEvent(new Event('error'));
+    expect(onSurfaceError).toHaveBeenCalledOnce();
+    await mounted.unmount();
+    expect(adapter.listInstances()).toEqual([]);
+  });
+
+  it('retains attributable artifact and handshake failures until unmount', async () => {
+    for (const stage of ['artifact', 'handshake'] as const) {
+      const pluginRuntime = await runtime();
+      const adapter = createWujiePluginAdapter({
+        runtime: pluginRuntime,
+        driver: {
+          async startApp(options) {
+            if (stage === 'artifact') options.loadError?.('asset.js', new Error('not found'));
+          },
+          destroyApp: vi.fn(async () => undefined),
+        },
+        handshake: stage === 'artifact' ? successfulHandshake() : {
+          begin: () => ({ result: Promise.reject(new BridgeHandshakeError('BRIDGE_NONCE_INVALID', 'invalid nonce')), cancel() {} }),
+        },
+        hostWindow: hostWindow(), createSurfaceInstanceId: () => `${stage}-failure`,
+      });
+      await expect(adapter.mount({ pluginId: 'kubeeye', surfaceId: 'overview', mountPointId: `route:${stage}`, container })).rejects.toMatchObject({
+        issue: { stage, pluginId: 'kubeeye', surfaceId: 'overview', surfaceInstanceId: `${stage}-failure`, mountPointId: `route:${stage}` },
+      });
+      expect(adapter.listInstances()[0]?.state).toMatchObject({ state: 'FAILED', stage });
+      expect(pluginRuntime.plugins.get('kubeeye')).toEqual({ state: 'ACTIVE' });
+      await adapter.unmount(`${stage}-failure`);
+      expect(adapter.listInstances()).toEqual([]);
+    }
+  });
+
+  it('does not reuse an instance id after unmount', async () => {
+    const adapter = createWujiePluginAdapter({
+      runtime: await runtime(), driver: { async startApp() {}, async destroyApp() {} },
+      handshake: successfulHandshake(), hostWindow: hostWindow(), createSurfaceInstanceId: () => 'fixed',
+    });
+    const input = { pluginId: 'kubeeye', surfaceId: 'overview', mountPointId: 'route:id', container };
+    await (await adapter.mount(input)).unmount();
+    await expect(adapter.mount(input)).rejects.toThrow('already used');
+  });
+
+  it('rejects Host objects in metadata and clones allowed JSON before Wujie injection', async () => {
+    const startApp = vi.fn(async (_options: WujieStartOptions) => undefined);
+    const adapter = createWujiePluginAdapter({
+      runtime: await runtime(), driver: { startApp, async destroyApp() {} },
+      handshake: successfulHandshake(), hostWindow: hostWindow(),
+    });
+    const input = { pluginId: 'kubeeye', surfaceId: 'overview', mountPointId: 'route:props', container };
+    await expect(adapter.mount({ ...input, initialParameters: { client: () => 'host' } as never })).rejects.toThrow('JSON');
+    expect(startApp).not.toHaveBeenCalled();
+    const parameters = { cluster: { name: 'original' } };
+    const mounted = await adapter.mount({ ...input, initialParameters: parameters });
+    parameters.cluster.name = 'changed';
+    expect(startApp.mock.calls[0]?.[0].props?.surface.initialParameters).toEqual({ cluster: { name: 'original' } });
+    await mounted.unmount();
+  });
+
   it('does not load Wujie or allocate a handshake before mount', async () => {
     const loadDriver = vi.fn(async (): Promise<WujieDriver> => ({
       startApp: vi.fn(),
@@ -179,12 +313,12 @@ describe('WujiePluginAdapter', () => {
         surfaceInstanceId: 'surface-1',
         mountPointId: 'route:kubeeye-overview',
       },
-      wujieName: 'nexus-surface-surface-1',
+      wujieName: expect.stringMatching(/^nexus-surface-surface-1-/),
       state: { state: 'MOUNTING' },
     });
     const wujieOptions = startApp.mock.calls[0]?.[0];
     expect(wujieOptions).toMatchObject({
-      name: 'nexus-surface-surface-1',
+      name: adapter.getInstance('surface-1')?.wujieName,
       url: 'http://localhost:3000/plugins/kubeeye/1.0.0/',
       el: container,
       sync: false,

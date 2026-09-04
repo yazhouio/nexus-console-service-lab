@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { hostConnectionPromise } from './host-bridge';
+import { getCurrentCluster, hostConnectionPromise } from './host-bridge';
 
 const cardStyle = {
   padding: 24,
@@ -14,6 +14,7 @@ const cardStyle = {
 export function App() {
   const [bridgeState, setBridgeState] = useState('CONNECTING');
   const [parentAccessible, setParentAccessible] = useState(false);
+  const [cluster, setCluster] = useState('Not requested');
 
   useEffect(() => {
     void hostConnectionPromise.then(
@@ -37,6 +38,12 @@ export function App() {
       <p>
         Bridge: <strong>{bridgeState}</strong>
       </p>
+      <button disabled={bridgeState !== 'CONNECTED'} onClick={async () => {
+        setCluster('Loading');
+        try { setCluster(await getCurrentCluster()); }
+        catch (error) { setCluster(error instanceof Error ? error.message : 'FAILED'); }
+      }}>Read current cluster</button>
+      <p>Current cluster: <strong data-testid="current-cluster">{cluster}</strong></p>
     </section>
   );
 }

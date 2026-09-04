@@ -3,6 +3,7 @@ packages:
   - packages/*
 
 catalog:
+  '@playwright/test': 1.62.1
   '@rsbuild/core': 2.2.2
   '@rsbuild/plugin-react': 2.1.0
   '@rspack/cli': 2.2.2

@@ -2,9 +2,8 @@ import {
   validateBridgeBootstrapDescriptor,
   type BridgeBootstrapDescriptor,
 } from '../bridge-bootstrap';
-import type { JsonValue } from '../contribution';
-import type { CapabilityId, PluginId } from '../identifiers';
-import type { PermissionId } from '../manifest';
+import { isJsonValue, type JsonValue } from '../contribution';
+import type { PluginId } from '../identifiers';
 import type { PluginRuntime } from '../bootstrap';
 import {
   BridgeHandshakeError,
@@ -17,6 +16,13 @@ import {
   type WujieDriver,
   type WujieStartOptions,
 } from './wujie-driver';
+import {
+  createPluginBridgeSession,
+  type BridgeHostError,
+  type PluginBridgeSession,
+} from './plugin-bridge';
+
+let nextWujieName = 0;
 
 export type SurfaceFailureStage =
   | 'artifact'
@@ -53,6 +59,7 @@ export interface SurfaceInstanceRecord {
 
 export type SurfaceMountErrorCode =
   | 'INVALID_SURFACE_MOUNT'
+  | 'SURFACE_MOUNT_CANCELLED'
   | 'WUJIE_RESOURCE_FAILED'
   | 'BRIDGE_BOOTSTRAP_FAILED'
   | 'BRIDGE_PROTOCOL_MISMATCH'
@@ -82,6 +89,7 @@ export interface MountRestrictedSurfaceInput {
   readonly container: HTMLElement;
   readonly layout?: JsonValue;
   readonly initialParameters?: JsonValue;
+  readonly signal?: AbortSignal;
 }
 
 export interface MountedSurface {
@@ -106,18 +114,8 @@ export interface CreateWujiePluginAdapterOptions {
   readonly hostWindow?: Window;
   readonly createSurfaceInstanceId?: () => string;
   readonly createNonce?: () => string;
-}
-
-interface BridgeSessionIdentity extends SurfaceInstanceIdentity {
-  readonly protocolVersion: number;
-  readonly requires: readonly CapabilityId[];
-  readonly grantedPermissions: readonly PermissionId[];
-}
-
-interface OwnedBridgeSession {
-  readonly identity: BridgeSessionIdentity;
-  readonly state: 'ACTIVE' | 'DISPOSED';
-  dispose(): void;
+  readonly onSurfaceError?: (error: SurfaceMountError) => void;
+  readonly onHostError?: (error: BridgeHostError) => void;
 }
 
 interface InternalSurfaceInstance {
@@ -125,10 +123,17 @@ interface InternalSurfaceInstance {
   readonly wujieName: string;
   state: SurfaceInstanceState;
   handshake?: BridgeHandshakeAttempt;
-  session?: OwnedBridgeSession;
+  session?: PluginBridgeSession;
   destroyWujie?: () => Promise<void>;
+  driver?: WujieDriver;
+  startTask: Promise<void>;
+  cleanupTask?: Promise<void>;
+  readonly abortController: AbortController;
+  removeListeners(): void;
+  interrupt(error: SurfaceMountError): void;
   wujieStarted: boolean;
-  cleaned: boolean;
+  stopped: boolean;
+  unmountRequested: boolean;
 }
 
 function freezeIdentity(identity: SurfaceInstanceIdentity): SurfaceInstanceIdentity {
@@ -151,30 +156,6 @@ function requireNonEmpty(value: string, label: string): void {
   if (value.trim().length === 0) {
     throw new Error(`${label} must be a non-empty string.`);
   }
-}
-
-function createBridgeSession(
-  identity: BridgeSessionIdentity,
-  port: MessagePort,
-): OwnedBridgeSession {
-  let state: 'ACTIVE' | 'DISPOSED' = 'ACTIVE';
-  return {
-    identity: Object.freeze({
-      ...identity,
-      requires: Object.freeze([...identity.requires]),
-      grantedPermissions: Object.freeze([...identity.grantedPermissions]),
-    }),
-    get state() {
-      return state;
-    },
-    dispose() {
-      if (state === 'DISPOSED') {
-        return;
-      }
-      state = 'DISPOSED';
-      port.close();
-    },
-  };
 }
 
 function handshakeMountError(
@@ -200,12 +181,17 @@ export function createWujiePluginAdapter(
 ): WujiePluginAdapter {
   const protocolVersion = options.protocolVersion ?? 1;
   const handshakeTimeoutMs = options.handshakeTimeoutMs ?? 10_000;
+  if (!Number.isInteger(protocolVersion) || protocolVersion < 1 ||
+      !Number.isFinite(handshakeTimeoutMs) || handshakeTimeoutMs <= 0) {
+    throw new Error('Bridge protocol and handshake timeout must be positive.');
+  }
   const hostWindow = options.hostWindow ?? window;
   const handshake =
     options.handshake ?? createWindowBridgeHandshakeCoordinator(hostWindow);
   const createSurfaceInstanceId = options.createSurfaceInstanceId ?? randomId;
   const createNonce = options.createNonce ?? randomId;
   const instances = new Map<string, InternalSurfaceInstance>();
+  const issuedInstanceIds = new Set<string>();
   const issuedNonces = new Set<string>();
 
   const resolveDriver = async (): Promise<WujieDriver> => {
@@ -217,25 +203,30 @@ export function createWujiePluginAdapter(
       : options.driver;
   };
 
-  const cleanup = async (instance: InternalSurfaceInstance): Promise<void> => {
-    if (instance.cleaned) {
-      return;
-    }
-    instance.cleaned = true;
+  const cleanup = (instance: InternalSurfaceInstance): Promise<void> => {
+    if (instance.cleanupTask !== undefined) return instance.cleanupTask;
+    instance.stopped = true;
+    // Invalidate communication before touching browser resources.
+    instance.session?.dispose();
     instance.handshake?.cancel();
     instance.handshake = undefined;
-    instance.session?.dispose();
-
-    try {
-      if (instance.destroyWujie !== undefined) {
-        await instance.destroyWujie();
-      } else if (instance.wujieStarted) {
-        const driver = await resolveDriver();
-        await driver.destroyApp(instance.wujieName);
+    instance.abortController.abort();
+    instance.removeListeners();
+    instance.cleanupTask = (async () => {
+      // Wujie has no cancellable start API. Abort fetches, then destroy the
+      // eventual instance instead of allowing a late start to resurrect it.
+      await instance.startTask.catch(() => undefined);
+      try {
+        if (instance.destroyWujie !== undefined) {
+          await instance.destroyWujie();
+        } else if (instance.wujieStarted) {
+          await instance.driver?.destroyApp(instance.wujieName);
+        }
+      } finally {
+        instance.destroyWujie = undefined;
       }
-    } finally {
-      instance.destroyWujie = undefined;
-    }
+    })();
+    return instance.cleanupTask;
   };
 
   const adapter: WujiePluginAdapter = {
@@ -247,6 +238,12 @@ export function createWujiePluginAdapter(
         input.surfaceId,
       );
       requireNonEmpty(input.mountPointId, 'mountPointId');
+      if (input.signal?.aborted) throw new DOMException('Mount was cancelled.', 'AbortError');
+      for (const value of [input.layout, input.initialParameters]) {
+        if (value !== undefined && !isJsonValue(value)) {
+          throw new Error('Surface metadata must contain JSON values only.');
+        }
+      }
 
       if (
         record === undefined ||
@@ -258,10 +255,16 @@ export function createWujiePluginAdapter(
         );
       }
 
+      const entryUrl = new URL(record.manifest.entry, hostWindow.location.href);
+      if (entryUrl.origin !== hostWindow.location.origin ||
+          !['http:', 'https:'].includes(entryUrl.protocol)) {
+        throw new Error('Restricted Plugin entry must use the same Host origin.');
+      }
+
       const surfaceInstanceId = createSurfaceInstanceId();
       requireNonEmpty(surfaceInstanceId, 'surfaceInstanceId');
-      if (instances.has(surfaceInstanceId)) {
-        throw new Error(`Surface Instance ${surfaceInstanceId} already exists.`);
+      if (issuedInstanceIds.has(surfaceInstanceId)) {
+        throw new Error(`Surface Instance ${surfaceInstanceId} was already used.`);
       }
       const nonce = createNonce();
       requireNonEmpty(nonce, 'Bridge nonce');
@@ -269,6 +272,7 @@ export function createWujiePluginAdapter(
         throw new Error('Bridge nonce factory returned a reused value.');
       }
       issuedNonces.add(nonce);
+      issuedInstanceIds.add(surfaceInstanceId);
 
       const identity = freezeIdentity({
         pluginId: input.pluginId,
@@ -279,10 +283,15 @@ export function createWujiePluginAdapter(
       });
       const instance: InternalSurfaceInstance = {
         identity,
-        wujieName: `nexus-surface-${surfaceInstanceId}`,
+        wujieName: `nexus-surface-${surfaceInstanceId}-${++nextWujieName}`,
         state: Object.freeze({ state: 'MOUNTING' }),
         wujieStarted: false,
-        cleaned: false,
+        stopped: false,
+        unmountRequested: false,
+        startTask: Promise.resolve(),
+        abortController: new AbortController(),
+        removeListeners() {},
+        interrupt() {},
       };
       instances.set(surfaceInstanceId, instance);
 
@@ -292,19 +301,65 @@ export function createWujiePluginAdapter(
           surfaceInstanceId,
           nonce,
         });
-      const entryUrl = new URL(record.manifest.entry, hostWindow.location.href);
       let startFailureStage: SurfaceFailureStage = 'wujie-bootstrap';
       let artifactError: unknown;
+      let rejectInterrupted: (error: SurfaceMountError) => void = () => undefined;
+      const interrupted = new Promise<never>((_resolve, reject) => {
+        rejectInterrupted = reject;
+      });
+      // An error may arrive after the initial mount has already resolved.
+      void interrupted.catch(() => undefined);
+      instance.interrupt = rejectInterrupted;
+      const reportFailure = (stage: SurfaceFailureStage, cause: unknown): void => {
+        if (instance.stopped) return;
+        const error = new SurfaceMountError({
+          ...identity, code: 'WUJIE_RESOURCE_FAILED', stage,
+          message: 'Restricted Surface execution failed.', cause,
+        });
+        instance.state = Object.freeze({ state: 'FAILED', stage, error });
+        rejectInterrupted(error);
+        void cleanup(instance).catch(() => undefined);
+        try { options.onSurfaceError?.(error); } catch { /* Host diagnostics only. */ }
+      };
+      let iframeWindow: Window | undefined;
+      const onError = (event: ErrorEvent): void => reportFailure('render', event.error ?? event.message);
+      const onRejection = (event: PromiseRejectionEvent): void => reportFailure('render', event.reason);
+      const onAbort = (): void => {
+        void adapter.unmount(surfaceInstanceId).catch(() => undefined);
+      };
+      input.signal?.addEventListener('abort', onAbort, { once: true });
+      instance.removeListeners = () => {
+        input.signal?.removeEventListener('abort', onAbort);
+        iframeWindow?.removeEventListener('error', onError);
+        iframeWindow?.removeEventListener('unhandledrejection', onRejection);
+      };
 
       try {
-        instance.handshake = handshake.begin({
+        const attempt = handshake.begin({
           descriptor,
           expectedOrigin: entryUrl.origin,
           timeoutMs: handshakeTimeoutMs,
         });
-        void instance.handshake.result.catch(() => undefined);
+        instance.handshake = attempt;
+        const sessionTask = attempt.result.then(port => {
+          if (instance.stopped) {
+            port.close();
+            throw new Error('Surface was disposed before handshake completed.');
+          }
+          instance.session = createPluginBridgeSession({
+            runtime: options.runtime,
+            identity: {
+              ...identity, protocolVersion,
+              requires: record.manifest.requires,
+              grantedPermissions: record.config.grantedPermissions,
+            },
+            port,
+            onHostError: options.onHostError,
+          });
+          instance.handshake = undefined;
+        }).catch(error => { throw handshakeMountError(identity, error); });
+        void sessionTask.catch(() => undefined);
 
-        const driver = await resolveDriver();
         const startOptions: WujieStartOptions = {
           name: instance.wujieName,
           url: entryUrl.href,
@@ -313,7 +368,7 @@ export function createWujiePluginAdapter(
           alive: false,
           fiber: true,
           degrade: false,
-          props: Object.freeze({
+          props: JSON.parse(JSON.stringify({
             plugin: Object.freeze({
               id: record.manifest.id,
               version: record.manifest.version,
@@ -326,45 +381,56 @@ export function createWujiePluginAdapter(
                 : { initialParameters: input.initialParameters }),
             }),
             bridge: descriptor,
-          }),
+          })),
+          fetch: async (resource, init) => {
+            const signal = init?.signal
+              ? AbortSignal.any([init.signal, instance.abortController.signal])
+              : instance.abortController.signal;
+            try {
+              const response = await hostWindow.fetch(resource, { ...init, signal });
+              if (!response.ok) throw new Error(`Artifact returned HTTP ${response.status}.`);
+              return response;
+            } catch (error) {
+              if (!instance.stopped) reportFailure('artifact', error);
+              throw error;
+            }
+          },
           loadError(_url, error) {
             artifactError = error;
           },
           beforeMount() {
             startFailureStage = 'render';
           },
+          plugins: [{
+            // beforeLoad runs before iframe navigation/document.open(), which
+            // clears listeners. This callback runs after iframe initialization
+            // and before the first Plugin script instead.
+            jsBeforeLoaders: [{ callback(appWindow) {
+              if (instance.stopped) return;
+              iframeWindow = appWindow;
+              appWindow.addEventListener('error', onError);
+              appWindow.addEventListener('unhandledrejection', onRejection);
+            } }],
+          }],
         };
 
-        instance.wujieStarted = true;
-        const destroy = await driver.startApp(startOptions);
-        if (typeof destroy === 'function') {
-          instance.destroyWujie = async () => {
-            await destroy();
-          };
-        }
-        if (artifactError !== undefined) {
-          throw new SurfaceMountError({
-            ...identity,
-            code: 'WUJIE_RESOURCE_FAILED',
-            stage: 'artifact',
-            message: 'Restricted Plugin artifact failed to load.',
-            cause: artifactError,
-          });
-        }
-
-        const port = await instance.handshake.result.catch(error => {
-          throw handshakeMountError(identity, error);
-        });
-        instance.handshake = undefined;
-        instance.session = createBridgeSession(
-          {
-            ...identity,
-            protocolVersion,
-            requires: record.manifest.requires,
-            grantedPermissions: record.config.grantedPermissions,
-          },
-          port,
-        );
+        instance.startTask = (async () => {
+          instance.driver = await resolveDriver();
+          if (instance.stopped) return;
+          instance.wujieStarted = true;
+          const destroy = await instance.driver.startApp(startOptions);
+          if (typeof destroy === 'function') {
+            instance.destroyWujie = async () => { await destroy(); };
+          }
+          if (artifactError !== undefined) {
+            throw new SurfaceMountError({
+              ...identity, code: 'WUJIE_RESOURCE_FAILED', stage: 'artifact',
+              message: 'Restricted Plugin artifact failed to load.', cause: artifactError,
+            });
+          }
+        })();
+        await Promise.race([Promise.all([instance.startTask, sessionTask]), interrupted]);
+        if (instance.stopped) throw new Error('Surface was disposed during mount.');
         instance.state = Object.freeze({
           state: 'MOUNTED',
           bridgeSessionState: 'ACTIVE',
@@ -389,11 +455,11 @@ export function createWujiePluginAdapter(
                     : 'Wujie Surface mount failed.',
                 cause: error,
               });
-        instance.state = Object.freeze({
-          state: 'FAILED',
-          stage: mountError.issue.stage,
-          error: mountError,
-        });
+        if (!instance.unmountRequested) {
+          instance.state = Object.freeze({
+            state: 'FAILED', stage: mountError.issue.stage, error: mountError,
+          });
+        }
         await cleanup(instance).catch(() => undefined);
         throw mountError;
       }
@@ -404,6 +470,12 @@ export function createWujiePluginAdapter(
       if (instance === undefined) {
         return;
       }
+      instance.unmountRequested = true;
+      instance.interrupt(new SurfaceMountError({
+        ...instance.identity,
+        code: 'SURFACE_MOUNT_CANCELLED', stage: 'wujie-bootstrap',
+        message: 'Surface mount was cancelled by the Host.',
+      }));
       try {
         await cleanup(instance);
       } finally {

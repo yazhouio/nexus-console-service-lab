@@ -114,3 +114,33 @@ export function connectHostBridge(): Promise<HostConnection> {
 }
 
 export const hostConnectionPromise = connectHostBridge();
+
+/** Fixture-local client for the single unary action demonstrated by this app. */
+export async function getCurrentCluster(): Promise<string> {
+  const connection = await hostConnectionPromise;
+  if (connection.state !== 'CONNECTED') throw new Error('Host Bridge is not connected.');
+  const requestId = crypto.randomUUID();
+  return new Promise<string>((resolve, reject) => {
+    const cleanup = (): void => {
+      window.clearTimeout(timeout);
+      connection.port.removeEventListener('message', onMessage);
+    };
+    const onMessage = (event: MessageEvent): void => {
+      if (!isRecord(event.data) || event.data.type !== 'response' || event.data.requestId !== requestId) return;
+      cleanup();
+      if (event.data.ok === true && typeof event.data.result === 'string') {
+        resolve(event.data.result);
+      } else {
+        const code = isRecord(event.data.error) && typeof event.data.error.code === 'string'
+          ? event.data.error.code : 'INVALID_RESPONSE';
+        reject(new Error(code));
+      }
+    };
+    const timeout = window.setTimeout(() => { cleanup(); reject(new Error('TIMEOUT')); }, 5_000);
+    connection.port.addEventListener('message', onMessage);
+    connection.port.postMessage({
+      type: 'request', requestId, capability: 'kubesphere.cluster@2',
+      action: 'getCurrentCluster', payload: null,
+    });
+  });
+}

@@ -99,6 +99,10 @@ export function createWindowBridgeHandshakeCoordinator(
 ): BridgeHandshakeCoordinator {
   return Object.freeze({
     begin(request: BridgeHandshakeRequest): BridgeHandshakeAttempt {
+      validateBridgeBootstrapDescriptor(request.descriptor);
+      if (!Number.isFinite(request.timeoutMs) || request.timeoutMs <= 0) {
+        throw new Error('Handshake timeout must be positive.');
+      }
       let settled = false;
       let connectedPort: MessagePort | undefined;
       let rejectResult: (error: Error) => void = () => undefined;
@@ -125,9 +129,9 @@ export function createWindowBridgeHandshakeCoordinator(
 
       const onMessage = (event: MessageEvent): void => {
         if (
-          isRecord(event.data) &&
-          event.data.type === BRIDGE_CONNECT_MESSAGE &&
-          typeof event.data.surfaceInstanceId === 'string' &&
+          settled || event.origin !== request.expectedOrigin ||
+          !isRecord(event.data) ||
+          event.data.type !== BRIDGE_CONNECT_MESSAGE ||
           event.data.surfaceInstanceId !== request.descriptor.surfaceInstanceId
         ) {
           return;
@@ -182,8 +186,13 @@ export function createWindowBridgeHandshakeCoordinator(
           return;
         }
 
-        const channel = createChannel();
+        // Consume the one-time nonce and remove the listener before any
+        // allocation or transfer, including synchronous/reentrant transports.
+        settled = true;
+        cleanup();
+        let channel: MessageChannel | undefined;
         try {
+          channel = createChannel();
           (event.source as MessageDestination).postMessage(
             Object.freeze({
               type: BRIDGE_CONNECTED_MESSAGE,
@@ -193,11 +202,10 @@ export function createWindowBridgeHandshakeCoordinator(
             request.expectedOrigin,
             [channel.port2],
           );
-          channel.port1.start();
         } catch (error) {
-          channel.port1.close();
-          channel.port2.close();
-          fail(
+          channel?.port1.close();
+          channel?.port2.close();
+          rejectResult(
             new BridgeHandshakeError(
               'BRIDGE_BOOTSTRAP_FAILED',
               error instanceof Error
@@ -208,9 +216,8 @@ export function createWindowBridgeHandshakeCoordinator(
           return;
         }
 
-        settled = true;
         connectedPort = channel.port1;
-        cleanup();
+        // The port stays paused until the bound Session installs its listener.
         resolveResult(channel.port1);
       };
 
