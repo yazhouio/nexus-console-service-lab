@@ -11,6 +11,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: [
+    { command: 'node e2e/authorization-server.mjs', url: 'http://127.0.0.1:3002/health', reuseExistingServer: !process.env.CI, timeout: 10_000 },
     {
       command: 'pnpm dev:plugin',
       url: 'http://localhost:3001/plugins/kubeeye/1.0.0/',

@@ -24,6 +24,11 @@ export {
 } from './wujie-plugin-adapter';
 export type { WujieDriver, WujieStartOptions } from './wujie-driver';
 export type {
+  BridgeEvent,
+  BridgeUnsubscribeRequest,
+  BridgeSubscriptionResult,
+  BridgeLimits,
+  BridgeAuditEntry,
   BridgeErrorCode,
   BridgeHostError,
   BridgeRequest,

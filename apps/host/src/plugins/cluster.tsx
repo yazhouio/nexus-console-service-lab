@@ -4,6 +4,8 @@ import type { ConsoleShellCapability } from './console-shell';
 
 export interface ClusterCapability {
   getCurrentCluster(): string;
+  setCurrentCluster(name: string): void;
+  watchCurrentCluster(emit: (name: string) => void): { snapshot: string; dispose(): void };
 }
 
 function ClusterOverview() {
@@ -19,10 +21,17 @@ export const cluster: PluginDefinition = {
     context.capabilities.require<ConsoleShellCapability>(
       'kubesphere.console-shell@1',
     );
+    let current = 'demo-cluster';
+    const listeners = new Set<(name: string) => void>();
     context.capabilities.register<ClusterCapability>(
       'kubesphere.cluster@2',
       {
-        getCurrentCluster: () => 'demo-cluster',
+        getCurrentCluster: () => current,
+        setCurrentCluster(name) { current = name; for (const listener of listeners) listener(name); },
+        watchCurrentCluster(emit) {
+          listeners.add(emit);
+          return { snapshot: current, dispose: () => { listeners.delete(emit); } };
+        },
       },
     );
     context.contributions.registerRoute({

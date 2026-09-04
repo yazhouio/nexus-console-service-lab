@@ -1,3 +1,4 @@
+import { frozenCopy } from './immutable';
 import { isCapabilityId, isHostApiId } from './identifiers';
 import { isJsonValue } from './contribution';
 import type {
@@ -171,7 +172,7 @@ function optionalJsonValue(
   if (!isJsonValue(value)) {
     invalid(`${label} must be a serializable JsonValue.`, pluginId);
   }
-  return value;
+  return frozenCopy(value);
 }
 
 function parseSurfaces(

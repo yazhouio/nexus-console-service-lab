@@ -86,3 +86,8 @@ export type {
   SurfaceDefinitionRecord,
   SurfaceDefinitionRegistry,
 } from './surface-definition';
+
+export { createInstallationStore, PluginInstallationError } from './installation-store';
+export type { InstallationStore, InstallationStoreOptions, InstallationStoreSnapshot, InstallationStorage, ReloadRequired } from './installation-store';
+export { inspect } from './inspection';
+export type { BootstrapFailure, RuntimeSnapshot, PluginSnapshot, SurfaceInstanceSnapshot, RuntimeErrorSnapshot } from './inspection';

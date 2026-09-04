@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   bootstrapPluginRuntime,
+  inspect,
   validateRestrictedInstallRecord,
   type BridgeCapabilityContract,
 } from '../src';
@@ -465,4 +466,42 @@ describe('WujiePluginAdapter', () => {
     expect(cleanupOrder).toEqual(['session', 'wujie']);
     expect(adapter.getInstance('surface-cleanup')).toBeUndefined();
   });
+});
+
+
+it('projects session failure only on the owning instance and preserves earlier snapshots', async () => {
+  const first = new MessageChannel();
+  const second = new MessageChannel();
+  const pluginRuntime = await runtime();
+  let sequence = 0;
+  const adapter = createWujiePluginAdapter({
+    runtime: pluginRuntime, hostWindow: hostWindow(),
+    driver: { async startApp() {}, async destroyApp() {} },
+    handshake: successfulHandshake([first.port1, second.port1]),
+    createSurfaceInstanceId: () => `instance-${++sequence}`,
+    bridgeLimits: { maxProtocolViolations: 2 },
+  });
+  try {
+    await adapter.mount({ pluginId: 'kubeeye', surfaceId: 'overview', mountPointId: 'route:overview', container });
+    await adapter.mount({ pluginId: 'kubeeye', surfaceId: 'overview', mountPointId: 'extension:cards/overview', container });
+    const before = inspect(pluginRuntime, adapter);
+    first.port2.postMessage({ type: 'request', pluginId: 'forged', requestId: 'bad-1' });
+    first.port2.postMessage({ type: 'request', pluginId: 'forged', requestId: 'bad-2' });
+    await vi.waitFor(() => expect(adapter.getInstance('instance-1')?.state).toMatchObject({ state: 'FAILED', stage: 'bridge' }));
+    const after = inspect(pluginRuntime, adapter);
+    const plugin = after.plugins.find(plugin => plugin.id === 'kubeeye');
+    expect(plugin?.state).toBe('ACTIVE');
+    expect(plugin?.surfaces?.[0].instances).toMatchObject([
+      { surfaceInstanceId: 'instance-1', state: 'FAILED', bridgeSession: { state: 'DISPOSED', subscriptionCount: 0 } },
+      { surfaceInstanceId: 'instance-2', state: 'MOUNTED', bridgeSession: { state: 'ACTIVE', subscriptionCount: 0 } },
+    ]);
+    expect(before.plugins.find(plugin => plugin.id === 'kubeeye')?.surfaces?.[0].instances.every(instance => instance.state === 'MOUNTED')).toBe(true);
+    const response = new Promise(resolve => { second.port2.onmessage = event => resolve(event.data); });
+    second.port2.postMessage({ type: 'request', requestId: 'bad-1', capability: 'kubesphere.cluster@2', action: 'read', payload: null });
+    expect(await response).toMatchObject({ ok: true, result: null });
+    expect(inspect(pluginRuntime, adapter)).toEqual(after);
+  } finally {
+    await Promise.all(adapter.listInstances().map(instance => adapter.unmount(instance.identity.surfaceInstanceId)));
+    first.port2.close(); second.port2.close();
+  }
 });

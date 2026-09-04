@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { getCurrentCluster, hostConnectionPromise } from './host-bridge';
+import { getCurrentCluster, hostConnectionPromise, watchCurrentCluster } from './host-bridge';
 
 const cardStyle = {
   padding: 24,
@@ -15,8 +15,13 @@ export function App() {
   const [bridgeState, setBridgeState] = useState('CONNECTING');
   const [parentAccessible, setParentAccessible] = useState(false);
   const [cluster, setCluster] = useState('Not requested');
+  const [watchedCluster, setWatchedCluster] = useState('Not subscribed');
+  const [watching, setWatching] = useState(false);
+  const stopRef = useRef<(() => Promise<void>) | undefined>(undefined);
+  const disposedRef = useRef(false);
 
   useEffect(() => {
+    disposedRef.current = false;
     void hostConnectionPromise.then(
       connection => {
         setBridgeState(connection.state);
@@ -24,6 +29,7 @@ export function App() {
       },
       () => setBridgeState('FAILED'),
     );
+    return () => { disposedRef.current = true; void stopRef.current?.().catch(() => undefined); };
   }, []);
 
   return (
@@ -43,6 +49,23 @@ export function App() {
         try { setCluster(await getCurrentCluster()); }
         catch (error) { setCluster(error instanceof Error ? error.message : 'FAILED'); }
       }}>Read current cluster</button>
+      <button disabled={bridgeState !== 'CONNECTED'} onClick={async () => {
+        if (watching) {
+          const stop = stopRef.current; stopRef.current = undefined;
+          if (!stop) return;
+          try { await stop(); } catch { /* Session may already be disposed. */ }
+          setWatching(false);
+          return;
+        }
+        setWatching(true);
+        try {
+          const stop = await watchCurrentCluster(name => { if (!disposedRef.current) setWatchedCluster(name); });
+          if (disposedRef.current) await stop(); else stopRef.current = stop;
+        } catch (error) {
+          if (!disposedRef.current) { setWatching(false); setWatchedCluster(error instanceof Error ? error.message : 'FAILED'); }
+        }
+      }}>{watching ? 'Stop watching' : 'Watch current cluster'}</button>
+      <p>Watched cluster: <strong data-testid="watched-cluster">{watchedCluster}</strong></p>
       <p>Current cluster: <strong data-testid="current-cluster">{cluster}</strong></p>
     </section>
   );

@@ -15,6 +15,11 @@ export default defineConfig({
     port: 3000,
     strictPort: true,
     proxy: {
+      '/api': { target: 'http://127.0.0.1:3002' },
+      '/plugins/kubeeye/2.0.0': {
+        target: 'http://localhost:3001', changeOrigin: false,
+        pathRewrite: { '^/plugins/kubeeye/2.0.0': '/plugins/kubeeye/1.0.0' },
+      },
       '/plugins/kubeeye/1.0.0': {
         target: 'http://localhost:3001',
         changeOrigin: false,

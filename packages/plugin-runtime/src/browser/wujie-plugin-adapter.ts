@@ -19,6 +19,8 @@ import {
 import {
   createPluginBridgeSession,
   type BridgeHostError,
+  type BridgeLimits,
+  type BridgeAuditEntry,
   type PluginBridgeSession,
 } from './plugin-bridge';
 
@@ -55,9 +57,11 @@ export interface SurfaceInstanceRecord {
   readonly identity: SurfaceInstanceIdentity;
   readonly wujieName: string;
   readonly state: SurfaceInstanceState;
+  readonly bridgeSession?: Readonly<{ state: 'ACTIVE' | 'DISPOSED'; subscriptionCount: number }>;
 }
 
 export type SurfaceMountErrorCode =
+  | 'BRIDGE_SESSION_FAILED'
   | 'INVALID_SURFACE_MOUNT'
   | 'SURFACE_MOUNT_CANCELLED'
   | 'WUJIE_RESOURCE_FAILED'
@@ -116,6 +120,8 @@ export interface CreateWujiePluginAdapterOptions {
   readonly createNonce?: () => string;
   readonly onSurfaceError?: (error: SurfaceMountError) => void;
   readonly onHostError?: (error: BridgeHostError) => void;
+  readonly bridgeLimits?: Partial<BridgeLimits>;
+  readonly onAudit?: (entry: BridgeAuditEntry) => void;
 }
 
 interface InternalSurfaceInstance {
@@ -145,6 +151,7 @@ function snapshot(instance: InternalSurfaceInstance): SurfaceInstanceRecord {
     identity: instance.identity,
     wujieName: instance.wujieName,
     state: instance.state,
+    ...(instance.session ? { bridgeSession: Object.freeze({ state: instance.session.state, subscriptionCount: instance.session.subscriptionCount }) } : {}),
   });
 }
 
@@ -313,7 +320,7 @@ export function createWujiePluginAdapter(
       const reportFailure = (stage: SurfaceFailureStage, cause: unknown): void => {
         if (instance.stopped) return;
         const error = new SurfaceMountError({
-          ...identity, code: 'WUJIE_RESOURCE_FAILED', stage,
+          ...identity, code: stage === 'bridge' ? 'BRIDGE_SESSION_FAILED' : 'WUJIE_RESOURCE_FAILED', stage,
           message: 'Restricted Surface execution failed.', cause,
         });
         instance.state = Object.freeze({ state: 'FAILED', stage, error });
@@ -355,6 +362,9 @@ export function createWujiePluginAdapter(
             },
             port,
             onHostError: options.onHostError,
+            limits: options.bridgeLimits,
+            onAudit: options.onAudit,
+            onSessionFailure: code => reportFailure('bridge', code),
           });
           instance.handshake = undefined;
         }).catch(error => { throw handshakeMountError(identity, error); });
@@ -386,17 +396,13 @@ export function createWujiePluginAdapter(
             const signal = init?.signal
               ? AbortSignal.any([init.signal, instance.abortController.signal])
               : instance.abortController.signal;
-            try {
-              const response = await hostWindow.fetch(resource, { ...init, signal });
-              if (!response.ok) throw new Error(`Artifact returned HTTP ${response.status}.`);
-              return response;
-            } catch (error) {
-              if (!instance.stopped) reportFailure('artifact', error);
-              throw error;
-            }
+            // Wujie also installs this fetch in the child window. Preserve native
+            // HTTP semantics; only its artifact loader's loadError is a mount failure.
+            return hostWindow.fetch(resource, { ...init, signal });
           },
           loadError(_url, error) {
             artifactError = error;
+            reportFailure('artifact', error);
           },
           beforeMount() {
             startFailureStage = 'render';

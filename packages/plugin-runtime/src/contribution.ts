@@ -1,3 +1,4 @@
+import { frozenCopy } from './immutable';
 import type { PluginId } from './identifiers';
 import { PluginRuntimeContractError } from './runtime-state';
 
@@ -77,6 +78,7 @@ export interface OwnedContribution<T> {
 }
 
 export interface ContributionRegistry {
+  listExtensionSlots(): readonly string[];
   listRoutes(): readonly OwnedContribution<RouteContribution>[];
   listNavigation(): readonly OwnedContribution<NavigationContribution>[];
   listExtensions(
@@ -222,7 +224,7 @@ function owned<T>(
 ): OwnedContribution<T> {
   return Object.freeze({
     ownerPluginId,
-    contribution: Object.freeze({ ...contribution }),
+    contribution: frozenCopy(contribution),
   });
 }
 
@@ -238,6 +240,7 @@ export function createContributionRegistry(): ContributionRegistryController {
   >();
 
   const registry: ContributionRegistry = Object.freeze({
+    listExtensionSlots: () => Object.freeze([...extensions.keys()].sort()),
     listRoutes: () => stableOwned(routes.values()),
     listNavigation: () => visualOwned(navigation.values()),
     listExtensions: (slot: string) =>

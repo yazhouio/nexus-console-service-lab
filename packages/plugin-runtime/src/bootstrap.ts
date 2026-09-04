@@ -1,3 +1,4 @@
+import { frozenCopy, readonlyMap, readonlySet } from './immutable';
 import {
   createCapabilityRegistry,
   type CapabilityRegistry,
@@ -41,6 +42,8 @@ import {
 
 export interface PluginRuntime {
   readonly ready: true;
+  readonly candidates: readonly PluginCandidate[];
+  readonly installations: readonly InstalledPluginRecord[];
   readonly resolution: Resolution;
   readonly capabilities: CapabilityRegistry;
   readonly contributions: ContributionRegistry;
@@ -118,10 +121,10 @@ function createBridgeContractCatalog(
     catalog.set(contract.id, contract);
   }
 
-  return catalog;
+  return readonlyMap(catalog);
 }
 
-function validateRestrictedAgainstHost(
+export function validateRestrictedAgainstHost(
   installed: readonly InstalledPluginRecord[],
   supportedHostApis: ReadonlySet<HostApiId>,
   bridgeContracts: ReadonlyMap<string, BridgeCapabilityContract>,
@@ -436,6 +439,8 @@ function bootstrapFailure(
 export async function bootstrapPluginRuntime(
   options: BootstrapPluginRuntimeOptions,
 ): Promise<PluginRuntime> {
+  // Capture inputs before the first await. Ready catalogs cannot follow caller edits.
+  options = frozenCopy(options);
   const bridgeContracts = createBridgeContractCatalog(
     options.bridgeContracts ?? [],
   );
@@ -684,12 +689,22 @@ export async function bootstrapPluginRuntime(
 
   return Object.freeze({
     ready: true,
-    resolution,
+    candidates: frozenCopy([
+      ...options.builtins.map(definition => ({ kind: 'builtin' as const, descriptor: {
+        id: definition.id, version: definition.version, requires: definition.requires, provides: definition.provides,
+      } })),
+      ...(options.installed ?? []).filter(record => record.config.enabled).map(record => ({ kind: 'restricted' as const, descriptor: record.manifest })),
+    ]),
+    installations: Object.freeze((options.installed ?? []).filter(record => record.config.enabled)),
+    resolution: Object.freeze({
+      ...resolution, coreClosure: readonlySet(resolution.coreClosure),
+      skipped: readonlyMap(resolution.skipped),
+    }),
     capabilities: capabilityController.registry,
     contributions: contributionController.registry,
     surfaces: surfaceController.registry,
     bridgeContracts,
-    restrictedPlugins: new Map(
+    restrictedPlugins: readonlyMap(
       [...activeRestrictedRecords.entries()].sort(([left], [right]) =>
         left.localeCompare(right),
       ),
@@ -699,7 +714,7 @@ export async function bootstrapPluginRuntime(
         left.pluginId.localeCompare(right.pluginId),
       ),
     ),
-    plugins: new Map(
+    plugins: readonlyMap(
       [...pluginStates.entries()].sort(([left], [right]) =>
         left.localeCompare(right),
       ),

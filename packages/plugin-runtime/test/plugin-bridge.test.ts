@@ -8,6 +8,7 @@ import {
 import {
   createPluginBridgeSession,
   type BridgeResponse,
+  type CreatePluginBridgeSessionOptions,
   type BridgeSessionIdentity,
   type PluginBridgeSession,
 } from '../src/browser/plugin-bridge';
@@ -29,6 +30,7 @@ async function fixture(
   actionOverrides: Partial<BridgeUnaryActionContract> = {},
   identityOverrides: Partial<BridgeSessionIdentity> = {},
   transformRuntime: (runtime: PluginRuntime) => PluginRuntime = runtime => runtime,
+  options: Partial<CreatePluginBridgeSessionOptions> = {},
 ) {
   const capabilityValue = { getCurrentCluster: () => 'demo', secret: 'host-only' };
   const invoke = vi.fn((value: unknown) => (value as typeof capabilityValue).getCurrentCluster());
@@ -50,7 +52,7 @@ async function fixture(
   }));
   const channel = new MessageChannel();
   const session = createPluginBridgeSession({
-    runtime, identity: { ...identity, ...identityOverrides }, port: channel.port1,
+    ...options, runtime, identity: { ...identity, ...identityOverrides }, port: channel.port1,
   });
   cleanup.push(() => { session.dispose(); channel.port2.close(); });
   return { channel, session, invoke, runtime, capabilityValue };
@@ -192,4 +194,71 @@ describe('MessagePort-bound Unary Bridge', () => {
     session = createPluginBridgeSession({ runtime, identity, port: channel.port1 });
     expect((await response).ok).toBe(true);
   });
+
+  it('rejects a reused request ID before invoking the provider, independently per session', async () => {
+    const first = await fixture();
+    const second = await fixture({}, { surfaceInstanceId: 'surface-2' });
+    expect((await send(first.channel)).ok).toBe(true);
+    expect(await send(first.channel)).toMatchObject({ ok: false, error: { code: 'DUPLICATE_REQUEST' } });
+    expect(first.invoke).toHaveBeenCalledTimes(1);
+    expect((await send(second.channel)).ok).toBe(true);
+  });
+});
+
+
+describe('Bridge request containment', () => {
+  it('times out and aborts the provider, releases capacity and audits every exit without data', async () => {
+    let signal: AbortSignal | undefined;
+    const { channel, session } = await fixture({ invoke(_value, _payload, context) {
+      signal = context.signal;
+      return new Promise(() => undefined);
+    } }, {}, runtime => runtime, { limits: { requestTimeoutMs: 15, maxConcurrentRequests: 1 } });
+    expect(await send(channel)).toMatchObject({ ok: false, error: { code: 'TIMEOUT' } });
+    expect(signal?.aborted).toBe(true);
+    expect(await send(channel, { ...request, requestId: 'next' })).toMatchObject({ ok: false, error: { code: 'TIMEOUT' } });
+    expect(await send(channel, { ...request, requestId: 'bad-action', action: 'unknown' })).toMatchObject({ ok: false, error: { code: 'UNKNOWN_ACTION' } });
+    expect(session.audit.map(entry => entry.resultCode)).toEqual(['TIMEOUT', 'TIMEOUT', 'UNKNOWN_ACTION']);
+    expect(session.audit[0]).toMatchObject({ pluginId: 'kubeeye', surfaceId: 'overview', surfaceInstanceId: 'surface-1', mountPointId: identity.mountPointId, capability: request.capability, action: request.action, duration: expect.any(Number), timestamp: expect.any(Number) });
+    expect(JSON.stringify(session.audit)).not.toContain('payload');
+  });
+
+  it('limits concurrent requests without blocking another session', async () => {
+    let resolve: (value: string) => void = () => undefined;
+    const first = await fixture({ invoke() { return new Promise<string>(done => { resolve = done; }); } }, {}, runtime => runtime, { limits: { maxConcurrentRequests: 1 } });
+    const second = await fixture();
+    first.channel.port2.postMessage(request);
+    await vi.waitFor(() => expect(first.session.pendingRequestCount).toBe(1));
+    expect(await send(first.channel, { ...request, requestId: 'parallel' })).toMatchObject({ ok: false, error: { code: 'CONCURRENCY_LIMITED' } });
+    expect((await send(second.channel)).ok).toBe(true);
+    resolve('done');
+    await vi.waitFor(() => expect(first.session.pendingRequestCount).toBe(0));
+  });
+
+  it('bounds messages and request rate within each session', async () => {
+    const { channel, session } = await fixture({}, {}, runtime => runtime, { limits: { maxMessageBytes: 256, requestsPerSecond: 1 } });
+    expect(await send(channel, { ...request, payload: 'x'.repeat(300) })).toMatchObject({ ok: false, error: { code: 'MESSAGE_TOO_LARGE' } });
+    expect((await send(channel, { ...request, requestId: 'valid' })).ok).toBe(true);
+    expect(await send(channel, { ...request, requestId: 'limited' })).toMatchObject({ ok: false, error: { code: 'RATE_LIMITED' } });
+    expect(session.state).toBe('ACTIVE');
+    expect(session.audit.map(entry => entry.resultCode)).toEqual(['MESSAGE_TOO_LARGE', 'OK', 'RATE_LIMITED']);
+  });
+
+  it('disposes before reporting persistent protocol failure and keeps an inactive ingress closed', async () => {
+    let stateAtFailure: string | undefined;
+    const { channel, session } = await fixture({}, {}, runtime => runtime, {
+      limits: { maxProtocolViolations: 2 }, onSessionFailure() { stateAtFailure = session.state; },
+    });
+    expect(await send(channel, { ...request, pluginId: 'forged' })).toMatchObject({ ok: false });
+    await send(channel, { ...request, requestId: 'forged-2', pluginId: 'forged' });
+    await vi.waitFor(() => expect(stateAtFailure).toBe('DISPOSED'));
+    expect(await session.dispatch(request)).toMatchObject({ ok: false, error: { code: 'BRIDGE_SESSION_INACTIVE' } });
+    expect(session.identity.surfaceInstanceId).toBe('surface-1');
+  });
+});
+
+it('does not echo oversized correlation data back in a rejection', async () => {
+  const { channel } = await fixture({}, {}, runtime => runtime, { limits: { maxMessageBytes: 256 } });
+  const response = await send(channel, { ...request, requestId: 'x'.repeat(10_000) });
+  expect(response).toMatchObject({ ok: false, error: { code: 'MESSAGE_TOO_LARGE' } });
+  expect(new TextEncoder().encode(JSON.stringify(response)).length).toBeLessThanOrEqual(256);
 });

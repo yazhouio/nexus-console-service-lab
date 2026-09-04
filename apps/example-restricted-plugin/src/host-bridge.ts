@@ -115,32 +115,65 @@ export function connectHostBridge(): Promise<HostConnection> {
 
 export const hostConnectionPromise = connectHostBridge();
 
-/** Fixture-local client for the single unary action demonstrated by this app. */
-export async function getCurrentCluster(): Promise<string> {
-  const connection = await hostConnectionPromise;
-  if (connection.state !== 'CONNECTED') throw new Error('Host Bridge is not connected.');
+/** Fixture-local client; the capability and actions remain Host-defined. */
+async function send(port: MessagePort, message: Record<string, unknown>): Promise<unknown> {
   const requestId = crypto.randomUUID();
-  return new Promise<string>((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const cleanup = (): void => {
       window.clearTimeout(timeout);
-      connection.port.removeEventListener('message', onMessage);
+      port.removeEventListener('message', onMessage);
     };
     const onMessage = (event: MessageEvent): void => {
       if (!isRecord(event.data) || event.data.type !== 'response' || event.data.requestId !== requestId) return;
       cleanup();
-      if (event.data.ok === true && typeof event.data.result === 'string') {
-        resolve(event.data.result);
-      } else {
-        const code = isRecord(event.data.error) && typeof event.data.error.code === 'string'
-          ? event.data.error.code : 'INVALID_RESPONSE';
+      if (event.data.ok === true) resolve(event.data.result);
+      else {
+        const code = isRecord(event.data.error) && typeof event.data.error.code === 'string' ? event.data.error.code : 'INVALID_RESPONSE';
         reject(new Error(code));
       }
     };
-    const timeout = window.setTimeout(() => { cleanup(); reject(new Error('TIMEOUT')); }, 5_000);
-    connection.port.addEventListener('message', onMessage);
-    connection.port.postMessage({
-      type: 'request', requestId, capability: 'kubesphere.cluster@2',
-      action: 'getCurrentCluster', payload: null,
-    });
+    const timeout = window.setTimeout(() => { cleanup(); reject(new Error('TIMEOUT')); }, 15_000);
+    port.addEventListener('message', onMessage);
+    port.postMessage({ ...message, requestId });
   });
+}
+
+async function connectedPort(): Promise<MessagePort> {
+  const connection = await hostConnectionPromise;
+  if (connection.state !== 'CONNECTED') throw new Error('Host Bridge is not connected.');
+  return connection.port;
+}
+
+export async function getCurrentCluster(): Promise<string> {
+  const result = await send(await connectedPort(), {
+    type: 'request', capability: 'kubesphere.cluster@2', action: 'getCurrentCluster', payload: null,
+  });
+  if (typeof result !== 'string') throw Error('INVALID_RESPONSE');
+  return result;
+}
+
+export async function watchCurrentCluster(onValue: (name: string) => void): Promise<() => Promise<void>> {
+  const port = await connectedPort();
+  let subscriptionId: string | undefined;
+  let stopped = false;
+  const onEvent = (event: MessageEvent): void => {
+    if (!stopped && isRecord(event.data) && event.data.type === 'event' &&
+        event.data.subscriptionId === subscriptionId && typeof event.data.payload === 'string') onValue(event.data.payload);
+  };
+  port.addEventListener('message', onEvent);
+  try {
+    const result = await send(port, { type: 'request', capability: 'kubesphere.cluster@2', action: 'watchCurrentCluster', payload: null });
+    if (!isRecord(result) || typeof result.subscriptionId !== 'string' || typeof result.snapshot !== 'string') throw Error('INVALID_RESPONSE');
+    subscriptionId = result.subscriptionId;
+    onValue(result.snapshot);
+    return async () => {
+      if (stopped) return;
+      stopped = true;
+      port.removeEventListener('message', onEvent);
+      await send(port, { type: 'unsubscribe', subscriptionId });
+    };
+  } catch (error) {
+    port.removeEventListener('message', onEvent);
+    throw error;
+  }
 }

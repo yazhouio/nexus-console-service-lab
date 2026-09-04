@@ -22,8 +22,16 @@ export const kubeeyeInstallation = validateRestrictedInstallRecord(
             id: 'kubeeye-overview-route',
             path: '/kubeeye',
             surfaceId: 'overview',
+            layout: { width: 'full' },
+            initialParameters: { view: 'route' },
           },
         ],
+        extensions: [{
+          id: 'kubeeye-overview-card', slot: 'console.home.cards', surfaceId: 'overview',
+          layout: { width: 'compact' }, initialParameters: { view: 'card' },
+        }, {
+          id: 'kubeeye-unused', slot: 'unavailable.slot', surfaceId: 'overview',
+        }],
         navigation: [
           {
             id: 'kubeeye-overview-navigation',
@@ -49,6 +57,13 @@ export const kubeeyeInstallation = validateRestrictedInstallRecord(
 export const clusterBridgeContract: BridgeCapabilityContract = {
   id: 'kubesphere.cluster@2',
   actions: {
+    watchCurrentCluster: {
+      kind: 'subscription', requiredPermissions: ['cluster.read'],
+      requestSchema: { parse(value) { if (value !== null) throw Error('Expected null'); return null; } },
+      snapshotSchema: { parse(value) { if (typeof value !== 'string') throw Error('Expected cluster name'); return value; } },
+      eventSchema: { parse(value) { if (typeof value !== 'string') throw Error('Expected cluster name'); return value; } },
+      open(capability, _payload, _context, emit) { return (capability as ClusterCapability).watchCurrentCluster(emit); },
+    },
     getCurrentCluster: {
       kind: 'request',
       requiredPermissions: ['cluster.read'],
