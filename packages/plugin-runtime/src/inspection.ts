@@ -5,8 +5,18 @@ import type { HostRenderTarget } from './contribution';
 import type { PluginRuntimeState } from './runtime-state';
 import type { SurfaceFailureStage, SurfaceInstanceRecord } from './browser/wujie-plugin-adapter';
 import { frozenCopy } from './immutable';
+import { isCapabilityId } from './identifiers';
 
-export interface RuntimeErrorSnapshot { readonly code: string; readonly message: string }
+export interface RuntimeErrorSnapshot {
+  readonly code: string;
+  readonly message: string;
+  readonly pluginId?: string;
+  readonly pluginIds?: readonly string[];
+  readonly stage?: string;
+  readonly validationStage?: string;
+  readonly capability?: string;
+  readonly path?: readonly string[];
+}
 export interface BootstrapFailure { readonly ready: false; readonly error: unknown }
 export interface SurfaceInstanceSnapshot {
   readonly surfaceInstanceId: string;
@@ -20,7 +30,7 @@ export interface SurfaceInstanceSnapshot {
 export interface PluginSnapshot extends PluginDescriptor {
   readonly kind: PluginKind;
   readonly executionMode: 'direct' | 'wujie';
-  readonly securityPosture: 'host-privileged' | 'cooperative-isolation';
+  readonly securityPosture: 'full-trust' | 'cooperative-isolation';
   readonly core: boolean;
   readonly state: PluginRuntimeState['state'];
   readonly stage?: string;
@@ -85,15 +95,31 @@ const errorMessages = {
 
 function safeError(error: unknown, fallback: keyof typeof errorMessages): RuntimeErrorSnapshot {
   let code: string = fallback;
+  let attribution: Omit<RuntimeErrorSnapshot, 'code' | 'message'> = {};
+  const identifier = (value: unknown): value is string => typeof value === 'string' &&
+    value.length > 0 && value.length <= 256 && !/[\u0000-\u001f\u007f]/u.test(value);
+  const identifiers = (value: unknown): value is readonly string[] =>
+    Array.isArray(value) && value.length <= 64 && value.every(identifier);
   // Never stringify arbitrary errors, causes, stacks, or Host result objects.
   try {
     if (typeof error === 'object' && error !== null && 'issue' in error) {
       const issue = error.issue;
       if (typeof issue === 'object' && issue !== null && 'code' in issue &&
-          typeof issue.code === 'string' && Object.hasOwn(errorMessages, issue.code)) code = issue.code;
+          typeof issue.code === 'string' && Object.hasOwn(errorMessages, issue.code)) {
+        code = issue.code;
+        const fields = issue as Record<string, unknown>;
+        attribution = {
+          ...(identifier(fields.pluginId) ? { pluginId: fields.pluginId } : {}),
+          ...(identifiers(fields.pluginIds) ? { pluginIds: fields.pluginIds } : {}),
+          ...(isCapabilityId(fields.capability) && identifier(fields.capability) ? { capability: fields.capability } : {}),
+          ...(identifiers(fields.path) ? { path: fields.path } : {}),
+          ...(typeof fields.stage === 'string' && ['activate', 'assertion', 'artifact', 'wujie-bootstrap', 'handshake', 'render', 'bridge'].includes(fields.stage) ? { stage: fields.stage } : {}),
+          ...(typeof fields.validationStage === 'string' && ['descriptor', 'manifest', 'resolve'].includes(fields.validationStage) ? { validationStage: fields.validationStage } : {}),
+        };
+      }
     }
   } catch { /* A thrown value may even contain accessors. */ }
-  return Object.freeze({ code, message: errorMessages[code as keyof typeof errorMessages] });
+  return frozenCopy({ code, message: errorMessages[code as keyof typeof errorMessages], ...attribution });
 }
 
 /** Pure projection. The optional source supplies live instance facts without exposing sessions. */
@@ -116,7 +142,7 @@ export function inspect(
     return {
       id, version: descriptor.version, requires: descriptor.requires, provides: descriptor.provides,
       kind, executionMode: kind === 'builtin' ? 'direct' : 'wujie',
-      securityPosture: kind === 'builtin' ? 'host-privileged' : 'cooperative-isolation',
+      securityPosture: kind === 'builtin' ? 'full-trust' : 'cooperative-isolation',
       core: kind === 'builtin' && runtime.resolution.coreClosure.has(id), state: state.state,
       ...(state.state === 'FAILED' ? { stage: state.stage, error: safeError(state.error, 'PLUGIN_ACTIVATION_FAILED') } : {}),
       ...(state.state === 'SKIPPED' ? { stage: state.stage, error: safeError({ issue: { code: state.reason } }, 'PLUGIN_SKIPPED') } : {}),

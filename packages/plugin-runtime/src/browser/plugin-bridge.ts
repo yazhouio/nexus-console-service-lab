@@ -63,7 +63,8 @@ export interface BridgeAuditEntry extends SurfaceInstanceIdentity {
   readonly type: 'request' | 'subscription' | 'unsubscribe' | 'event';
   readonly subscriptionId?: string;
   readonly requestId: string;
-  readonly capability?: CapabilityId;
+  /** Diagnostic text may be truncated; it is not an invocable capability ID. */
+  readonly capability?: string;
   readonly action?: string;
   readonly resultCode: 'OK' | BridgeErrorCode;
   readonly duration: number;
@@ -202,6 +203,16 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     entries.push(value);
     if (entries.length > limits.maxDiagnosticEntries) entries.shift();
   };
+  const recordAudit = (details: Omit<BridgeAuditEntry, keyof SurfaceInstanceIdentity>): void => {
+    const entry: BridgeAuditEntry = Object.freeze({
+      ...attribution, ...details, requestId: details.requestId.slice(0, 128),
+      ...(details.capability === undefined ? {} : { capability: details.capability.slice(0, 256) }),
+      ...(details.action === undefined ? {} : { action: details.action.slice(0, 128) }),
+      ...(details.subscriptionId === undefined ? {} : { subscriptionId: details.subscriptionId.slice(0, 128) }),
+    });
+    append(audit, entry);
+    try { options.onAudit?.(entry); } catch { /* Audit sinks do not control dispatch. */ }
+  };
   const fits = (value: unknown): boolean =>
     new TextEncoder().encode(JSON.stringify(value)).byteLength <= limits.maxMessageBytes;
   const recordHostError = (request: BridgeRequest, code: BridgeErrorCode, cause: unknown): void => {
@@ -235,14 +246,12 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
   };
   const eventFailure = (subscription: Subscription, code: BridgeErrorCode, cause: unknown): void => {
     recordHostError(subscription.request, code, cause);
-    const entry: BridgeAuditEntry = Object.freeze({
-      ...attribution, type: 'event', requestId: subscription.request.requestId,
+    recordAudit({
+      type: 'event', requestId: subscription.request.requestId,
       capability: subscription.request.capability, action: subscription.request.action,
       ...(subscription.subscriptionId ? { subscriptionId: subscription.subscriptionId } : {}),
       resultCode: code, duration: 0, timestamp: Date.now(),
     });
-    append(audit, entry);
-    try { options.onAudit?.(entry); } catch { /* Host diagnostics only. */ }
     closeSubscription(subscription, code);
   };
   const deliverEvent = (subscription: Subscription, payload: JsonValue): void => {
@@ -275,25 +284,31 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
 
   const dispatch = async (value: unknown): Promise<BridgeResponse> => {
     const started = Date.now();
-    const requestId = isRecord(value) && typeof value.requestId === 'string' ? value.requestId : '';
+    const fields = isRecord(value) ? value : {};
+    const requestId = typeof fields.requestId === 'string' ? fields.requestId : '';
     let request: BridgeRequest | BridgeUnsubscribeRequest | undefined;
-    let auditType: BridgeAuditEntry['type'] = isRecord(value) && value.type === 'unsubscribe' ? 'unsubscribe' : 'request';
-    let subscriptionId: string | undefined;
-    let unsubscribedRequest: BridgeRequest | undefined;
+    // Read only correlation metadata before validation. Authorization still uses
+    // the parsed envelope and the immutable MessagePort-bound identity below.
+    let auditType: BridgeAuditEntry['type'] = fields.type === 'unsubscribe' ? 'unsubscribe' : 'request';
+    let subscriptionId = fields.type === 'unsubscribe' && typeof fields.subscriptionId === 'string'
+      ? fields.subscriptionId : undefined;
+    let auditTarget: Pick<BridgeRequest, 'capability' | 'action'> | undefined;
+    if (fields.type === 'unsubscribe') {
+      auditTarget = [...subscriptions].find(entry => entry.subscriptionId === subscriptionId)?.request;
+    } else if (isCapabilityId(fields.capability) && typeof fields.action === 'string') {
+      auditTarget = { capability: fields.capability, action: fields.action };
+      const actions = runtime.bridgeContracts.get(fields.capability)?.actions;
+      if (actions && Object.hasOwn(actions, fields.action)) auditType = actions[fields.action].kind;
+    }
     // Every exit, including pre-provider rejection and cancellation, is audited once.
     const finish = (response: BridgeResponse): BridgeResponse => {
-      const entry: BridgeAuditEntry = Object.freeze({
-        ...attribution, type: auditType, requestId: requestId.slice(0, 128),
+      recordAudit({
+        type: auditType, requestId: requestId.slice(0, 128),
         ...(subscriptionId === undefined ? {} : { subscriptionId }),
-        ...((request?.type === 'request' ? request : unsubscribedRequest) ? {
-          capability: (request?.type === 'request' ? request : unsubscribedRequest)!.capability,
-          action: (request?.type === 'request' ? request : unsubscribedRequest)!.action.slice(0, 128),
-        } : {}),
+        ...(auditTarget ? { capability: auditTarget.capability, action: auditTarget.action } : {}),
         resultCode: response.ok ? 'OK' : response.error.code,
         duration: Math.max(0, Date.now() - started), timestamp: started,
       });
-      append(audit, entry);
-      try { options.onAudit?.(entry); } catch { /* Audit sinks do not control dispatch. */ }
       if (state === 'ACTIVE') {
         try { port.postMessage(response); } catch { failSession('BRIDGE_SESSION_INACTIVE'); }
       }
@@ -325,7 +340,7 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     if (request.type === 'unsubscribe') {
       subscriptionId = request.subscriptionId;
       const subscription = [...subscriptions].find(entry => entry.subscriptionId === subscriptionId);
-      if (subscription) { unsubscribedRequest = subscription.request; closeSubscription(subscription); }
+      if (subscription) closeSubscription(subscription);
       return finish({ type: 'response', requestId, ok: true, result: null });
     }
     // Count all valid envelopes, including rejected actions, against the session rate.

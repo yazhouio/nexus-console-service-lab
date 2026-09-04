@@ -96,11 +96,14 @@ provide a package distribution service.
 `inspect(runtime, adapter)` returns a deeply immutable projection of plugin
 states, dependencies, Core Closure, ownership, Surface Instances, and session
 subscription counts. `inspect({ ready: false, error })` projects bootstrap
-failure. Error messages come from fixed templates. Render functions, initial
+failure. Error messages come from fixed templates; safe metadata retains plugin
+IDs, stages, capabilities, and dependency paths. Render functions, initial
 parameters, capability values, error stacks, and raw Bridge data are excluded.
 The adapter's `onAudit` callback receives bounded metadata for every request,
 subscription open, unsubscribe, and event validation failure. The Host Inspector
 keeps the latest 200 entries and refreshes instance facts four times per second.
+Audit request/action/subscription identifiers are capped at 128 characters and
+capability diagnostic text at 256, including messages rejected before dispatch.
 
 Playwright also starts a real HTTP authorization fixture on port 3002, proxied at
 `/api`. It proves that a plugin denied by Bridge grants can still issue same-origin

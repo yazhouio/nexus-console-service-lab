@@ -262,3 +262,21 @@ it('does not echo oversized correlation data back in a rejection', async () => {
   expect(response).toMatchObject({ ok: false, error: { code: 'MESSAGE_TOO_LARGE' } });
   expect(new TextEncoder().encode(JSON.stringify(response)).length).toBeLessThanOrEqual(256);
 });
+
+it('attributes rejected oversized requests to the declared action without auditing their payload', async () => {
+  const { channel, session } = await fixture({}, {}, runtime => runtime, { limits: { maxMessageBytes: 256 } });
+  await send(channel, { ...request, payload: 'private-payload'.repeat(100) });
+  expect(session.audit.at(-1)).toMatchObject({
+    capability: 'kubesphere.cluster@2', action: 'getCurrentCluster', resultCode: 'MESSAGE_TOO_LARGE',
+  });
+  expect(JSON.stringify(session.audit)).not.toContain('private-payload');
+});
+
+it('bounds capability metadata even for oversized and inactive requests', async () => {
+  const { session } = await fixture({}, {}, runtime => runtime, { limits: { maxMessageBytes: 256 } });
+  const oversized = { ...request, capability: `host.${'x'.repeat(4096)}@1` };
+  expect(await session.dispatch(oversized)).toMatchObject({ ok: false, error: { code: 'MESSAGE_TOO_LARGE' } });
+  session.dispose();
+  expect(await session.dispatch(oversized)).toMatchObject({ ok: false, error: { code: 'BRIDGE_SESSION_INACTIVE' } });
+  for (const entry of session.audit) expect(entry.capability?.length ?? 0).toBeLessThanOrEqual(256);
+});

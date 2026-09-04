@@ -698,6 +698,8 @@ export async function bootstrapPluginRuntime(
     installations: Object.freeze((options.installed ?? []).filter(record => record.config.enabled)),
     resolution: Object.freeze({
       ...resolution, coreClosure: readonlySet(resolution.coreClosure),
+      dependencies: frozenCopy(resolution.dependencies),
+      rejected: frozenCopy(resolution.rejected),
       skipped: readonlyMap(resolution.skipped),
     }),
     capabilities: capabilityController.registry,

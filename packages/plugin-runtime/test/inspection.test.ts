@@ -15,8 +15,9 @@ it('projects ownership and inactive surfaces without exposing providers, render 
   const snapshot = inspect(runtime);
   expect(snapshot.ready).toBe(true);
   expect(snapshot.coreClosure).toEqual(['cluster']);
-  expect(snapshot.plugins).toContainEqual(expect.objectContaining({ id: 'cluster', kind: 'builtin', core: true, executionMode: 'direct' }));
+  expect(snapshot.plugins).toContainEqual(expect.objectContaining({ id: 'cluster', kind: 'builtin', core: true, executionMode: 'direct', securityPosture: 'full-trust' }));
   expect(snapshot.plugins).toContainEqual(expect.objectContaining({ id: 'external', kind: 'restricted', state: 'ACTIVE', core: false, executionMode: 'wujie', securityPosture: 'cooperative-isolation', requestedPermissions: ['cluster.read'], grantedPermissions: [], surfaces: [{ id: 'page', instances: [] }] }));
+  expect(() => Object.assign(runtime.resolution.dependencies[0], { provider: 'forged' })).toThrow();
   expect(snapshot.dependencies).toEqual([{ consumer: 'external', capability: 'host.cluster@1', provider: 'cluster' }]);
   expect(snapshot.capabilities).toEqual([{ id: 'host.cluster@1', providerPluginId: 'cluster' }]);
   expect(snapshot.contributions.extensions).toContainEqual(expect.objectContaining({ id: 'unused', slot: 'missing.slot', ownerPluginId: 'external' }));
@@ -39,4 +40,21 @@ it('sanitizes bootstrap and plugin failures while retaining dependency skip reas
   expect(snapshot.plugins).toContainEqual(expect.objectContaining({ id: 'broken', state: 'FAILED', error: { code: 'PLUGIN_ACTIVATION_FAILED', message: 'Plugin activation failed.' } }));
   expect(snapshot.plugins).toContainEqual(expect.objectContaining({ id: 'skipped', state: 'SKIPPED', error: expect.objectContaining({ code: 'MISSING_CAPABILITY' }) }));
   expect(JSON.stringify([failed, snapshot])).not.toMatch(/secret-token|Bearer|stack|private provider/);
+});
+
+it('keeps safe plugin, stage and dependency attribution when Core bootstrap fails', async () => {
+  const snapshot = await bootstrapPluginRuntime({
+    builtins: [{ id: 'core-shell', version: '1', requires: ['missing.api@1'], provides: [], activate() {} }],
+    coreRootIds: ['core-shell'],
+  }).then(() => { throw Error('Expected bootstrap failure'); }, error => inspect({ ready: false, error }));
+  expect(snapshot.bootstrapError).toMatchObject({
+    code: 'MISSING_CAPABILITY', pluginId: 'core-shell', validationStage: 'resolve',
+    capability: 'missing.api@1', path: ['core-shell', 'missing.api@1'],
+  });
+  const activation = await bootstrapPluginRuntime({
+    builtins: [{ id: 'core-shell', version: '1', requires: [], provides: [], activate() { throw Error('Bearer secret-token'); } }],
+    coreRootIds: ['core-shell'],
+  }).then(() => { throw Error('Expected bootstrap failure'); }, error => inspect({ ready: false, error }));
+  expect(activation.bootstrapError).toMatchObject({ code: 'PLUGIN_ACTIVATION_FAILED', pluginId: 'core-shell', stage: 'activate' });
+  expect(JSON.stringify(activation)).not.toMatch(/Bearer|secret-token|stack|cause/);
 });
