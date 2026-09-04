@@ -68,3 +68,9 @@ Handshake 成功后，协议版本、Plugin、Surface、实例和权限事实绑
 - 不要通过配置数组顺序表达兼容性或激活优先级。
 
 V1 不实现 SemVer Solver、Multiple Provider Negotiation、运行时 Artifact Negotiation 或 Provider Switching。
+
+## 6. Host Contribution Contract 兼容窗口
+
+新增的 `parentRouteId` / `acceptsChildren` 属于 contribution contract 2，字段可选，旧声明保持可读。旧 Host 的 closed schema 会拒绝新字段，发布前须执行 `pnpm check:plugin-contract <manifest.json> <target-contract-version>`；安装入口可显式配置 `contributionContractVersion: 1 | 2`。这不是自动 feature negotiation，也不改变 Bridge/Host API 的精确版本语义。
+
+关闭生产 routing 后仍保留可读新声明的 runtime。若要回退到旧 validator，应先在兼容 Host 清除所有已保存的新 schema 版本，再重新安装旧声明；仅切换 active version 仍会保留不可读的新版本。兼容测试覆盖该拒绝及恢复路径。生产启用另受目标环境 gate 控制，见 [Host 路由实施与启用](./host-routing-implementation)。

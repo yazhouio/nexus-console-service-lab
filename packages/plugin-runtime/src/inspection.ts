@@ -1,3 +1,4 @@
+import type { ContributionDiagnostic, HostContributionFact } from './host-contribution';
 import type { PluginRuntime } from './bootstrap';
 import type { CapabilityMetadata } from './capability';
 import type { DependencyEdge, PluginDescriptor, PluginKind } from './plugin';
@@ -39,7 +40,8 @@ export interface PluginSnapshot extends PluginDescriptor {
   readonly grantedPermissions?: readonly string[];
   readonly surfaces?: readonly Readonly<{ id: string; instances: readonly SurfaceInstanceSnapshot[] }>[];
 }
-interface ContributionSnapshot {
+export interface ContributionSnapshot {
+  readonly host?: HostContributionFact;
   readonly id: string;
   readonly ownerPluginId: string;
   readonly target?: Readonly<{ kind: HostRenderTarget['kind']; surfaceId?: string }>;
@@ -47,6 +49,8 @@ interface ContributionSnapshot {
   readonly slot?: string;
   readonly routeId?: string;
   readonly parentId?: string;
+  readonly parentRouteId?: string;
+  readonly acceptsChildren?: boolean;
 }
 export interface RuntimeSnapshot {
   readonly ready: boolean;
@@ -122,17 +126,44 @@ function safeError(error: unknown, fallback: keyof typeof errorMessages): Runtim
   return frozenCopy({ code, message: errorMessages[code as keyof typeof errorMessages], ...attribution });
 }
 
+function projectHostFact(fact: HostContributionFact): HostContributionFact {
+  const diagnostic = (d: ContributionDiagnostic, depth = 0): ContributionDiagnostic => ({
+    code: d.code,
+    ...(d.related ? { related: d.related.map(r => ({ ownerPluginId: r.ownerPluginId, kind: r.kind, contributionId: r.contributionId })) } : {}),
+    ...(d.witness === undefined ? {} : { witness: d.witness }),
+    ...(d.missingParams === undefined ? {} : { missingParams: [...d.missingParams] }),
+    ...(d.cause && depth < 32 ? { cause: diagnostic(d.cause, depth + 1) } : {}),
+  });
+  return {
+    ownerPluginId: fact.ownerPluginId, kind: fact.kind, contributionId: fact.contributionId,
+    state: fact.state, diagnostics: fact.diagnostics.map(d => diagnostic(d)),
+    ...(fact.declaredPath === undefined ? {} : { declaredPath: fact.declaredPath }),
+    ...(fact.fullPath === undefined ? {} : { fullPath: fact.fullPath }),
+    ...(fact.parentId === undefined ? {} : { parentId: fact.parentId }),
+    ...(fact.navigationDiagnostic ? { navigationDiagnostic: diagnostic(fact.navigationDiagnostic) } : {}),
+  };
+}
+export interface InspectionSource {
+  listInstances?(): readonly SurfaceInstanceRecord[];
+  listHostContributions?(): readonly HostContributionFact[];
+}
+
 /** Pure projection. The optional source supplies live instance facts without exposing sessions. */
 export function inspect(
   runtime: PluginRuntime | BootstrapFailure,
-  source?: { listInstances(): readonly SurfaceInstanceRecord[] },
+  source?: InspectionSource,
 ): RuntimeSnapshot {
   if (!runtime.ready) return frozenCopy({
     ready: false, bootstrapError: safeError(runtime.error, 'BOOTSTRAP_FAILED'),
     plugins: [], coreClosure: [], dependencies: [], capabilities: [],
     contributions: { routes: [], navigation: [], extensions: [] },
   });
-  const instances = source?.listInstances() ?? [];
+  const instances = source?.listInstances?.() ?? [];
+  const hostFacts = source?.listHostContributions?.();
+  const host = (owner: string, kind: HostContributionFact['kind'], id: string) => {
+    const fact = hostFacts?.find(f => f.ownerPluginId === owner && f.kind === kind && f.contributionId === id);
+    return fact ? { host: projectHostFact(fact) } : {};
+  };
   const target = (value: HostRenderTarget) => value.kind === 'builtin'
     ? { kind: value.kind } : { kind: value.kind, surfaceId: value.surfaceId };
   const plugins: PluginSnapshot[] = [...runtime.plugins].map(([id, state]) => {
@@ -166,8 +197,8 @@ export function inspect(
     coreClosure: [...runtime.resolution.coreClosure].sort(), dependencies: runtime.resolution.dependencies,
     capabilities: runtime.capabilities.list(),
     contributions: {
-      routes: runtime.contributions.listRoutes().map(({ ownerPluginId, contribution }) => ({ ownerPluginId, id: contribution.id, path: contribution.path, target: target(contribution.target) })),
-      navigation: runtime.contributions.listNavigation().map(({ ownerPluginId, contribution }) => ({ ownerPluginId, id: contribution.id, ...(contribution.routeId ? { routeId: contribution.routeId } : {}), ...(contribution.parentId ? { parentId: contribution.parentId } : {}) })),
+      routes: runtime.contributions.listRoutes().map(({ ownerPluginId, contribution }) => ({ ownerPluginId, ...host(ownerPluginId, 'route', contribution.id), id: contribution.id, path: contribution.path, ...(contribution.parentRouteId === undefined ? {} : { parentRouteId: contribution.parentRouteId }), ...(contribution.acceptsChildren === undefined ? {} : { acceptsChildren: contribution.acceptsChildren }), target: target(contribution.target) })),
+      navigation: runtime.contributions.listNavigation().map(({ ownerPluginId, contribution }) => ({ ownerPluginId, ...host(ownerPluginId, 'navigation', contribution.id), id: contribution.id, ...(contribution.acceptsChildren === undefined ? {} : { acceptsChildren: contribution.acceptsChildren }), ...(contribution.routeId ? { routeId: contribution.routeId } : {}), ...(contribution.parentId ? { parentId: contribution.parentId } : {}) })),
       extensions: runtime.contributions.listExtensionSlots().flatMap(slot => runtime.contributions.listExtensions(slot).map(({ ownerPluginId, contribution }) => ({ ownerPluginId, id: contribution.id, slot, target: target(contribution.target) }))),
     },
   });

@@ -105,10 +105,13 @@ interface PluginContributionContext {
 interface RouteContribution {
   readonly id: string;
   readonly path: string;
+  readonly parentRouteId?: string;
+  readonly acceptsChildren?: boolean;
   readonly target: HostRenderTarget;
 }
 
 interface NavigationContribution {
+  readonly acceptsChildren?: boolean;
   readonly id: string;
   readonly label: string;
   readonly parentId?: string;
@@ -124,7 +127,7 @@ interface UiExtensionContribution {
 }
 ```
 
-Builtin 可以使用 `target: { kind: 'builtin', render }`。Restricted Manifest 使用 `surfaceId` 声明式描述 `sandbox-surface` 目标；不能携带 Host-local render value。
+Builtin 可以使用 `target: { kind: 'builtin', render }`；作为父 Layout 时声明 `routeLayout: true` 并渲染 `<Outlet />`。Restricted Manifest 使用 `surfaceId` 声明式描述 `sandbox-surface` 目标；不能携带 Host-local render value。
 
 ## 5. Manifest 与 Installation Store
 
@@ -166,6 +169,7 @@ const mounted = await adapter.mount({
   container,
   layout: { width: 'full' },
   initialParameters: { view: 'route' },
+  routeContext: { routeId: 'kubeeye-overview-route', pathname: '/kubeeye', params: {}, search: '' },
 });
 
 await mounted.unmount();
@@ -218,3 +222,14 @@ const snapshot = inspect(runtime, adapter);
 ```
 
 Snapshot 投影 Runtime Ready、Plugin 状态、依赖、Core Closure、Capability ownership、Contribution ownership、Surface Instance、BridgeSession 和 Subscription count；不暴露原始 payload、Token、Capability value 或 Host 内部对象。
+
+Host 可提供第二条 contribution availability 轴，旧调用保持兼容：
+
+```ts
+const snapshot = inspect(runtime, {
+  listInstances: () => adapter.listInstances(),
+  listHostContributions: () => routeModel.listHostContributions(location.pathname + location.search),
+});
+```
+
+每个 Route/Navigation snapshot 的可选 `host` 提供 state、parent/fullPath、封闭 diagnostic codes 和瞬时导航 diagnostic。没有 Host source 时不生成该轴；它独立于 Plugin ACTIVE/FAILED。`RouteContext` 不写入 inspection，以免把当前 URL 参数或 search 当成诊断数据公开。安装和发布到旧 Host 前，可用 `assertContributionContractCompatible(manifest, 1)` 明确拒绝新字段；当前支持版本为 2，详见 [路由 rollout](./host-routing-implementation)。

@@ -2,7 +2,7 @@ import {
   validateBridgeBootstrapDescriptor,
   type BridgeBootstrapDescriptor,
 } from '../bridge-bootstrap';
-import { isJsonValue, type JsonValue } from '../contribution';
+import { isJsonValue, type JsonValue, type RouteContext } from '../contribution';
 import type { PluginId } from '../identifiers';
 import type { PluginRuntime } from '../bootstrap';
 import {
@@ -93,6 +93,7 @@ export interface MountRestrictedSurfaceInput {
   readonly container: HTMLElement;
   readonly layout?: JsonValue;
   readonly initialParameters?: JsonValue;
+  readonly routeContext?: RouteContext;
   readonly signal?: AbortSignal;
 }
 
@@ -122,6 +123,7 @@ export interface CreateWujiePluginAdapterOptions {
   readonly onHostError?: (error: BridgeHostError) => void;
   readonly bridgeLimits?: Partial<BridgeLimits>;
   readonly onAudit?: (entry: BridgeAuditEntry) => void;
+  readonly onLifecycle?: (event: { phase: 'mount-requested' | 'bridge-ready' | 'cleanup-complete'; identity: SurfaceInstanceIdentity }) => void;
 }
 
 interface InternalSurfaceInstance {
@@ -201,6 +203,10 @@ export function createWujiePluginAdapter(
   const issuedInstanceIds = new Set<string>();
   const issuedNonces = new Set<string>();
 
+  const lifecycle = (phase: 'mount-requested' | 'bridge-ready' | 'cleanup-complete', identity: SurfaceInstanceIdentity) => {
+    try { options.onLifecycle?.({ phase, identity }); } catch { /* Optional observation cannot break a Surface. */ }
+  };
+
   const resolveDriver = async (): Promise<WujieDriver> => {
     if (options.driver === undefined) {
       return loadWujieDriver();
@@ -231,6 +237,7 @@ export function createWujiePluginAdapter(
         }
       } finally {
         instance.destroyWujie = undefined;
+        lifecycle('cleanup-complete', instance.identity);
       }
     })();
     return instance.cleanupTask;
@@ -246,7 +253,7 @@ export function createWujiePluginAdapter(
       );
       requireNonEmpty(input.mountPointId, 'mountPointId');
       if (input.signal?.aborted) throw new DOMException('Mount was cancelled.', 'AbortError');
-      for (const value of [input.layout, input.initialParameters]) {
+      for (const value of [input.layout, input.initialParameters, input.routeContext]) {
         if (value !== undefined && !isJsonValue(value)) {
           throw new Error('Surface metadata must contain JSON values only.');
         }
@@ -301,6 +308,7 @@ export function createWujiePluginAdapter(
         interrupt() {},
       };
       instances.set(surfaceInstanceId, instance);
+      lifecycle('mount-requested', identity);
 
       const descriptor: BridgeBootstrapDescriptor =
         validateBridgeBootstrapDescriptor({
@@ -367,6 +375,7 @@ export function createWujiePluginAdapter(
             onSessionFailure: code => reportFailure('bridge', code),
           });
           instance.handshake = undefined;
+          lifecycle('bridge-ready', identity);
         }).catch(error => { throw handshakeMountError(identity, error); });
         void sessionTask.catch(() => undefined);
 
@@ -390,6 +399,7 @@ export function createWujiePluginAdapter(
                 ? {}
                 : { initialParameters: input.initialParameters }),
             }),
+            ...(input.routeContext === undefined ? {} : { routeContext: input.routeContext }),
             bridge: descriptor,
           })),
           fetch: async (resource, init) => {
@@ -408,6 +418,10 @@ export function createWujiePluginAdapter(
             startFailureStage = 'render';
           },
           plugins: [{
+            // Wujie's parsed-HTML cache retains the first instance's fetch/loadError
+            // closures and even an empty HTTP-error result. A per-instance loader
+            // bypasses that cache; browser HTTP and Wujie script caches still apply.
+            htmlLoader: html => html,
             // beforeLoad runs before iframe navigation/document.open(), which
             // clears listeners. This callback runs after iframe initialization
             // and before the first Plugin script instead.

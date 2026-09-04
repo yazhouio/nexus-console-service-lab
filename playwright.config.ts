@@ -6,7 +6,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   workers: 1,
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3100',
     browserName: 'chromium',
     trace: 'retain-on-failure',
   },
@@ -19,8 +19,8 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      command: 'pnpm dev:host',
-      url: 'http://localhost:3000/',
+      command: 'HOST_PORT=3100 NEXUS_TEST_FIXTURES=true pnpm dev:host',
+      url: 'http://localhost:3100/',
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
     },

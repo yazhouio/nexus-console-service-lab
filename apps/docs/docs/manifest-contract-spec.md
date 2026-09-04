@@ -81,16 +81,21 @@ grantedPermissions is a subset of manifest.permissions
 interface RestrictedRouteContribution {
   readonly id: string;
   readonly path: string;
+  readonly parentRouteId?: string;
+  readonly acceptsChildren?: boolean;
   readonly surfaceId: string;
   readonly layout?: JsonValue;
   readonly initialParameters?: JsonValue;
 }
 ```
 
+`parentRouteId` 引用父 Route，child 的 `path` 为非空相对路径；省略时使用顶层绝对路径。`acceptsChildren` 表达 owner 开放扩展点，还必须获得统一 Host Contribution Policy 授权。Restricted Surface 只作为叶 target，Host realm 的 Builtin Layout 承担 Outlet 组合。Host 路径、授权、环与冲突的 quarantine 不改变 Plugin bootstrap state。完整 grammar、隔离和 rollout 见 [Host 路由实施](./host-routing-implementation)。
+
 ### Navigation
 
 ```ts
 interface NavigationContribution {
+  readonly acceptsChildren?: boolean;
   readonly id: string;
   readonly label: string;
   readonly parentId?: string;

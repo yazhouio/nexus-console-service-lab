@@ -13,6 +13,8 @@ export type JsonValue =
 export interface BuiltinRenderTarget {
   readonly kind: 'builtin';
   readonly render: unknown;
+  /** Host-realm component that renders its nested outlet. */
+  readonly routeLayout?: boolean;
 }
 
 export interface SandboxSurfaceDefinition {
@@ -28,13 +30,25 @@ export interface SandboxRenderTarget {
 
 export type HostRenderTarget = BuiltinRenderTarget | SandboxRenderTarget;
 
-export interface RouteContribution {
+export interface RouteContext {
+  readonly routeId: string;
+  readonly pathname: string;
+  readonly params: Readonly<Record<string, string>>;
+  readonly search: string;
+}
+
+export interface RouteMetadata {
+  readonly parentRouteId?: string;
+  readonly acceptsChildren?: boolean;
+}
+
+export interface RouteContribution extends RouteMetadata {
   readonly id: string;
   readonly path: string;
   readonly target: HostRenderTarget;
 }
 
-export interface RestrictedRouteContribution {
+export interface RestrictedRouteContribution extends RouteMetadata {
   readonly id: string;
   readonly path: string;
   readonly surfaceId: string;
@@ -43,6 +57,7 @@ export interface RestrictedRouteContribution {
 }
 
 export interface NavigationContribution {
+  readonly acceptsChildren?: boolean;
   readonly id: string;
   readonly label: string;
   readonly parentId?: string;
@@ -297,7 +312,9 @@ export function createContributionRegistry(): ContributionRegistryController {
           if (
             !isNonEmptyString(route.id) ||
             !isNonEmptyString(route.path) ||
-            routeIds.has(route.id)
+            routeIds.has(route.id) ||
+            (route.parentRouteId !== undefined && !isNonEmptyString(route.parentRouteId)) ||
+            (route.acceptsChildren !== undefined && typeof route.acceptsChildren !== 'boolean')
           ) {
             invalidContribution(
               ownerPluginId,
@@ -314,6 +331,7 @@ export function createContributionRegistry(): ContributionRegistryController {
             !isNonEmptyString(item.id) ||
             !isNonEmptyString(item.label) ||
             navigationIds.has(item.id) ||
+            (item.acceptsChildren !== undefined && typeof item.acceptsChildren !== 'boolean') ||
             (item.order !== undefined && !Number.isFinite(item.order))
           ) {
             invalidContribution(

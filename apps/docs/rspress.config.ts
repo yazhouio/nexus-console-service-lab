@@ -48,6 +48,7 @@ export default defineConfig({
           text: 'P1 · Operations',
           items: [
             { text: 'Compatibility & Versioning', link: '/compatibility-versioning' },
+            { text: 'Host 路由实施与启用', link: '/host-routing-implementation' },
             { text: 'Sandbox Security Model', link: '/sandbox-security-model' },
           ],
         },

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   bootstrapPluginRuntime,
+  inspect,
   validateRestrictedInstallRecord,
   type BridgeCapabilityContract,
   type InstalledPluginRecord,
@@ -111,6 +112,21 @@ function coreAndCluster(
 }
 
 describe('Restricted Manifest-first bootstrap', () => {
+  it('preserves optional routing metadata through validation, normalization and inspection', async () => {
+    const runtime = await bootstrapPluginRuntime({
+      builtins: [coreAndCluster()[0]], coreRootIds: ['console-shell'],
+      installed: [installed('alpha', { requires: [], permissions: [], contributions: {
+        routes: [{ id: 'alerts', parentRouteId: 'node', path: 'alerts', surfaceId: 'overview', acceptsChildren: false }],
+        navigation: [{ id: 'alerts-nav', label: 'Alerts', routeId: 'alerts', acceptsChildren: true }],
+      } })], supportedHostApis: ['kubesphere.console@1'],
+    });
+    expect(runtime.plugins.get('alpha')).toEqual({ state: 'ACTIVE' });
+    expect(runtime.contributions.listRoutes()[0].contribution).toMatchObject({ parentRouteId: 'node', acceptsChildren: false });
+    expect(inspect(runtime).contributions.routes[0]).toMatchObject({ parentRouteId: 'node', acceptsChildren: false });
+    expect(inspect(runtime).contributions.navigation[0]).toMatchObject({ acceptsChildren: true });
+    expect(inspect(runtime).contributions.routes[0]).not.toHaveProperty('host');
+  });
+
   it('publishes ACTIVE declarations without loading plugin code', async () => {
     const runtime = await bootstrapPluginRuntime({
       builtins: coreAndCluster(),
@@ -293,4 +309,12 @@ describe('Restricted Manifest-first bootstrap', () => {
       { ownerPluginId: 'alpha', contribution: { routeId: 'zeta-route' } },
     ]);
   });
+});
+
+it('joins Host diagnostics to ACTIVE plugin contributions without leaking policy data', async () => {
+  const runtime = await bootstrapPluginRuntime({ builtins: [coreAndCluster()[0]], coreRootIds: ['console-shell'], installed: [installed('alpha', { requires: [], permissions: [] })], supportedHostApis: ['kubesphere.console@1'] });
+  const snapshot = inspect(runtime, { listHostContributions: () => [{ ownerPluginId: 'alpha', kind: 'route', contributionId: 'alpha-route', state: 'QUARANTINED', declaredPath: '/alpha', fullPath: '/alpha', diagnostics: [{ code: 'ROUTE_CONFLICT', witness: '/alpha', secret: 'policy-token' }], secret: 'policy-token' }] });
+  expect(snapshot.plugins[0]).toMatchObject({ id: 'alpha', state: 'ACTIVE' });
+  expect(snapshot.contributions.routes[0]).toMatchObject({ host: { state: 'QUARANTINED', diagnostics: [{ code: 'ROUTE_CONFLICT' }] } });
+  expect(JSON.stringify(snapshot)).not.toContain('policy-token');
 });

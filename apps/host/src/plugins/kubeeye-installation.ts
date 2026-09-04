@@ -90,3 +90,20 @@ export const clusterBridgeContract: BridgeCapabilityContract = {
   },
 };
 
+
+/** Only publish these declarations to a Host advertising contribution contract v2. */
+export const kubeeyeInstallationV2 = validateRestrictedInstallRecord({
+  manifest: {
+    ...kubeeyeInstallation.manifest, version: '2.0.0', entry: '/plugins/kubeeye/2.0.0/',
+    contributions: {
+      ...kubeeyeInstallation.manifest.contributions,
+      routes: [...(kubeeyeInstallation.manifest.contributions.routes ?? []), {
+        id: 'node-alert-messages', parentRouteId: 'node-detail', path: 'alert-messages', surfaceId: 'overview', initialParameters: { view: 'node-alerts' },
+      }],
+      navigation: [...(kubeeyeInstallation.manifest.contributions.navigation ?? []), {
+        id: 'node-alert-navigation', label: 'Alerts', parentId: 'node-navigation', routeId: 'node-alert-messages',
+      }],
+    },
+  },
+  config: { ...kubeeyeInstallation.config, version: '2.0.0' },
+}, { isEntryAllowed: entry => entry.startsWith('/plugins/') });

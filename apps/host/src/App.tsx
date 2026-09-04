@@ -1,76 +1,63 @@
 import { useEffect, useState } from 'react';
-import type { BootstrapFailure, InstallationStore, PluginRuntime } from '@nexus/plugin-runtime';
-import type { BridgeAuditEntry, SurfaceMountIssue, WujiePluginAdapter } from '@nexus/plugin-runtime/browser';
-
+import { BrowserRouter } from 'react-router';
+import type { BootstrapFailure } from '@nexus/plugin-runtime';
 import { installationStorePromise, runtimePromise } from './runtime';
-import { PluginConfiguration } from './PluginConfiguration';
+import { HostContext, type HostServices } from './HostContext';
+import { Overview } from './Overview';
 import { RuntimeInspector } from './RuntimeInspector';
-import type { ClusterCapability } from './plugins/cluster';
 import { SurfaceMount } from './SurfaceMount';
+import { createRouteModel } from './routing/route-model';
+import { contributionPolicy } from './routing/contribution-policy';
+import { Navigation } from './routing/Navigation';
+import { RoutedContent } from './routing/RoutePage';
 
-const pageStyle = {
-  maxWidth: 880, margin: '0 auto', padding: '64px 24px',
-  fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif', color: '#172033',
-} as const;
+const pageStyle = { maxWidth: 1080, margin: '0 auto', padding: '32px 24px', fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif', color: '#172033' } as const;
+// Production builds must pass the release gate in rsbuild.config.ts before this becomes true.
+const routingEnabled = process.env.PUBLIC_HOST_ROUTING === 'true';
+type Startup = { state: 'BOOTSTRAPPING' } | { state: 'FAILED'; failure: BootstrapFailure } | { state: 'READY'; services: HostServices };
 
 export function App() {
-  const [runtime, setRuntime] = useState<PluginRuntime>();
-  const [adapter, setAdapter] = useState<WujiePluginAdapter>();
-  const [bootstrapFailure, setBootstrapFailure] = useState<BootstrapFailure>();
-  const [store, setStore] = useState<InstallationStore>();
-  const [audit, setAudit] = useState<readonly BridgeAuditEntry[]>([]);
-  const [failures, setFailures] = useState<Record<string, SurfaceMountIssue>>({});
-
+  const [startup, setStartup] = useState<Startup>({ state: 'BOOTSTRAPPING' });
   useEffect(() => {
     let disposed = false;
-    let mountedAdapter: WujiePluginAdapter | undefined;
-    void Promise.all([runtimePromise, installationStorePromise, import('@nexus/plugin-runtime/browser')]).then(
-      ([runtime, store, browser]) => {
-        if (disposed) return;
-        mountedAdapter = browser.createWujiePluginAdapter({ runtime, onAudit(entry) {
-          if (!disposed) setAudit(previous => [...previous.slice(-199), entry]);
-        }, onSurfaceError(error) {
-          if (!disposed) setFailures(previous => ({ ...previous, [error.issue.mountPointId]: error.issue }));
-        } });
-        setRuntime(runtime); setStore(store); setAdapter(mountedAdapter);
-      },
-      error => { if (!disposed) setBootstrapFailure({ ready: false, error }); },
-    );
-    return () => {
-      disposed = true;
-      for (const instance of mountedAdapter?.listInstances() ?? []) {
-        void mountedAdapter?.unmount(instance.identity.surfaceInstanceId).catch(() => undefined);
-      }
-    };
+    let cleanup: (() => void) | undefined;
+    void Promise.all([runtimePromise, installationStorePromise, import('@nexus/plugin-runtime/browser')]).then(([runtime, store, browser]) => {
+      if (disposed) return;
+      const adapter = browser.createWujiePluginAdapter({ runtime,
+        onLifecycle(event) {
+          const name = `nexus:surface:${event.phase}`;
+          if (performance.getEntriesByName(name).length >= 100) performance.clearMarks(name);
+          performance.mark(name, { detail: event.identity });
+        },
+        onAudit(entry) { if (!disposed) setStartup(s => s.state === 'READY' ? { ...s, services: { ...s.services, audit: [...s.services.audit.slice(-199), entry] } } : s); },
+        onSurfaceError(error) { if (!disposed) setStartup(s => s.state === 'READY' ? { ...s, services: { ...s.services, failures: { ...s.services.failures, [error.issue.mountPointId]: error.issue } } } : s); },
+      });
+      cleanup = () => { for (const instance of adapter.listInstances()) void adapter.unmount(instance.identity.surfaceInstanceId).catch(() => undefined); };
+      const model = routingEnabled ? createRouteModel({ routes: runtime.contributions.listRoutes(), navigation: runtime.contributions.listNavigation(), policy: contributionPolicy }) : undefined;
+      setStartup({ state: 'READY', services: { runtime, store, adapter, model, audit: [], failures: {} } });
+    }).catch(error => { if (!disposed) setStartup({ state: 'FAILED', failure: { ready: false, error } }); });
+    return () => { disposed = true; cleanup?.(); };
   }, []);
+  const services = startup.state === 'READY' ? startup.services : undefined;
+  return <div style={pageStyle}>
+    <header><p>Nexus Console</p>
+      <p>Runtime state: <strong data-testid="runtime-state">{services ? `READY · ${services.runtime.contributions.listRoutes().length} routes` : startup.state}</strong></p>
+      <p>KubeEye Plugin: <strong data-testid="plugin-state">{services?.runtime.plugins.get('kubeeye')?.state ?? 'MISSING'}</strong></p>
+      <p>Runtime KubeEye version: <strong data-testid="runtime-plugin-version">{services?.runtime.restrictedPlugins.get('kubeeye')?.manifest.version ?? 'NONE'}</strong></p>
+    </header>
+    {startup.state === 'BOOTSTRAPPING' && <p role="status">Starting plugin runtime…</p>}
+    {startup.state === 'FAILED' && <><h1>Runtime startup failed</h1><RuntimeInspector runtime={startup.failure} audit={[]} /></>}
+    {services && <HostContext value={services}>
+      {services.model ? <BrowserRouter><nav aria-label="Primary"><Navigation model={services.model} /></nav><main><RoutedContent model={services.model} /></main></BrowserRouter> : <main><LegacySurface /><Overview /></main>}
+    </HostContext>}
+  </div>;
+}
 
-  const route = runtime?.contributions.listRoutes().find(route => route.ownerPluginId === 'kubeeye');
-  // Only the mounted Host slot asks for its contributions. Unknown slots stay unused.
-  const extensions = runtime?.contributions.listExtensions('console.home.cards') ?? [];
-  return <main style={pageStyle}>
-    <p>Nexus Console</p>
-    <h1>Frontend Plugin Runtime</h1>
-    <p>Runtime state: <strong data-testid="runtime-state">{runtime ? `READY · ${runtime.contributions.listRoutes().length} routes` : bootstrapFailure ? 'FAILED' : 'BOOTSTRAPPING'}</strong></p>
-    <p>KubeEye Plugin: <strong data-testid="plugin-state">{runtime?.plugins.get('kubeeye')?.state ?? 'MISSING'}</strong></p>
-    <p>Runtime KubeEye version: <strong data-testid="runtime-plugin-version">{runtime?.restrictedPlugins.get('kubeeye')?.manifest.version ?? 'NONE'}</strong></p>
-    {runtime && <button onClick={() => {
-      const cluster = runtime.capabilities.require<ClusterCapability>('kubesphere.cluster@2');
-      cluster.setCurrentCluster(cluster.getCurrentCluster() === 'demo-cluster' ? 'second-cluster' : 'demo-cluster');
-    }}>Switch Host cluster</button>}
-    <p>Isolation: cooperative-isolation — same-origin plugins can access the parent window.</p>
-    {adapter && route?.contribution.target.kind === 'sandbox-surface' && <SurfaceMount
-      adapter={adapter} pluginId={route.ownerPluginId} target={route.contribution.target}
-      mountPointId={`route:${route.contribution.id}`} label="KubeEye Surface" testId="surface"
-      failure={failures[`route:${route.contribution.id}`]}
-    />}
-    <section aria-label="Home cards">
-      {adapter && extensions.map(extension => extension.contribution.target.kind === 'sandbox-surface' && <SurfaceMount
-        key={extension.contribution.id} adapter={adapter} pluginId={extension.ownerPluginId}
-        target={extension.contribution.target} mountPointId={`extension:${extension.contribution.slot}/${extension.contribution.id}`}
-        label="KubeEye Card" testId="extension" failure={failures[`extension:${extension.contribution.slot}/${extension.contribution.id}`]}
-      />)}
-    </section>
-    {store && <PluginConfiguration store={store} />}
-    {(runtime || bootstrapFailure) && <RuntimeInspector runtime={(runtime ?? bootstrapFailure)!} adapter={adapter} audit={audit} />}
-  </main>;
+function LegacySurface() {
+  // Keep existing manual access when the environment has not enabled routing.
+  return <HostContext.Consumer>{services => {
+    const route = services?.runtime.contributions.listRoutes().find(r => r.contribution.id === 'kubeeye-overview-route');
+    return services && route?.contribution.target.kind === 'sandbox-surface' ? <SurfaceMount adapter={services.adapter} pluginId={route.ownerPluginId}
+      target={route.contribution.target} mountPointId={`route:${route.contribution.id}`} label="KubeEye Surface" testId="surface" failure={services.failures[`route:${route.contribution.id}`]} /> : null;
+  }}</HostContext.Consumer>;
 }

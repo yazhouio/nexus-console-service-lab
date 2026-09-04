@@ -190,3 +190,12 @@ describe('validateRestrictedInstallRecord', () => {
   });
 });
 
+
+it('preflights new contribution fields before publishing to an old Host contract', () => {
+  const legacy = validRecord();
+  expect(validateRestrictedInstallRecord(legacy, { ...validationOptions, contributionContractVersion: 1 }).manifest.id).toBe('kubeeye');
+  const next = validRecord();
+  Object.assign(next.manifest.contributions.routes[0], { parentRouteId: 'node-detail' });
+  expect(() => validateRestrictedInstallRecord(next, { ...validationOptions, contributionContractVersion: 1 })).toThrow('CONTRIBUTION_CONTRACT_UNSUPPORTED');
+  expect(validateRestrictedInstallRecord(next, { ...validationOptions, contributionContractVersion: 2 }).manifest.contributions.routes?.[0].parentRouteId).toBe('node-detail');
+});

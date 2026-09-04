@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { InstallationStore, ReloadRequired } from '@nexus/plugin-runtime';
-import { kubeeyeInstallation } from './plugins/kubeeye-installation';
+import { kubeeyeInstallation, kubeeyeInstallationV2 } from './plugins/kubeeye-installation';
 
 export function PluginConfiguration({ store }: { readonly store: InstallationStore }) {
   const [status, setStatus] = useState({ message: 'Configuration applied' });
@@ -18,7 +18,7 @@ export function PluginConfiguration({ store }: { readonly store: InstallationSto
       <button onClick={() => change(() => store.setEnabled('kubeeye', !selected.config.enabled))}>{selected.config.enabled ? 'Disable' : 'Enable'} KubeEye</button>{' '}
       <button onClick={() => change(() => store.uninstall('kubeeye'))}>Uninstall KubeEye</button>{' '}
       {selected.manifest.version === '1.0.0' ? <button onClick={() => change(() => store.install({
-        manifest: { ...kubeeyeInstallation.manifest, version: '2.0.0', entry: '/plugins/kubeeye/2.0.0/' },
+        manifest: kubeeyeInstallationV2.manifest,
         config: { ...selected.config, version: '2.0.0' },
       }))}>Install KubeEye 2.0.0</button> : <button onClick={() => change(() => store.selectVersion('kubeeye', '1.0.0'))}>Roll back to 1.0.0</button>}
     </>}{' '}

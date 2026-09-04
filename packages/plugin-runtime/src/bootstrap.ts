@@ -224,6 +224,8 @@ function normalizeRestrictedContributions(
         Object.freeze({
           id: route.id,
           path: route.path,
+          ...(route.parentRouteId === undefined ? {} : { parentRouteId: route.parentRouteId }),
+          ...(route.acceptsChildren === undefined ? {} : { acceptsChildren: route.acceptsChildren }),
           target: normalizeTarget(route),
         }),
       ),

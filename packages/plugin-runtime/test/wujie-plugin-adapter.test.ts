@@ -122,6 +122,18 @@ function successfulHandshake(
 const container = {} as HTMLElement;
 
 describe('WujiePluginAdapter', () => {
+  it('injects a JSON route snapshot independently from static Surface configuration', async () => {
+    let props: unknown;
+    const adapter = createWujiePluginAdapter({ runtime: await runtime(), hostWindow: hostWindow(), handshake: successfulHandshake(), driver: {
+      async startApp(options) { props = options.props; }, async destroyApp() {},
+    } });
+    const routeContext = { routeId: 'alerts', pathname: '/nodes/n1/alerts', params: { node: 'n1' }, search: '?severity=high' };
+    const mounted = await adapter.mount({ pluginId: 'kubeeye', surfaceId: 'overview', mountPointId: 'route:alerts', container, routeContext, initialParameters: { view: 'route' } });
+    routeContext.params.node = 'mutated';
+    expect(props).toMatchObject({ routeContext: { params: { node: 'n1' }, search: '?severity=high' }, surface: { initialParameters: { view: 'route' } } });
+    await mounted.unmount();
+  });
+
   it('cancels an in-flight start, disposes first, and destroys its late result once', async () => {
     const start = deferred<Function | void>();
     const order: string[] = [];

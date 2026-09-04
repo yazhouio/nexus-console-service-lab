@@ -1,3 +1,4 @@
+import { assertContributionContractCompatible } from './contribution-compatibility';
 import { frozenCopy } from './immutable';
 import { isCapabilityId, isHostApiId } from './identifiers';
 import { isJsonValue } from './contribution';
@@ -41,6 +42,8 @@ export interface InstalledPluginRecord {
 
 export interface RestrictedInstallValidationOptions {
   readonly isEntryAllowed: (entry: string) => boolean;
+  /** Explicit installation/publishing target capability, not automatic negotiation. */
+  readonly contributionContractVersion?: 1 | 2;
 }
 
 export interface RestrictedManifestValidationIssue {
@@ -126,6 +129,13 @@ function optionalString(
   pluginId?: PluginId,
 ): string | undefined {
   return value === undefined ? undefined : nonEmptyString(value, label, pluginId);
+}
+
+function extensionMetadata(value: Record<string, unknown>, pluginId: string) {
+  if (value.acceptsChildren !== undefined && typeof value.acceptsChildren !== 'boolean') {
+    invalid('acceptsChildren must be a boolean.', pluginId);
+  }
+  return value.acceptsChildren === undefined ? {} : { acceptsChildren: value.acceptsChildren as boolean };
 }
 
 function optionalOrder(
@@ -216,7 +226,7 @@ function parseRoutes(
       const route = record(routeValue, `Route ${index}`, pluginId);
       assertClosed(
         route,
-        ['id', 'path', 'surfaceId', 'layout', 'initialParameters'],
+        ['id', 'path', 'surfaceId', 'layout', 'initialParameters', 'parentRouteId', 'acceptsChildren'],
         `Route ${index}`,
         pluginId,
       );
@@ -245,6 +255,8 @@ function parseRoutes(
       return Object.freeze({
         id,
         path,
+        ...(route.parentRouteId === undefined ? {} : { parentRouteId: optionalString(route.parentRouteId, `Route ${id} parentRouteId`, pluginId) }),
+        ...extensionMetadata(route, pluginId),
         surfaceId,
         ...(layout === undefined ? {} : { layout }),
         ...(initialParameters === undefined ? {} : { initialParameters }),
@@ -274,7 +286,7 @@ function parseNavigation(
       );
       assertClosed(
         navigation,
-        ['id', 'label', 'parentId', 'routeId', 'order'],
+        ['id', 'label', 'parentId', 'routeId', 'order', 'acceptsChildren'],
         `Navigation ${index}`,
         pluginId,
       );
@@ -311,6 +323,7 @@ function parseNavigation(
       return Object.freeze({
         id,
         label,
+        ...extensionMetadata(navigation, pluginId),
         ...(parentId === undefined ? {} : { parentId }),
         ...(routeId === undefined ? {} : { routeId }),
         ...(order === undefined ? {} : { order }),
@@ -535,6 +548,7 @@ export function validateRestrictedInstallRecord(
 ): InstalledPluginRecord {
   const installRecord = record(value, 'Installed plugin record');
   assertClosed(installRecord, ['manifest', 'config'], 'Installed plugin record');
+  assertContributionContractCompatible(installRecord.manifest, options.contributionContractVersion ?? 2);
   const manifest = parseManifest(installRecord.manifest, options);
   const config = parseConfig(installRecord.config, manifest.id);
 

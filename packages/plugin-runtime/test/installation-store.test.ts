@@ -77,3 +77,19 @@ it('revalidates persisted installations against the next Host instead of failing
   const runtime = await bootstrapPluginRuntime({ builtins: [], coreRootIds: [], installed: store.list(), supportedHostApis: ['host.console@2'] });
   expect(runtime.plugins.get('example')).toMatchObject({ state: 'SKIPPED', reason: 'HOST_API_INCOMPATIBLE' });
 });
+
+it('keeps contract v2 readable while routing is disabled and requires removing newer declarations before an old-validator rollback', () => {
+  const options = { isEntryAllowed: () => true, supportedHostApis: ['host.console@1' as const], bridgeContracts: [] };
+  const next = { ...record('2.0.0'), manifest: { ...record('2.0.0').manifest, contributions: { routes: [{ id: 'child', parentRouteId: 'node', path: 'child', surfaceId: 'page' }] } } };
+  const store = createInstallationStore({ ...options, contributionContractVersion: 2, records: [record()] });
+  store.install(next);
+  // Routing enablement is deliberately not an input to the readable installation contract.
+  expect(createInstallationStore({ ...options, storage: { read: () => store.snapshot(), write() {} } }).list()[0].manifest.version).toBe('2.0.0');
+  const oldValidator = () => createInstallationStore({ ...options, contributionContractVersion: 1, storage: { read: () => store.snapshot(), write() {} } });
+  expect(oldValidator).toThrow('CONTRIBUTION_CONTRACT_UNSUPPORTED');
+  store.selectVersion('example', '1.0.0');
+  expect(oldValidator).toThrow('CONTRIBUTION_CONTRACT_UNSUPPORTED');
+  // Retained, inactive versions also need migration before replacing the validator.
+  store.uninstall('example'); store.install(record());
+  expect(oldValidator().list()[0].manifest.version).toBe('1.0.0');
+});

@@ -1,0 +1,46 @@
+name: Routing release gate
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Protected target environment containing ROUTING_RELEASE_CONFIG
+        required: true
+        default: production
+jobs:
+  gated-build:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env:
+      NEXUS_BUILD_VERSION: ${{ github.sha }}
+      NEXUS_ROUTING_CONFIG: ${{ github.workspace }}/routing-target.json
+      NEXUS_ROUTING_EVIDENCE: ${{ github.workspace }}/routing-evidence.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.0
+      - run: node scripts/check-node-version.mjs
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.1
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Read trusted environment configuration
+        env:
+          ROUTING_RELEASE_CONFIG: ${{ vars.ROUTING_RELEASE_CONFIG }}
+        run: |
+          node --input-type=module <<'JS'
+          import { writeFileSync } from 'node:fs';
+          const config = JSON.parse(process.env.ROUTING_RELEASE_CONFIG);
+          if (config.buildVersion !== process.env.NEXUS_BUILD_VERSION) throw new Error('Target candidate must match this commit');
+          writeFileSync(process.env.NEXUS_ROUTING_CONFIG, JSON.stringify(config));
+          JS
+      - run: pnpm routing:smoke "$NEXUS_ROUTING_CONFIG" "$NEXUS_ROUTING_EVIDENCE"
+      - run: pnpm --filter @nexus/plugin-runtime build
+      - run: pnpm build:routing-release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gated-host-release
+          path: |
+            apps/host/dist/
+            routing-evidence.json

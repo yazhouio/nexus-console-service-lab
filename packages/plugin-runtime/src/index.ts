@@ -15,6 +15,8 @@ export type {
   RestrictedRouteContribution,
   RestrictedUiExtensionContribution,
   RouteContribution,
+  RouteContext,
+  RouteMetadata,
   SandboxRenderTarget,
   SandboxSurfaceDefinition,
   UiExtensionContribution,
@@ -90,4 +92,6 @@ export type {
 export { createInstallationStore, PluginInstallationError } from './installation-store';
 export type { InstallationStore, InstallationStoreOptions, InstallationStoreSnapshot, InstallationStorage, ReloadRequired } from './installation-store';
 export { inspect } from './inspection';
-export type { BootstrapFailure, RuntimeSnapshot, PluginSnapshot, SurfaceInstanceSnapshot, RuntimeErrorSnapshot } from './inspection';
+export type { InspectionSource, ContributionSnapshot, BootstrapFailure, RuntimeSnapshot, PluginSnapshot, SurfaceInstanceSnapshot, RuntimeErrorSnapshot } from './inspection';
+export type { ContributionState, ContributionKind, ContributionIdentity, ContributionDiagnosticCode, ContributionDiagnostic, HostContributionFact } from './host-contribution';
+export { assertContributionContractCompatible } from './contribution-compatibility';

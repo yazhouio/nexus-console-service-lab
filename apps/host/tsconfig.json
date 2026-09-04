@@ -3,6 +3,9 @@
   "compilerOptions": {
     "jsx": "react-jsx"
   },
-  "include": ["src", "rsbuild.config.ts"]
+  "include": [
+    "src",
+    "rsbuild.config.ts",
+    "test"
+  ]
 }
-

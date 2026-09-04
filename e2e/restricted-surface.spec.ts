@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 async function ready(page: Page) {
-  await page.goto('/');
+  await page.goto('/__fixtures__/surfaces');
   await expect(page.getByTestId('runtime-state')).toContainText('READY');
   await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
 }
@@ -55,7 +55,7 @@ test('artifact failure affects the Surface only', async ({ page }) => {
   await ready(page);
   await page.route('**/plugins/kubeeye/1.0.0/**', route => route.fulfill({ status: 503, body: 'unavailable' }));
   await page.getByRole('button', { name: 'Open KubeEye Surface' }).click();
-  await expect(page.getByTestId('surface-state')).toHaveText('FAILED');
+  await expect(page.getByTestId('surface-state')).toHaveText('ERROR');
   await expect(page.getByTestId('failure-stage')).toHaveText('artifact');
   await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
   await expect(page.getByTestId('runtime-state')).toContainText('READY');
@@ -89,7 +89,7 @@ test('runtime rendering errors are local and dispose the Surface resources', asy
     const child = document.querySelector('iframe')?.contentWindow;
     child?.dispatchEvent(new ErrorEvent('error', { message: 'fixture render failure' }));
   });
-  await expect(page.getByTestId('surface-state')).toHaveText('FAILED');
+  await expect(page.getByTestId('surface-state')).toHaveText('ERROR');
   await expect(page.getByTestId('failure-stage')).toHaveText('render');
   await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
   await expect(page.locator('iframe')).toHaveCount(0);
@@ -118,14 +118,14 @@ test('mounts Route and Extension independently, isolates failure, and unmounts i
   expect(props.map(props => props?.surface.layout)).toEqual([{ width: 'full' }, { width: 'compact' }]);
 
   await page.evaluate(() => document.querySelector('iframe')?.contentWindow?.dispatchEvent(new ErrorEvent('error', { message: 'route failed' })));
-  await expect(page.getByTestId('surface-state')).toHaveText('FAILED');
+  await expect(page.getByTestId('surface-state')).toHaveText('ERROR');
   await expect(page.getByTestId('extension-state')).toHaveText('MOUNTED');
   await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
   await card.getByRole('button', { name: 'Read current cluster' }).click();
   await expect(card.getByTestId('current-cluster')).toHaveText('demo-cluster');
   await page.getByRole('button', { name: 'Close KubeEye Card' }).click();
   await expect(page.getByTestId('extension-state')).toHaveText('UNMOUNTED');
-  await expect(page.getByTestId('surface-state')).toHaveText('FAILED');
+  await expect(page.getByTestId('surface-state')).toHaveText('ERROR');
   await page.getByRole('button', { name: 'Close KubeEye Surface' }).click();
   await expect(page.getByTestId('surface-state')).toHaveText('UNMOUNTED');
   await expect(page.locator('iframe')).toHaveCount(0);
@@ -153,7 +153,7 @@ test('streams Host cluster changes to independent sessions and exposes safe Runt
   await expect(card.getByTestId('watched-cluster')).toHaveText('demo-cluster');
   await expect(route.getByTestId('watched-cluster')).toHaveText('second-cluster');
   await page.evaluate(() => document.querySelector('iframe')?.contentWindow?.dispatchEvent(new ErrorEvent('error', { message: 'Bearer secret-token' })));
-  await expect(page.getByTestId('surface-state')).toHaveText('FAILED');
+  await expect(page.getByTestId('surface-state')).toHaveText('ERROR');
   await expect.poll(async () => (await snapshot()).plugins.find((plugin: { id: string }) => plugin.id === 'kubeeye').surfaces[0].instances.find((instance: { state: string }) => instance.state === 'FAILED')?.bridgeSession.state).toBe('DISPOSED');
   expect(JSON.stringify(await snapshot())).not.toContain('secret-token');
   const audit = await page.getByTestId('bridge-audit').textContent();
@@ -194,8 +194,8 @@ test('keeps mounted runtime unchanged until configuration Reload', async ({ page
   await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
 });
 
-test('Bridge grants do not authorize same-origin network access; the Backend enforces its own permissions', async ({ page, context }) => {
-  await context.addCookies([{ name: 'fixture-session', value: 'reader', domain: 'localhost', path: '/' }]);
+test('Bridge grants do not authorize same-origin network access; the Backend enforces its own permissions', async ({ page, context, baseURL }) => {
+  await context.addCookies([{ name: 'fixture-session', value: 'reader', url: baseURL! }]);
   await ready(page);
   await page.getByRole('button', { name: 'Disable KubeEye' }).click();
   await page.getByRole('button', { name: 'Enable KubeEye' }).click();
