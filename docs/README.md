@@ -1,0 +1,38 @@
+# Nexus Frontend Plugin Runtime 文档
+
+这组文档面向 Plugin Author、Host 集成开发者和 Runtime 维护者。文档按交付优先级排列；P0 是使用和集成 V1 所必需的契约，P1 用于上线运维和兼容性，P2 用于理解内部实现。
+
+## 文档优先级
+
+| 优先级 | 文档 | 用途 |
+| --- | --- | --- |
+| P0 | [Plugin Author Guide](./plugin-author-guide.md) | 如何编写、声明和调试 Restricted Plugin |
+| P0 | [Plugin API Reference](./plugin-api-reference.md) | Runtime、Manifest、Bridge 和 Adapter 的公开 API |
+| P0 | [Manifest / Contract Spec](./manifest-contract-spec.md) | Manifest、Config、Contribution、Bridge Contract 的规范 |
+| P0 | [Lifecycle & Architecture](./lifecycle-architecture.md) | Bootstrap、依赖解析、挂载和失败边界 |
+| P0 | [Capability Catalog](./capability-catalog.md) | 当前 Host 暴露的 Capability 与 Action 清单 |
+| P1 | [Compatibility & Versioning](./compatibility-versioning.md) | Major、Host API、Bridge Protocol 和 Reload 规则 |
+| P1 | [Sandbox Security Model](./sandbox-security-model.md) | Restricted + Wujie 的真实安全边界 |
+| P1 | [Troubleshooting](./troubleshooting.md) | 常见失败、检查入口和修复方向 |
+| P1 | [Example Plugins](./example-plugins.md) | Host 和 KubeEye 示例的完整走读 |
+| P2 | [Internal Implementation Design](./internal-implementation-design.md) | Module 责任、原子提交和测试策略 |
+
+## 规范来源与优先级
+
+V1 的规范性来源是 [spec/技术落地方案.md](../spec/技术落地方案.md)。本目录是面向读者的拆分版：
+
+1. 如果本目录与 V1 规范冲突，以 V1 规范为准。
+2. 如果实现与规范冲突，应修复实现或明确记录偏差，不通过文档默默改变 Contract。
+3. `README.md` 描述仓库运行方式和当前 Fixture；它不是替代 V1 规范的架构决策记录。
+
+## 当前状态
+
+V1 tickets 01–12 已完成，最近一次 Standards / Spec Review 没有遗留问题；验证记录见 [.scratch/frontend-plugin-runtime-v1/review.md](../.scratch/frontend-plugin-runtime-v1/review.md)。
+
+当前仓库的示例 Host 使用：
+
+- Host：`http://localhost:3000`
+- Restricted Plugin dev server：`http://localhost:3001`
+- 测试授权服务：`http://localhost:3002`
+- Host API：`kubesphere.console@1`
+- Bridge Capability：`kubesphere.cluster@2`

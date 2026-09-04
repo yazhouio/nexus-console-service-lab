@@ -8,6 +8,14 @@ V1 frontend plugin runtime workspace described by the normative documents in `sp
 - `apps/example-restricted-plugin`: React 19 restricted-plugin fixture built directly with Rspack.
 - `packages/plugin-runtime`: build-tool-independent TypeScript runtime model.
 
+## Documentation
+
+The documentation is organized by delivery priority in
+[docs/README.md](docs/README.md). P0 covers authoring, public APIs, contracts,
+architecture, and the current capability catalog; P1 covers compatibility,
+security, troubleshooting, and examples; P2 covers internal implementation
+design.
+
 ## Commands
 
 ```bash
