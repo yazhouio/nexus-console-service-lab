@@ -6,6 +6,7 @@
 
 | 优先级 | 文档 | 用途 |
 | --- | --- | --- |
+| P0 | [Console Core 插件化设计](./console-core-architecture.md) | Q1–Q60 已确认目标：四层边界、参数化契约、治理与验收 |
 | P0 | [Plugin Author Guide](./plugin-author-guide.md) | 如何编写、声明和调试 Restricted Plugin |
 | P0 | [Plugin API Reference](./plugin-api-reference.md) | Runtime、Manifest、Bridge 和 Adapter 的公开 API |
 | P0 | [Manifest / Contract Spec](./manifest-contract-spec.md) | Manifest、Config、Contribution、Bridge Contract 的规范 |
@@ -25,7 +26,9 @@ V1 的规范性来源是仓库中的 `spec/技术落地方案.md`。本目录是
 
 跨插件 UI 容器协议是 2026-09-04 后续确认的设计，按 [首期 UI 契约](./cross-plugin-ui-composition-contract.md) 与 ADR 0007–0015 执行；它取代早期 UI Extension 的全局 slot string、局部唯一性和直接挂载假设，其他既有 V1 约束继续有效。
 
-1. 如果本目录与 V1 规范冲突，以 V1 规范为准。
+Console Core 插件化是 2026-09-07 后续确认的目标设计，按 [Console Core 插件化设计](./console-core-architecture.md) 与 ADR 0017–0018 执行；其中明确变更的职责、导航和扩展契约优先于早期方案。新增能力尚待实施，现有 API 文档仍反映当前实现。
+
+1. 除上述后续决策明确变更的范围外，如果本目录与 V1 规范冲突，以 V1 规范为准。
 2. 如果实现与规范冲突，应修复实现或明确记录偏差，不通过文档默默改变 Contract。
 3. `README.md` 描述仓库运行方式和当前 Fixture；它不是替代 V1 规范的架构决策记录。
 

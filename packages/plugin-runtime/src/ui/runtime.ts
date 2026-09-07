@@ -29,11 +29,30 @@ interface Scope { id: string; owner: string; kind: 'root' | 'contribution' | 'ov
 interface Attempt { id: string; scope: Scope; valid: boolean; signal: AbortController; initial: ContextSnapshot | null; pinned: boolean; occurrences: Set<Occurrence>; execution: UiExecution; task: Promise<void>; mounted?: UiMounted; cleanup?: Promise<void> }
 interface Occurrence { id: string; attempt: Attempt; point: ExtensionPointDefinition; anchor: unknown; input: SlotInput; lastAccepted: ContextSnapshot | null; effective: ContextSnapshot | null; error?: string; runtimeError?: string; executions: Map<string, Scope>; active: boolean }
 interface Overlay { id: string; owner: Scope; surfaceId: string; input: JsonValue; outcome: OverlayObservation['outcome']; execution: Scope; view: ReturnType<UiDriver['overlay']> }
-export interface UiRuntimeOptions { registry: ContributionRegistry; driver: UiDriver; policy: HostContributionPolicy; canOverlay?: (owner: string) => boolean; maxScopes?: number; maxDepth?: number; maxOverlaysPerScope?: number; onError?: (cause: unknown, attemptId: string) => void }
+export interface UiRuntimeOptions {
+  /** Supply completed declarations; this runtime snapshots them at construction. */
+  registry: ContributionRegistry;
+  driver: UiDriver;
+  /** Static, side-effect-free admission policy, evaluated once per cross-owner relation.
+   * Throwing denies that relation with POLICY_ERROR; it cannot abort unrelated UI.
+   * Changes require a new runtime, like changes to declarations.
+   */
+  policy: HostContributionPolicy;
+  canOverlay?: (owner: string) => boolean;
+  maxScopes?: number;
+  maxDepth?: number;
+  maxOverlaysPerScope?: number;
+  onError?: (cause: unknown, attemptId: string) => void;
+}
 
 /** Host-only logical execution core. Browser placement and communication live in adapters. */
 export function createUiRuntime(options: UiRuntimeOptions) {
-  const { registry, driver } = options;
+  const { driver } = options;
+  const points = frozenCopy(options.registry.listExtensionPoints());
+  const extensions = frozenCopy(options.registry.listExtensions());
+  const surfaces = frozenCopy(options.registry.listUiSurfaces());
+  const pointsById = new Map(points.map(point => [uiKey(point.ownerPluginId, point.contribution.id), point]));
+  const surfacesById = new Map(surfaces.map(surface => [uiKey(surface.ownerPluginId, surface.contribution.id), surface]));
   const scopes = new Map<string, Scope>();
   const attempts = new Map<string, Attempt>();
   const occurrences = new Map<string, Occurrence>();
@@ -123,14 +142,21 @@ export function createUiRuntime(options: UiRuntimeOptions) {
     const baseline = frozenCopy(s.context);
     const a = start(s, baseline, endAttempt(old), false, true); s.changed?.(); return a.id;
   }
-  function relations(pointOwner: string, point: ExtensionPointDefinition): UiRelation[] {
-    return registry.listExtensions({ ownerPluginId: pointOwner, id: point.id }).map(({ ownerPluginId, contribution: c }) => {
-      const authorized = ownerPluginId === pointOwner || options.policy({ kind: 'surface', contributorId: ownerPluginId, ownerPluginId: pointOwner, targetId: point.id, contractMajor: c.point.contractMajor });
-      const surface = registry.listUiSurfaces().find(s => s.ownerPluginId === ownerPluginId && s.contribution.id === c.surfaceId);
-      const reason = !authorized ? 'POLICY_DENIED' : c.point.contractMajor !== point.contractMajor ? 'CONTRACT_MISMATCH' : c.kind !== point.kind ? 'KIND_MISMATCH' : !surface ? 'SURFACE_MISSING' : undefined;
+  function compileRelations(pointOwner: string, point: ExtensionPointDefinition): UiRelation[] {
+    return extensions.filter(({ contribution: c }) => c.point.ownerPluginId === pointOwner && c.point.id === point.id).map(({ ownerPluginId, contribution: c }) => {
+      let authorized = ownerPluginId === pointOwner;
+      let policyFailed = false;
+      if (!authorized) {
+        try { authorized = options.policy({ kind: 'surface', contributorId: ownerPluginId, ownerPluginId: pointOwner, targetId: point.id, contractMajor: c.point.contractMajor }); }
+        catch { policyFailed = true; }
+      }
+      const surface = surfacesById.get(uiKey(ownerPluginId, c.surfaceId));
+      const reason = policyFailed ? 'POLICY_ERROR' : !authorized ? 'POLICY_DENIED' : c.point.contractMajor !== point.contractMajor ? 'CONTRACT_MISMATCH' : c.kind !== point.kind ? 'KIND_MISMATCH' : !surface ? 'SURFACE_MISSING' : undefined;
       return { ref: { ownerPluginId, id: c.id }, definition: c, authorized, availability: reason ? 'unavailable' : 'available', ...(reason ? { reason } : {}) };
     });
   }
+  const relationTable = new Map(points.map(({ ownerPluginId, contribution }) => [uiKey(ownerPluginId, contribution.id), frozenCopy(compileRelations(ownerPluginId, contribution))]));
+  function relations(owner: string, point: ExtensionPointDefinition): readonly UiRelation[] { return relationTable.get(uiKey(owner, point.id)) ?? []; }
   function endOccurrence(o: Occurrence) {
     if (!o.active) return;
     o.active = false; occurrences.delete(o.id); o.attempt.occurrences.delete(o);
@@ -172,7 +198,7 @@ export function createUiRuntime(options: UiRuntimeOptions) {
         catch { if (existing.attempt) failAttempt(existing.attempt.id); }
         continue;
       }
-      const surface = registry.listUiSurfaces().find(s => s.ownerPluginId === r.ref.ownerPluginId && s.contribution.id === r.definition.surfaceId)!;
+      const surface = surfacesById.get(uiKey(r.ref.ownerPluginId, r.definition.surfaceId))!;
       let cell: ReturnType<UiDriver['allocate']> | undefined;
       let s: Scope | undefined;
       try {
@@ -221,7 +247,7 @@ export function createUiRuntime(options: UiRuntimeOptions) {
     mountSlot(attemptId: string, anchor: unknown, input: SlotInput) {
       validateInput(input); const a = requireAttempt(attemptId);
       if (a.occurrences.size >= 32) throw new UiError('UI_RESOURCE_LIMIT');
-      const point = registry.listExtensionPoints().find(p => p.ownerPluginId === a.scope.owner && p.contribution.id === input.id)?.contribution;
+      const point = pointsById.get(uiKey(a.scope.owner, input.id))?.contribution;
       if (!point) throw new UiError('POINT_NOT_OWNED');
       const o: Occurrence = { id: id('occurrence'), attempt: a, point, anchor, input: frozenCopy(input), active: true, lastAccepted: null, effective: null, executions: new Map() };
       occurrences.set(o.id, o); a.occurrences.add(o); reconcile(o, input); return o.id;
@@ -243,7 +269,7 @@ export function createUiRuntime(options: UiRuntimeOptions) {
       if (!options.canOverlay?.(a.scope.owner)) throw new UiError('OVERLAY_PERMISSION_DENIED');
       if (!['modal','drawer'].includes(presentation)) throw new UiError('INVALID_OVERLAY');
       if (a.scope.overlays.size >= (options.maxOverlaysPerScope ?? 32)) throw new UiError('UI_RESOURCE_LIMIT');
-      const surface = registry.listUiSurfaces().find(s => s.ownerPluginId === a.scope.owner && s.contribution.id === surfaceId);
+      const surface = surfacesById.get(uiKey(a.scope.owner, surfaceId));
       if (!surface) throw new UiError('SURFACE_NOT_OWNED');
       const handle = id('overlay');
       const view = driver.overlay(handle, presentation, () => { const o = overlays.get(handle); if (o) finishOverlay(o, { state: 'cancelled' }); });
@@ -262,8 +288,8 @@ export function createUiRuntime(options: UiRuntimeOptions) {
     completeOverlay(attemptId: string, result: JsonValue) { assertUiJson(result); const a = requireAttempt(attemptId); if (!a.scope.overlay) throw new UiError('NOT_OVERLAY_EXECUTION'); return finishOverlay(a.scope.overlay, { state: 'completed', result }); },
     cancelOverlay(attemptId: string, handle: string) { return finishOverlay(ownedOverlay(attemptId, handle), { state: 'cancelled' }); },
     inspect() {
-      const relationFacts = registry.listExtensions().map(({ ownerPluginId, contribution }) => {
-        const point = registry.listExtensionPoints().find(p => p.ownerPluginId === contribution.point.ownerPluginId && p.contribution.id === contribution.point.id);
+      const relationFacts = extensions.map(({ ownerPluginId, contribution }) => {
+        const point = pointsById.get(uiKey(contribution.point.ownerPluginId, contribution.point.id));
         const relation = point && relations(point.ownerPluginId, point.contribution).find(r => r.ref.ownerPluginId === ownerPluginId && r.ref.id === contribution.id);
         return { ref: { ownerPluginId, id: contribution.id }, point: contribution.point, availability: relation?.availability ?? 'unavailable', reason: relation?.reason ?? (point ? undefined : 'POINT_MISSING') };
       });

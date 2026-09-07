@@ -90,6 +90,10 @@ JSON 输入上限为 65,536 UTF-8 bytes、深度 32、10,000 个值节点；控�
 
 `createUiHost` 组合纯逻辑 `createUiRuntime`、本地 Builtin adapter、Restricted Wujie adapter 和 Host policy。UI Control Plane 与 Capability RPC 分开 dispatch，共用一个 Session / MessagePort；插件不能提交 Scope 身份来选择资源归属。
 
+`createUiRuntime` 必须在声明接纳完成后创建。创建时快照 Point、Surface 和 Contribution，并对每个跨 owner 关系求值一次静态、无副作用的 policy，冻结准入与契约诊断；Context、selection 和执行寿命仍按 occurrence 更新。后续声明或 policy 修改须新建 Runtime，不能影响已有执行。policy 抛错时该关系拒绝执行，Host inspection 报告 `POLICY_ERROR`，不泄露异常内容，也不阻断其他贡献。
+
+Restricted Surface 只通过 Contribution Registry 提交声明；`runtime.surfaces.get/list` 是在接纳完成后派生的只读索引，保留 owner、版本和存在性查询，不再维护独立的 Surface activation 事务。
+
 逻辑 Scope tree 包含 root、Contribution Scope 和 Overlay execution Scope。Owner Execution Scope 是资源归属角色。Attempt 拥有 Session、presentation root、Anchor 和 occurrence；其失败使呈现子树失效，Scope 直接拥有的 Overlay 可继续。父 Attempt 的 occurrence 被撤销时，下属 Contribution Scope 及其 Overlay 一并结束。
 
 Anchor 只在当前 presentation root 内解析。Restricted 使用实际 ShadowRoot，Builtin 使用 Host 指定 root；物理父子检查使用 Host 原生 Node getter，绕开 Wujie 的虚拟 parentNode。MutationObserver 撤销已移出 root 的 Anchor 绑定。随机 DOM 标记只是定位信息，不能授予身份、跨 root 权限或 point ownership。

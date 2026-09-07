@@ -1,0 +1,22 @@
+import { expect, it } from 'vitest';
+import { createRouteModel } from '../src/routing/route-model';
+import { createRouteModel as reference } from './reference/route-model';
+import type { OwnedContribution, RouteContribution } from '@nexus/plugin-runtime';
+
+it('substitution: URL membership preserves observable resolution across encoding and conflict families', () => {
+  const paths = ['/', '/x', '/x/:id', '/x/*', '/:id/x', '/:id', '/*', '/x/:id/end'];
+  const urls = ['/', '//', '/x', '/X/', '/x///', '//x', '/x/a', '/x/a/', '/x/a/b', '/x//a', '/x/%61', '/x/a%2Fb', '/x/a%252Fb', '/%78', '/%2Fx', '/x/%', '/x/%E2%84%AA', '/x/a/end', '/X/A/END/', '/x/%2F/end', '/x/%252F/end'];
+  const differences: unknown[] = [];
+  let cases = 0;
+  for (const a of paths) for (const b of paths) for (const crossOwner of [false, true]) {
+    const routes: OwnedContribution<RouteContribution>[] = [a, b].map((path, i) => ({ ownerPluginId: i && crossOwner ? 'other' : 'owner', contribution: { id: `r${i}`, path, target: { kind: 'builtin', render: () => null } } }));
+    const expected = reference({ routes, navigation: [] }), actual = createRouteModel({ routes, navigation: [] });
+    for (const url of urls) {
+      cases++;
+      const left = expected.resolve(url), right = actual.resolve(url);
+      if (JSON.stringify(left) !== JSON.stringify(right)) differences.push({ a, b, crossOwner, url, expected: left, actual: right });
+    }
+  }
+  console.log('SUBSTITUTION_ROUTE_CASES', cases, 'DIFFERENCES', differences.length);
+  expect(differences.slice(0, 5)).toEqual([]);
+});

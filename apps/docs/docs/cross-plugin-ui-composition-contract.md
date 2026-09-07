@@ -1,5 +1,7 @@
 # 首期跨插件 UI 组合契约
 
+后续变更：2026-09-07 [Console Core 插件化设计](./console-core-architecture.md) 明确 Runtime 执行职责，并引入参数化 Profile/Ref Contract、Action/Tab 和 Execution Session。本文保留已实现的首期 Surface 契约；新增模型是后续目标，尚不表示当前 SDK 已支持。
+
 状态：已实现，进入验收记录归档。2026-09-04 按整体审阅后的六条补充收敛设计。本文合并 Q1–Q25、Q27–Q34；[设计记录](./cross-plugin-ui-composition-design.md)保存决策，仓库 `CONTEXT.md` 定义术语。协议语义以本文为准，公开 SDK、具体实现选择和验证结果见 [UI 组合实现与作者 API](./cross-plugin-ui-composition-implementation.md)。
 
 ## 1. 场景、角色与交付范围

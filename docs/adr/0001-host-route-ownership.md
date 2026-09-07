@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by ADR-0017
 ---
 
 # Host 统一承担页面路由，插件内部导航保持独立

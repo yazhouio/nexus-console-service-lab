@@ -1,0 +1,22 @@
+diff --git a/packages/plugin-runtime/src/ui/runtime.ts b/packages/plugin-runtime/src/ui/runtime.ts
+index aeab178..de891d3 100644
+--- a/packages/plugin-runtime/src/ui/runtime.ts
++++ b/packages/plugin-runtime/src/ui/runtime.ts
+@@ -123,7 +123,7 @@ export function createUiRuntime(options: UiRuntimeOptions) {
+     const baseline = frozenCopy(s.context);
+     const a = start(s, baseline, endAttempt(old), false, true); s.changed?.(); return a.id;
+   }
+-  function relations(pointOwner: string, point: ExtensionPointDefinition): UiRelation[] {
++  function compileRelations(pointOwner: string, point: ExtensionPointDefinition): UiRelation[] {
+     return registry.listExtensions({ ownerPluginId: pointOwner, id: point.id }).map(({ ownerPluginId, contribution: c }) => {
+       const authorized = ownerPluginId === pointOwner || options.policy({ kind: 'surface', contributorId: ownerPluginId, ownerPluginId: pointOwner, targetId: point.id, contractMajor: c.point.contractMajor });
+       const surface = registry.listUiSurfaces().find(s => s.ownerPluginId === ownerPluginId && s.contribution.id === c.surfaceId);
+@@ -131,6 +131,8 @@ export function createUiRuntime(options: UiRuntimeOptions) {
+       return { ref: { ownerPluginId, id: c.id }, definition: c, authorized, availability: reason ? 'unavailable' : 'available', ...(reason ? { reason } : {}) };
+     });
+   }
++  const relationTable = new Map(registry.listExtensionPoints().map(({ ownerPluginId, contribution }) => [uiKey(ownerPluginId, contribution.id), frozenCopy(compileRelations(ownerPluginId, contribution))]));
++  function relations(owner: string, point: ExtensionPointDefinition): readonly UiRelation[] { return relationTable.get(uiKey(owner, point.id)) ?? []; }
+   function endOccurrence(o: Occurrence) {
+     if (!o.active) return;
+     o.active = false; occurrences.delete(o.id); o.attempt.occurrences.delete(o);

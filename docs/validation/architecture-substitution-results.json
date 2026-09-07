@@ -1,0 +1,151 @@
+{
+  "recordedAt": "2026-09-07T05:38:15.746Z",
+  "node": "v24.14.1",
+  "baselineCommit": "e1b594c3a12816b05c4e7310bd2cf121fa6ae81d",
+  "scope": "Independent replacements in temporary source tree; full package unit suites, added contract probes and typechecking; source aliases explicitly set; no browser E2E or performance claim.",
+  "results": [
+    {
+      "name": "baseline-plugin-runtime",
+      "exitCode": 0,
+      "passed": 155,
+      "failed": 0,
+      "observations": [
+        {
+          "policyCalls": 38
+        }
+      ],
+      "failedTests": [],
+      "suiteErrors": []
+    },
+    {
+      "name": "baseline-types-plugin-runtime",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "baseline-host",
+      "exitCode": 0,
+      "passed": 41,
+      "failed": 0,
+      "observations": [
+        {
+          "routeCases": 2688,
+          "differences": 0
+        }
+      ],
+      "failedTests": [],
+      "suiteErrors": []
+    },
+    {
+      "name": "baseline-types-host",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "surface-projection-runtime",
+      "exitCode": 0,
+      "passed": 155,
+      "failed": 0,
+      "observations": [
+        {
+          "policyCalls": 38
+        }
+      ],
+      "failedTests": [],
+      "suiteErrors": []
+    },
+    {
+      "name": "surface-projection-types",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "surface-projection-host",
+      "exitCode": 0,
+      "passed": 41,
+      "failed": 0,
+      "observations": [
+        {
+          "routeCases": 2688,
+          "differences": 0
+        }
+      ],
+      "failedTests": [],
+      "suiteErrors": []
+    },
+    {
+      "name": "router-membership-host",
+      "exitCode": 0,
+      "passed": 41,
+      "failed": 0,
+      "observations": [
+        {
+          "routeCases": 2688,
+          "differences": 0
+        }
+      ],
+      "failedTests": [],
+      "suiteErrors": []
+    },
+    {
+      "name": "router-membership-types",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "admission-at-initialization-runtime",
+      "exitCode": 0,
+      "passed": 155,
+      "failed": 0,
+      "observations": [
+        {
+          "policyCalls": 2
+        }
+      ],
+      "failedTests": [],
+      "suiteErrors": []
+    },
+    {
+      "name": "admission-at-initialization-types",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "combined-plugin-runtime",
+      "exitCode": 0,
+      "passed": 155,
+      "failed": 0,
+      "observations": [
+        {
+          "policyCalls": 2
+        }
+      ],
+      "failedTests": [],
+      "suiteErrors": []
+    },
+    {
+      "name": "combined-types-plugin-runtime",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "combined-host",
+      "exitCode": 0,
+      "passed": 41,
+      "failed": 0,
+      "observations": [
+        {
+          "routeCases": 2688,
+          "differences": 0
+        }
+      ],
+      "failedTests": [],
+      "suiteErrors": []
+    },
+    {
+      "name": "combined-types-host",
+      "exitCode": 0,
+      "output": ""
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+diff --git a/apps/host/src/routing/path-space.ts b/apps/host/src/routing/path-space.ts
+index daac956..0dec13f 100644
+--- a/apps/host/src/routing/path-space.ts
++++ b/apps/host/src/routing/path-space.ts
+@@ -49,19 +49,3 @@ export function relationship(a: PathSpace, b: PathSpace): {
+   return { kind: ab && ba ? 'EQUIVALENT' : ab ? 'CONTAINS' : ba ? 'WITHIN' : 'CROSSING', witness: '/' + witness.join('/') };
+ }
+ 
+-/** Decode once per segment, preserving encoded slashes inside parameters, like the pinned executor. */
+-export function matchSpace(space: PathSpace, pathname: string): Record<string, string> | undefined {
+-  if (!pathname.startsWith('/')) return;
+-  let parts: string[];
+-  try { parts = pathname.slice(1).replace(/\/+$/, '').split('/').map(decodeURIComponent); }
+-  catch { return; }
+-  if (parts.length === 1 && parts[0] === '') parts = [];
+-  if (parts.length < space.segments.length || (!space.splat && parts.length !== space.segments.length)) return;
+-  const params: Record<string, string> = Object.create(null);
+-  for (const [i, segment] of space.segments.entries()) {
+-    if (!parts[i] || (segment.kind === 'literal' && segment.value !== parts[i].replace(/[A-Z]/g, c => c.toLowerCase()))) return;
+-    if (segment.kind === 'param') params[segment.name] = parts[i];
+-  }
+-  if (space.splat) params['*'] = parts.slice(space.segments.length).join('/');
+-  return params;
+-}
+diff --git a/apps/host/src/routing/route-model.ts b/apps/host/src/routing/route-model.ts
+index 0055764..ce7e438 100644
+--- a/apps/host/src/routing/route-model.ts
++++ b/apps/host/src/routing/route-model.ts
+@@ -3,7 +3,7 @@ import type {
+   ContributionDiagnostic, ContributionIdentity, ContributionState, HostContributionFact,
+   NavigationContribution, OwnedContribution, RouteContext, RouteContribution,
+ } from '@nexus/plugin-runtime';
+-import { makePath, matchSpace, parsePath, relationship, type PathSpace } from './path-space';
++import { makePath, parsePath, relationship, type PathSpace } from './path-space';
+ 
+ export type { HostContributionPolicyRequest as ContributionPolicyRequest, HostContributionPolicy } from '@nexus/plugin-runtime';
+ import type { HostContributionPolicy } from '@nexus/plugin-runtime';
+@@ -131,7 +131,7 @@ export function createRouteModel(input: {
+     const location = new URL(url.startsWith('/') ? `http://host.invalid${url}` : url, 'http://host.invalid');
+     try { location.pathname.split('/').forEach(segment => decodeURIComponent(segment)); }
+     catch { return { state: 'NOT_FOUND' }; }
+-    const blocked = routes.filter(r => r.state !== 'AVAILABLE' && r.space && matchSpace(r.space, location.pathname));
++    const blocked = routes.filter(r => r.state !== 'AVAILABLE' && r.space && matchRoutes([{ path: r.space.path, caseSensitive: false }], location.pathname));
+     if (blocked.length) {
+       const ancestors = blocked[0].ancestry.slice(0, -1).filter(id => {
+         const parent = byId.get(id)!;

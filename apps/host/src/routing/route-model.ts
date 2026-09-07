@@ -3,7 +3,7 @@ import type {
   ContributionDiagnostic, ContributionIdentity, ContributionState, HostContributionFact,
   NavigationContribution, OwnedContribution, RouteContext, RouteContribution,
 } from '@nexus/plugin-runtime';
-import { makePath, matchSpace, parsePath, relationship, type PathSpace } from './path-space';
+import { makePath, parsePath, relationship, type PathSpace } from './path-space';
 
 export type { HostContributionPolicyRequest as ContributionPolicyRequest, HostContributionPolicy } from '@nexus/plugin-runtime';
 import type { HostContributionPolicy } from '@nexus/plugin-runtime';
@@ -131,7 +131,7 @@ export function createRouteModel(input: {
     const location = new URL(url.startsWith('/') ? `http://host.invalid${url}` : url, 'http://host.invalid');
     try { location.pathname.split('/').forEach(segment => decodeURIComponent(segment)); }
     catch { return { state: 'NOT_FOUND' }; }
-    const blocked = routes.filter(r => r.state !== 'AVAILABLE' && r.space && matchSpace(r.space, location.pathname));
+    const blocked = routes.filter(r => r.state !== 'AVAILABLE' && r.space && matchRoutes([{ path: r.space.path, caseSensitive: false }], location.pathname));
     if (blocked.length) {
       const ancestors = blocked[0].ancestry.slice(0, -1).filter(id => {
         const parent = byId.get(id)!;

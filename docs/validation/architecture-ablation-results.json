@@ -1,0 +1,59 @@
+{
+  "recordedAt": "2026-09-07T05:38:09.944Z",
+  "node": "v24.14.1",
+  "baselineCommit": "e1b594c3a12816b05c4e7310bd2cf121fa6ae81d",
+  "scope": "Existing UI core and routing unit tests; independent one-factor mutations in a temporary source copy. Host dependencies use installed workspace packages. No browser E2E or target-design implementation experiment.",
+  "results": [
+    {
+      "name": "baseline-ui",
+      "exitCode": 0,
+      "passed": 9,
+      "failed": 0,
+      "failedTests": []
+    },
+    {
+      "name": "baseline-routing",
+      "exitCode": 0,
+      "passed": 40,
+      "failed": 0,
+      "failedTests": []
+    },
+    {
+      "name": "remove-ui-admission",
+      "exitCode": 1,
+      "passed": 8,
+      "failed": 1,
+      "failedTests": [
+        "Host UI composition contracts isolates unauthorized, mismatched and missing relations while filtering never grants execution"
+      ]
+    },
+    {
+      "name": "end-scope-on-attempt-failure",
+      "exitCode": 1,
+      "passed": 7,
+      "failed": 2,
+      "failedTests": [
+        "Host UI composition contracts captures retry Context at acceptance and then delivers later same-key updates",
+        "Host UI composition contracts keeps an owner-scope Overlay across retry but cascades child scopes on parent Attempt failure"
+      ]
+    },
+    {
+      "name": "remove-route-overlap-governance",
+      "exitCode": 1,
+      "passed": 30,
+      "failed": 10,
+      "failedTests": [
+        "keeps healthy sibling navigation usable from a quarantined child address",
+        "Host ownership policy isolates conflicting authorized children without disabling their parent or healthy sibling",
+        "Host ownership policy quarantines intersecting owners and keeps their addresses from falling through to a wildcard",
+        "governs same-owner /x/:id and /X/:renamed/ structurally",
+        "governs same-owner /:a/b and /a/:b structurally",
+        "checks full paths across separately declared parents and propagates conflict to descendants",
+        "only preserves explicit available Layout ancestors when resolving a conflict",
+        "does not let malformed URL encoding bypass a conflict into a wildcard",
+        "uses executor-compatible ASCII case folding and treats double leading slashes as a pathname",
+        "generated owner, parameter-renaming and registration-order properties stay compatible"
+      ]
+    }
+  ]
+}

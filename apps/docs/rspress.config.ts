@@ -43,6 +43,7 @@ export default defineConfig({
         {
           text: 'P0 · Architecture',
           items: [
+            { text: 'Console Core 插件化设计', link: '/console-core-architecture' },
             { text: 'Lifecycle & Architecture', link: '/lifecycle-architecture' },
           ],
         },

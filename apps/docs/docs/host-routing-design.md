@@ -1,5 +1,7 @@
 # Host 路由接入设计
 
+后续变更：2026-09-07 [Console Core 插件化设计](./console-core-architecture.md) 将 Route Model/治理归 Plugin Runtime、导航 UI 归 console-core，并开放显式授权的 Route ID 导航 Capability。本文保留原轮次记录；上述冲突部分以新设计和 ADR 0017 为准，未涉及的 ownership 与 URL 独立性约束继续适用。
+
 状态：Q1–Q22 已完成针对性设计收口，尚未实施。本文描述目标设计与验收/rollout 要求，不表示依赖已安装、性能已达标或生产 release gate 已通过。
 
 ## 已确认范围

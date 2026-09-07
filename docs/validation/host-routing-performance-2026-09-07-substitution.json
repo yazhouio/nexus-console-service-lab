@@ -1,0 +1,2345 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-09-07T05:38:41.592Z",
+  "origin": "http://127.0.0.1:3200",
+  "buildVersion": "routing-validation",
+  "validationBuild": "true",
+  "accepted": false,
+  "budget": null,
+  "interpretation": "Local characterization only. No production experience budget has been approved; empirical percentiles are not stable population estimates.",
+  "environment": {
+    "platform": "darwin",
+    "osRelease": "27.0.0",
+    "arch": "arm64",
+    "cpu": "Apple M4",
+    "browser": "151.0.7922.34",
+    "viewport": "1440x1100",
+    "network": "No browser throttling; transport to the recorded origin",
+    "cache": "Fresh browser context per iteration, cold phase with browser cache disabled; repeated/params/query phases with browser cache enabled and warm Wujie script cache."
+  },
+  "scenarios": {
+    "first-cold": {
+      "samples": 20,
+      "failed": 0,
+      "cancelled": 0,
+      "visibleP50Ms": 108.5,
+      "visibleP95Ms": 109.40000000037253,
+      "loadingP95Ms": 17.5,
+      "blankFrames": 0
+    },
+    "repeat": {
+      "samples": 20,
+      "failed": 0,
+      "cancelled": 0,
+      "visibleP50Ms": 95.59999999962747,
+      "visibleP95Ms": 96.09999999962747,
+      "loadingP95Ms": 12.299999998882413,
+      "blankFrames": 0
+    },
+    "params": {
+      "samples": 20,
+      "failed": 0,
+      "cancelled": 0,
+      "visibleP50Ms": 98.29999999888241,
+      "visibleP95Ms": 98.59999999962747,
+      "loadingP95Ms": 16.59999999962747,
+      "blankFrames": 0
+    },
+    "query": {
+      "samples": 20,
+      "failed": 0,
+      "cancelled": 0,
+      "visibleP50Ms": 98,
+      "visibleP95Ms": 99,
+      "loadingP95Ms": 15.199999999254942,
+      "blankFrames": 0
+    }
+  },
+  "raw": [
+    {
+      "scenario": "first-cold",
+      "iteration": 1,
+      "triggerAt": 27.300000000745058,
+      "loadingAt": 45.30000000074506,
+      "firstVisibleAt": 391.59999999962747,
+      "visibleMs": 364.2999999988824,
+      "loadingMs": 18,
+      "loadingDurationMs": 346.2999999988824,
+      "blankFrames": 0,
+      "loadingFrames": 21,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 30.800000000745058,
+          "instanceId": "3e5a3541-5af6-4021-ac2a-531b391a27e6"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 336.09999999962747,
+          "instanceId": "3e5a3541-5af6-4021-ac2a-531b391a27e6"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 1,
+      "triggerAt": 397,
+      "loadingAt": 408.19999999925494,
+      "firstVisibleAt": 491.59999999962747,
+      "visibleMs": 94.59999999962747,
+      "loadingMs": 11.199999999254942,
+      "loadingDurationMs": 83.40000000037253,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 398.19999999925494,
+          "instanceId": "57d6c689-fc71-462a-8d24-2dc4319f8c50"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 426.09999999962747,
+          "instanceId": "57d6c689-fc71-462a-8d24-2dc4319f8c50"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 1,
+      "triggerAt": 493.19999999925494,
+      "loadingAt": 508.30000000074506,
+      "firstVisibleAt": 590.5999999996275,
+      "visibleMs": 97.40000000037253,
+      "loadingMs": 15.100000001490116,
+      "loadingDurationMs": 82.29999999888241,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 494.90000000037253,
+          "instanceId": "ed287936-529c-498d-9460-e4c9323fe2d2"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 525.8000000007451,
+          "instanceId": "ed287936-529c-498d-9460-e4c9323fe2d2"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 494.80000000074506,
+          "instanceId": "57d6c689-fc71-462a-8d24-2dc4319f8c50"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 1,
+      "triggerAt": 592.3000000007451,
+      "loadingAt": 607.3000000007451,
+      "firstVisibleAt": 691.6999999992549,
+      "visibleMs": 99.39999999850988,
+      "loadingMs": 15,
+      "loadingDurationMs": 84.39999999850988,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 594.0999999996275,
+          "instanceId": "9b7e1ecb-e6f1-41c2-b112-9dbf6bae253e"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 626,
+          "instanceId": "9b7e1ecb-e6f1-41c2-b112-9dbf6bae253e"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 594,
+          "instanceId": "ed287936-529c-498d-9460-e4c9323fe2d2"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 2,
+      "triggerAt": 20.90000000037253,
+      "loadingAt": 29.90000000037253,
+      "firstVisibleAt": 128.59999999962747,
+      "visibleMs": 107.69999999925494,
+      "loadingMs": 9,
+      "loadingDurationMs": 98.69999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 24.09999999962747,
+          "instanceId": "baf5100f-ad12-4e20-a74f-5b7c37426c44"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 72.5,
+          "instanceId": "baf5100f-ad12-4e20-a74f-5b7c37426c44"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 2,
+      "triggerAt": 133.19999999925494,
+      "loadingAt": 145.30000000074506,
+      "firstVisibleAt": 228.69999999925494,
+      "visibleMs": 95.5,
+      "loadingMs": 12.100000001490116,
+      "loadingDurationMs": 83.39999999850988,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.40000000037253,
+          "instanceId": "23ccae85-7772-4b07-a5c1-3239ae8365da"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 163.09999999962747,
+          "instanceId": "23ccae85-7772-4b07-a5c1-3239ae8365da"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 2,
+      "triggerAt": 230.30000000074506,
+      "loadingAt": 246,
+      "firstVisibleAt": 328.69999999925494,
+      "visibleMs": 98.39999999850988,
+      "loadingMs": 15.699999999254942,
+      "loadingDurationMs": 82.69999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233,
+          "instanceId": "38603d97-4562-4799-bd70-79ea311238e8"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.19999999925494,
+          "instanceId": "38603d97-4562-4799-bd70-79ea311238e8"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 232.90000000037253,
+          "instanceId": "23ccae85-7772-4b07-a5c1-3239ae8365da"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 2,
+      "triggerAt": 331,
+      "loadingAt": 345.80000000074506,
+      "firstVisibleAt": 428.80000000074506,
+      "visibleMs": 97.80000000074506,
+      "loadingMs": 14.800000000745058,
+      "loadingDurationMs": 83,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.30000000074506,
+          "instanceId": "d188cfa3-b594-4332-ba5b-f3c1da09e9de"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 363.40000000037253,
+          "instanceId": "d188cfa3-b594-4332-ba5b-f3c1da09e9de"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.19999999925494,
+          "instanceId": "38603d97-4562-4799-bd70-79ea311238e8"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 3,
+      "triggerAt": 21.59999999962747,
+      "loadingAt": 30.5,
+      "firstVisibleAt": 129.40000000037253,
+      "visibleMs": 107.80000000074506,
+      "loadingMs": 8.900000000372529,
+      "loadingDurationMs": 98.90000000037253,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 24.59999999962747,
+          "instanceId": "5c70f333-fd02-4325-b544-2937d6a3af76"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 74.40000000037253,
+          "instanceId": "5c70f333-fd02-4325-b544-2937d6a3af76"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 3,
+      "triggerAt": 133.80000000074506,
+      "loadingAt": 145,
+      "firstVisibleAt": 229.30000000074506,
+      "visibleMs": 95.5,
+      "loadingMs": 11.199999999254942,
+      "loadingDurationMs": 84.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 135,
+          "instanceId": "51faf92e-a08e-43e2-980f-367f05ba3510"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 163.69999999925494,
+          "instanceId": "51faf92e-a08e-43e2-980f-367f05ba3510"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 3,
+      "triggerAt": 231.09999999962747,
+      "loadingAt": 246.69999999925494,
+      "firstVisibleAt": 329.30000000074506,
+      "visibleMs": 98.20000000111759,
+      "loadingMs": 15.599999999627471,
+      "loadingDurationMs": 82.60000000149012,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.69999999925494,
+          "instanceId": "adb041d3-f749-4fad-8332-b1234ba7dad6"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.90000000037253,
+          "instanceId": "adb041d3-f749-4fad-8332-b1234ba7dad6"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233.69999999925494,
+          "instanceId": "51faf92e-a08e-43e2-980f-367f05ba3510"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 3,
+      "triggerAt": 331.5,
+      "loadingAt": 346.69999999925494,
+      "firstVisibleAt": 429.5,
+      "visibleMs": 98,
+      "loadingMs": 15.199999999254942,
+      "loadingDurationMs": 82.80000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 335.09999999962747,
+          "instanceId": "63e34d52-bd3b-483f-8d4a-821e8c0a6c6f"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 364.19999999925494,
+          "instanceId": "63e34d52-bd3b-483f-8d4a-821e8c0a6c6f"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.90000000037253,
+          "instanceId": "adb041d3-f749-4fad-8332-b1234ba7dad6"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 4,
+      "triggerAt": 21.199999999254942,
+      "loadingAt": 29.90000000037253,
+      "firstVisibleAt": 128.5,
+      "visibleMs": 107.30000000074506,
+      "loadingMs": 8.700000001117587,
+      "loadingDurationMs": 98.59999999962747,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 24.59999999962747,
+          "instanceId": "04244857-83e7-4280-b95a-4432162ab3f4"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 73.69999999925494,
+          "instanceId": "04244857-83e7-4280-b95a-4432162ab3f4"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 4,
+      "triggerAt": 133.19999999925494,
+      "loadingAt": 145.19999999925494,
+      "firstVisibleAt": 228.5,
+      "visibleMs": 95.30000000074506,
+      "loadingMs": 12,
+      "loadingDurationMs": 83.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.2999999988824,
+          "instanceId": "f8b6220b-771f-4304-ba09-90d8dfe8d6e9"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 166.2999999988824,
+          "instanceId": "f8b6220b-771f-4304-ba09-90d8dfe8d6e9"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 4,
+      "triggerAt": 230.2999999988824,
+      "loadingAt": 245.2999999988824,
+      "firstVisibleAt": 328.5,
+      "visibleMs": 98.20000000111759,
+      "loadingMs": 15,
+      "loadingDurationMs": 83.20000000111759,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 232.69999999925494,
+          "instanceId": "0d11194c-bd13-4203-b25a-d2ee0d3bdaad"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.19999999925494,
+          "instanceId": "0d11194c-bd13-4203-b25a-d2ee0d3bdaad"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 232.69999999925494,
+          "instanceId": "f8b6220b-771f-4304-ba09-90d8dfe8d6e9"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 4,
+      "triggerAt": 330.59999999962747,
+      "loadingAt": 345.69999999925494,
+      "firstVisibleAt": 428.7999999988824,
+      "visibleMs": 98.19999999925494,
+      "loadingMs": 15.099999999627471,
+      "loadingDurationMs": 83.09999999962747,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.2999999988824,
+          "instanceId": "984284df-45b0-4d76-8c24-914388db296c"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 363.40000000037253,
+          "instanceId": "984284df-45b0-4d76-8c24-914388db296c"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.09999999962747,
+          "instanceId": "0d11194c-bd13-4203-b25a-d2ee0d3bdaad"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 5,
+      "triggerAt": 20.399999998509884,
+      "loadingAt": 37.69999999925494,
+      "firstVisibleAt": 129.2999999988824,
+      "visibleMs": 108.90000000037253,
+      "loadingMs": 17.300000000745058,
+      "loadingDurationMs": 91.59999999962747,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 23.299999998882413,
+          "instanceId": "691de72a-28d0-443c-a012-d9856cae2322"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 74.5,
+          "instanceId": "691de72a-28d0-443c-a012-d9856cae2322"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 5,
+      "triggerAt": 133.7999999988824,
+      "loadingAt": 146,
+      "firstVisibleAt": 229.39999999850988,
+      "visibleMs": 95.59999999962747,
+      "loadingMs": 12.200000001117587,
+      "loadingDurationMs": 83.39999999850988,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 135.09999999962747,
+          "instanceId": "85734ed3-4b70-4ccb-a5ad-a244b2492a6e"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 163.89999999850988,
+          "instanceId": "85734ed3-4b70-4ccb-a5ad-a244b2492a6e"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 5,
+      "triggerAt": 231,
+      "loadingAt": 247.09999999962747,
+      "firstVisibleAt": 329.2999999988824,
+      "visibleMs": 98.29999999888241,
+      "loadingMs": 16.09999999962747,
+      "loadingDurationMs": 82.19999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.69999999925494,
+          "instanceId": "23f0fb87-4430-423a-a821-5dc59d450a78"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.8999999985099,
+          "instanceId": "23f0fb87-4430-423a-a821-5dc59d450a78"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233.59999999962747,
+          "instanceId": "85734ed3-4b70-4ccb-a5ad-a244b2492a6e"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 5,
+      "triggerAt": 331.5,
+      "loadingAt": 346,
+      "firstVisibleAt": 429.5,
+      "visibleMs": 98,
+      "loadingMs": 14.5,
+      "loadingDurationMs": 83.5,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.59999999962747,
+          "instanceId": "355764e8-bc06-4530-8833-e646832838e4"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 364.2999999988824,
+          "instanceId": "355764e8-bc06-4530-8833-e646832838e4"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.5,
+          "instanceId": "23f0fb87-4430-423a-a821-5dc59d450a78"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 6,
+      "triggerAt": 20.5,
+      "loadingAt": 29.40000000037253,
+      "firstVisibleAt": 129.10000000149012,
+      "visibleMs": 108.60000000149012,
+      "loadingMs": 8.900000000372529,
+      "loadingDurationMs": 99.70000000111759,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 23.700000001117587,
+          "instanceId": "1b081cfd-380b-47b6-9c6e-b6da62ee65eb"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 73.10000000149012,
+          "instanceId": "1b081cfd-380b-47b6-9c6e-b6da62ee65eb"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 6,
+      "triggerAt": 133.5,
+      "loadingAt": 145.7000000011176,
+      "firstVisibleAt": 229.2000000011176,
+      "visibleMs": 95.70000000111759,
+      "loadingMs": 12.200000001117587,
+      "loadingDurationMs": 83.5,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.7000000011176,
+          "instanceId": "7061d1c3-4c67-4196-9021-93d6c20a4029"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 166.90000000037253,
+          "instanceId": "7061d1c3-4c67-4196-9021-93d6c20a4029"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 6,
+      "triggerAt": 231.2000000011176,
+      "loadingAt": 245.80000000074506,
+      "firstVisibleAt": 329.1000000014901,
+      "visibleMs": 97.90000000037253,
+      "loadingMs": 14.599999999627471,
+      "loadingDurationMs": 83.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.7000000011176,
+          "instanceId": "dfbd790c-cbe8-4d32-badd-002617aaed3f"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.80000000074506,
+          "instanceId": "dfbd790c-cbe8-4d32-badd-002617aaed3f"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233.7000000011176,
+          "instanceId": "7061d1c3-4c67-4196-9021-93d6c20a4029"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 6,
+      "triggerAt": 331.30000000074506,
+      "loadingAt": 346.40000000037253,
+      "firstVisibleAt": 429.2000000011176,
+      "visibleMs": 97.90000000037253,
+      "loadingMs": 15.099999999627471,
+      "loadingDurationMs": 82.80000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.90000000037253,
+          "instanceId": "4b99ea33-ad0d-4fe9-aa95-388e6fb8b045"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 363.80000000074506,
+          "instanceId": "4b99ea33-ad0d-4fe9-aa95-388e6fb8b045"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.80000000074506,
+          "instanceId": "dfbd790c-cbe8-4d32-badd-002617aaed3f"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 7,
+      "triggerAt": 20.59999999962747,
+      "loadingAt": 29.90000000037253,
+      "firstVisibleAt": 129.09999999962747,
+      "visibleMs": 108.5,
+      "loadingMs": 9.300000000745058,
+      "loadingDurationMs": 99.19999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 24,
+          "instanceId": "5ee0e04e-81f6-4c62-ba5f-b3116095f2fa"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 74.29999999888241,
+          "instanceId": "5ee0e04e-81f6-4c62-ba5f-b3116095f2fa"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 7,
+      "triggerAt": 133.5,
+      "loadingAt": 145.69999999925494,
+      "firstVisibleAt": 229.19999999925494,
+      "visibleMs": 95.69999999925494,
+      "loadingMs": 12.199999999254942,
+      "loadingDurationMs": 83.5,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.7999999988824,
+          "instanceId": "e858ac19-d855-4d1c-84dd-0b1b3b9890a9"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 163.5,
+          "instanceId": "e858ac19-d855-4d1c-84dd-0b1b3b9890a9"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 7,
+      "triggerAt": 230.69999999925494,
+      "loadingAt": 245.69999999925494,
+      "firstVisibleAt": 329,
+      "visibleMs": 98.30000000074506,
+      "loadingMs": 15,
+      "loadingDurationMs": 83.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.2999999988824,
+          "instanceId": "aef5dbe6-271a-4905-92aa-c6e47b4fae7b"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.7999999988824,
+          "instanceId": "aef5dbe6-271a-4905-92aa-c6e47b4fae7b"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233.19999999925494,
+          "instanceId": "e858ac19-d855-4d1c-84dd-0b1b3b9890a9"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 7,
+      "triggerAt": 331.2999999988824,
+      "loadingAt": 345.7999999988824,
+      "firstVisibleAt": 428.09999999962747,
+      "visibleMs": 96.80000000074506,
+      "loadingMs": 14.5,
+      "loadingDurationMs": 82.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 335,
+          "instanceId": "cb57e1c8-b5ec-4c55-a8ef-2656031b85f0"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 363.69999999925494,
+          "instanceId": "cb57e1c8-b5ec-4c55-a8ef-2656031b85f0"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.90000000037253,
+          "instanceId": "aef5dbe6-271a-4905-92aa-c6e47b4fae7b"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 8,
+      "triggerAt": 19.59999999962747,
+      "loadingAt": 36.90000000037253,
+      "firstVisibleAt": 129,
+      "visibleMs": 109.40000000037253,
+      "loadingMs": 17.300000000745058,
+      "loadingDurationMs": 92.09999999962747,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 22.799999998882413,
+          "instanceId": "06d4bb0d-231b-43bf-b4af-8f9fb4157b2b"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 73.29999999888241,
+          "instanceId": "06d4bb0d-231b-43bf-b4af-8f9fb4157b2b"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 8,
+      "triggerAt": 133.40000000037253,
+      "loadingAt": 145.59999999962747,
+      "firstVisibleAt": 229.19999999925494,
+      "visibleMs": 95.79999999888241,
+      "loadingMs": 12.199999999254942,
+      "loadingDurationMs": 83.59999999962747,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.69999999925494,
+          "instanceId": "bc7564bf-d50b-4338-a23c-ad4ce6170be7"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 163.19999999925494,
+          "instanceId": "bc7564bf-d50b-4338-a23c-ad4ce6170be7"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 8,
+      "triggerAt": 230.69999999925494,
+      "loadingAt": 245.7999999988824,
+      "firstVisibleAt": 329.09999999962747,
+      "visibleMs": 98.40000000037253,
+      "loadingMs": 15.099999999627471,
+      "loadingDurationMs": 83.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233,
+          "instanceId": "cd14df20-64a1-4aa3-8c95-a0465be98355"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.69999999925494,
+          "instanceId": "cd14df20-64a1-4aa3-8c95-a0465be98355"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233,
+          "instanceId": "bc7564bf-d50b-4338-a23c-ad4ce6170be7"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 8,
+      "triggerAt": 331.19999999925494,
+      "loadingAt": 344.69999999925494,
+      "firstVisibleAt": 429.19999999925494,
+      "visibleMs": 98,
+      "loadingMs": 13.5,
+      "loadingDurationMs": 84.5,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.09999999962747,
+          "instanceId": "37a22f9d-ee64-4e9b-b32f-98e0005f332f"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 363.90000000037253,
+          "instanceId": "37a22f9d-ee64-4e9b-b32f-98e0005f332f"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334,
+          "instanceId": "cd14df20-64a1-4aa3-8c95-a0465be98355"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 9,
+      "triggerAt": 20.699999999254942,
+      "loadingAt": 29.5,
+      "firstVisibleAt": 129.09999999962747,
+      "visibleMs": 108.40000000037253,
+      "loadingMs": 8.800000000745058,
+      "loadingDurationMs": 99.59999999962747,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 24,
+          "instanceId": "d73a58a3-940d-4afd-8d83-5d018b09c614"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 74.09999999962747,
+          "instanceId": "d73a58a3-940d-4afd-8d83-5d018b09c614"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 9,
+      "triggerAt": 133.5,
+      "loadingAt": 145.69999999925494,
+      "firstVisibleAt": 229.09999999962747,
+      "visibleMs": 95.59999999962747,
+      "loadingMs": 12.199999999254942,
+      "loadingDurationMs": 83.40000000037253,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.69999999925494,
+          "instanceId": "b2cd2ab2-f3be-4bf8-b0b4-1106befdc48d"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 162.5,
+          "instanceId": "b2cd2ab2-f3be-4bf8-b0b4-1106befdc48d"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 9,
+      "triggerAt": 230.59999999962747,
+      "loadingAt": 247.19999999925494,
+      "firstVisibleAt": 329,
+      "visibleMs": 98.40000000037253,
+      "loadingMs": 16.59999999962747,
+      "loadingDurationMs": 81.80000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233,
+          "instanceId": "100837ee-e882-4554-9b4b-d69ed98d98d7"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.5,
+          "instanceId": "100837ee-e882-4554-9b4b-d69ed98d98d7"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233,
+          "instanceId": "b2cd2ab2-f3be-4bf8-b0b4-1106befdc48d"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 9,
+      "triggerAt": 330.80000000074506,
+      "loadingAt": 345.80000000074506,
+      "firstVisibleAt": 429.40000000037253,
+      "visibleMs": 98.59999999962747,
+      "loadingMs": 15,
+      "loadingDurationMs": 83.59999999962747,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.09999999962747,
+          "instanceId": "d73a4544-ba2d-4245-a5cc-e6c0123f9747"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 364,
+          "instanceId": "d73a4544-ba2d-4245-a5cc-e6c0123f9747"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334,
+          "instanceId": "100837ee-e882-4554-9b4b-d69ed98d98d7"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 10,
+      "triggerAt": 20.40000000037253,
+      "loadingAt": 37.600000001490116,
+      "firstVisibleAt": 129.5,
+      "visibleMs": 109.09999999962747,
+      "loadingMs": 17.200000001117587,
+      "loadingDurationMs": 91.89999999850988,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 23.300000000745058,
+          "instanceId": "22fdf577-9092-41aa-9e0e-6063d0ae9e13"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 75.30000000074506,
+          "instanceId": "22fdf577-9092-41aa-9e0e-6063d0ae9e13"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 10,
+      "triggerAt": 133.7000000011176,
+      "loadingAt": 145.90000000037253,
+      "firstVisibleAt": 229.40000000037253,
+      "visibleMs": 95.69999999925494,
+      "loadingMs": 12.199999999254942,
+      "loadingDurationMs": 83.5,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.90000000037253,
+          "instanceId": "f106b9f6-3200-4103-b9dc-35708cd8e8e9"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 163.7000000011176,
+          "instanceId": "f106b9f6-3200-4103-b9dc-35708cd8e8e9"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 10,
+      "triggerAt": 230.90000000037253,
+      "loadingAt": 246.40000000037253,
+      "firstVisibleAt": 329.5,
+      "visibleMs": 98.59999999962747,
+      "loadingMs": 15.5,
+      "loadingDurationMs": 83.09999999962747,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.40000000037253,
+          "instanceId": "d85b8d64-2489-41de-865a-7bee92c443c4"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 264,
+          "instanceId": "d85b8d64-2489-41de-865a-7bee92c443c4"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233.30000000074506,
+          "instanceId": "f106b9f6-3200-4103-b9dc-35708cd8e8e9"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 10,
+      "triggerAt": 331.5,
+      "loadingAt": 346,
+      "firstVisibleAt": 429.5,
+      "visibleMs": 98,
+      "loadingMs": 14.5,
+      "loadingDurationMs": 83.5,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.40000000037253,
+          "instanceId": "d062061a-fd50-49c5-a5c8-565a3ea69da0"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 364.1000000014901,
+          "instanceId": "d062061a-fd50-49c5-a5c8-565a3ea69da0"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.30000000074506,
+          "instanceId": "d85b8d64-2489-41de-865a-7bee92c443c4"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 11,
+      "triggerAt": 20.59999999962747,
+      "loadingAt": 30.299999998882413,
+      "firstVisibleAt": 128,
+      "visibleMs": 107.40000000037253,
+      "loadingMs": 9.699999999254942,
+      "loadingDurationMs": 97.70000000111759,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 23.5,
+          "instanceId": "4381f9e0-d042-4d1c-a1a8-1c1860cea4b5"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 73.29999999888241,
+          "instanceId": "4381f9e0-d042-4d1c-a1a8-1c1860cea4b5"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 11,
+      "triggerAt": 132.7999999988824,
+      "loadingAt": 144.69999999925494,
+      "firstVisibleAt": 229,
+      "visibleMs": 96.20000000111759,
+      "loadingMs": 11.900000000372529,
+      "loadingDurationMs": 84.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 133.89999999850988,
+          "instanceId": "2b357110-c012-46e3-a4aa-e90527bff4de"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 162.39999999850988,
+          "instanceId": "2b357110-c012-46e3-a4aa-e90527bff4de"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 11,
+      "triggerAt": 230.69999999925494,
+      "loadingAt": 246.2999999988824,
+      "firstVisibleAt": 328.8999999985099,
+      "visibleMs": 98.19999999925494,
+      "loadingMs": 15.599999999627471,
+      "loadingDurationMs": 82.59999999962747,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.09999999962747,
+          "instanceId": "a0a06fbc-d3f3-4324-b4cc-7ac58c448020"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.5,
+          "instanceId": "a0a06fbc-d3f3-4324-b4cc-7ac58c448020"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233,
+          "instanceId": "2b357110-c012-46e3-a4aa-e90527bff4de"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 11,
+      "triggerAt": 331.09999999962747,
+      "loadingAt": 345.69999999925494,
+      "firstVisibleAt": 429.2999999988824,
+      "visibleMs": 98.19999999925494,
+      "loadingMs": 14.599999999627471,
+      "loadingDurationMs": 83.59999999962747,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.2999999988824,
+          "instanceId": "c2fb6aa8-65f8-456d-9d7b-0462d8212797"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 363.59999999962747,
+          "instanceId": "c2fb6aa8-65f8-456d-9d7b-0462d8212797"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.19999999925494,
+          "instanceId": "a0a06fbc-d3f3-4324-b4cc-7ac58c448020"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 12,
+      "triggerAt": 20.699999999254942,
+      "loadingAt": 29.90000000037253,
+      "firstVisibleAt": 129.09999999962747,
+      "visibleMs": 108.40000000037253,
+      "loadingMs": 9.200000001117587,
+      "loadingDurationMs": 99.19999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 24,
+          "instanceId": "26a4ee37-7b5a-47f4-812b-40d67c1f139b"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 73.29999999888241,
+          "instanceId": "26a4ee37-7b5a-47f4-812b-40d67c1f139b"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 12,
+      "triggerAt": 133.69999999925494,
+      "loadingAt": 145.69999999925494,
+      "firstVisibleAt": 229,
+      "visibleMs": 95.30000000074506,
+      "loadingMs": 12,
+      "loadingDurationMs": 83.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.90000000037253,
+          "instanceId": "ef454c6a-ae53-4beb-b6fb-a829fabd2cb3"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 166.7999999988824,
+          "instanceId": "ef454c6a-ae53-4beb-b6fb-a829fabd2cb3"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 12,
+      "triggerAt": 230.5,
+      "loadingAt": 245.69999999925494,
+      "firstVisibleAt": 329,
+      "visibleMs": 98.5,
+      "loadingMs": 15.199999999254942,
+      "loadingDurationMs": 83.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233,
+          "instanceId": "f9447055-97cd-478a-82b9-9b11fbfb7911"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.69999999925494,
+          "instanceId": "f9447055-97cd-478a-82b9-9b11fbfb7911"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233,
+          "instanceId": "ef454c6a-ae53-4beb-b6fb-a829fabd2cb3"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 12,
+      "triggerAt": 331,
+      "loadingAt": 345.5,
+      "firstVisibleAt": 429.19999999925494,
+      "visibleMs": 98.19999999925494,
+      "loadingMs": 14.5,
+      "loadingDurationMs": 83.69999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.5,
+          "instanceId": "7ffe2f72-a34e-44b9-81e0-61516148faf4"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 363.90000000037253,
+          "instanceId": "7ffe2f72-a34e-44b9-81e0-61516148faf4"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.40000000037253,
+          "instanceId": "f9447055-97cd-478a-82b9-9b11fbfb7911"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 13,
+      "triggerAt": 20.5,
+      "loadingAt": 29.5,
+      "firstVisibleAt": 129,
+      "visibleMs": 108.5,
+      "loadingMs": 9,
+      "loadingDurationMs": 99.5,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 23.59999999962747,
+          "instanceId": "3f7baf73-6977-4d4f-9a6a-8db50abe3c4b"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 73.90000000037253,
+          "instanceId": "3f7baf73-6977-4d4f-9a6a-8db50abe3c4b"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 13,
+      "triggerAt": 133.5,
+      "loadingAt": 145.7000000011176,
+      "firstVisibleAt": 229.09999999962747,
+      "visibleMs": 95.59999999962747,
+      "loadingMs": 12.200000001117587,
+      "loadingDurationMs": 83.39999999850988,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.7000000011176,
+          "instanceId": "f7c6063c-486d-44e7-ae13-ef7579f0d6a0"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 163.30000000074506,
+          "instanceId": "f7c6063c-486d-44e7-ae13-ef7579f0d6a0"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 13,
+      "triggerAt": 230.7000000011176,
+      "loadingAt": 245.7000000011176,
+      "firstVisibleAt": 328.90000000037253,
+      "visibleMs": 98.19999999925494,
+      "loadingMs": 15,
+      "loadingDurationMs": 83.19999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.2000000011176,
+          "instanceId": "13095767-4869-43f4-82bf-de6f25eeeb2c"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.7000000011176,
+          "instanceId": "13095767-4869-43f4-82bf-de6f25eeeb2c"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233.09999999962747,
+          "instanceId": "f7c6063c-486d-44e7-ae13-ef7579f0d6a0"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 13,
+      "triggerAt": 331.09999999962747,
+      "loadingAt": 346.09999999962747,
+      "firstVisibleAt": 429.2000000011176,
+      "visibleMs": 98.10000000149012,
+      "loadingMs": 15,
+      "loadingDurationMs": 83.10000000149012,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.90000000037253,
+          "instanceId": "181c43e3-2cc6-4068-b9e7-df8ffd6dce0a"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 363.80000000074506,
+          "instanceId": "181c43e3-2cc6-4068-b9e7-df8ffd6dce0a"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.7000000011176,
+          "instanceId": "13095767-4869-43f4-82bf-de6f25eeeb2c"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 14,
+      "triggerAt": 20.90000000037253,
+      "loadingAt": 30.09999999962747,
+      "firstVisibleAt": 129.40000000037253,
+      "visibleMs": 108.5,
+      "loadingMs": 9.199999999254942,
+      "loadingDurationMs": 99.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 24.300000000745058,
+          "instanceId": "cf3c99f8-45ed-4abd-89ca-46928ddd8221"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 74.30000000074506,
+          "instanceId": "cf3c99f8-45ed-4abd-89ca-46928ddd8221"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 14,
+      "triggerAt": 133.80000000074506,
+      "loadingAt": 146.09999999962747,
+      "firstVisibleAt": 229.40000000037253,
+      "visibleMs": 95.59999999962747,
+      "loadingMs": 12.299999998882413,
+      "loadingDurationMs": 83.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 135,
+          "instanceId": "43d55569-9048-4be2-be1a-170f717b482f"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 163.90000000037253,
+          "instanceId": "43d55569-9048-4be2-be1a-170f717b482f"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 14,
+      "triggerAt": 231.09999999962747,
+      "loadingAt": 248.80000000074506,
+      "firstVisibleAt": 329.5,
+      "visibleMs": 98.40000000037253,
+      "loadingMs": 17.700000001117587,
+      "loadingDurationMs": 80.69999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.69999999925494,
+          "instanceId": "908ade61-94b6-4795-9df3-1683a705d2cf"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 264,
+          "instanceId": "908ade61-94b6-4795-9df3-1683a705d2cf"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233.5,
+          "instanceId": "43d55569-9048-4be2-be1a-170f717b482f"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 14,
+      "triggerAt": 331.40000000037253,
+      "loadingAt": 346.19999999925494,
+      "firstVisibleAt": 429.59999999962747,
+      "visibleMs": 98.19999999925494,
+      "loadingMs": 14.799999998882413,
+      "loadingDurationMs": 83.40000000037253,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.59999999962747,
+          "instanceId": "928b819a-f775-4de1-a629-cac7f64c3c69"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 364.19999999925494,
+          "instanceId": "928b819a-f775-4de1-a629-cac7f64c3c69"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.5,
+          "instanceId": "908ade61-94b6-4795-9df3-1683a705d2cf"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 15,
+      "triggerAt": 20.799999998882413,
+      "loadingAt": 30,
+      "firstVisibleAt": 129.19999999925494,
+      "visibleMs": 108.40000000037253,
+      "loadingMs": 9.200000001117587,
+      "loadingDurationMs": 99.19999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 24.09999999962747,
+          "instanceId": "e205621b-f08f-4470-9f1f-5733ab25404e"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 74.29999999888241,
+          "instanceId": "e205621b-f08f-4470-9f1f-5733ab25404e"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 15,
+      "triggerAt": 133.69999999925494,
+      "loadingAt": 145.90000000037253,
+      "firstVisibleAt": 229.2999999988824,
+      "visibleMs": 95.59999999962747,
+      "loadingMs": 12.200000001117587,
+      "loadingDurationMs": 83.39999999850988,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.90000000037253,
+          "instanceId": "859da694-8013-4937-9b8b-65f75b3bb2a0"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 163.5,
+          "instanceId": "859da694-8013-4937-9b8b-65f75b3bb2a0"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 15,
+      "triggerAt": 231.19999999925494,
+      "loadingAt": 247.09999999962747,
+      "firstVisibleAt": 329.2999999988824,
+      "visibleMs": 98.09999999962747,
+      "loadingMs": 15.900000000372529,
+      "loadingDurationMs": 82.19999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.7999999988824,
+          "instanceId": "8a9bfab5-d723-4a8f-8856-2540355ea385"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.69999999925494,
+          "instanceId": "8a9bfab5-d723-4a8f-8856-2540355ea385"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233.59999999962747,
+          "instanceId": "859da694-8013-4937-9b8b-65f75b3bb2a0"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 15,
+      "triggerAt": 331.40000000037253,
+      "loadingAt": 346.2999999988824,
+      "firstVisibleAt": 429.40000000037253,
+      "visibleMs": 98,
+      "loadingMs": 14.899999998509884,
+      "loadingDurationMs": 83.10000000149012,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.7999999988824,
+          "instanceId": "8285081f-805e-4893-8f74-10ec7d479cf4"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 363.7999999988824,
+          "instanceId": "8285081f-805e-4893-8f74-10ec7d479cf4"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.69999999925494,
+          "instanceId": "8a9bfab5-d723-4a8f-8856-2540355ea385"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 16,
+      "triggerAt": 20.600000001490116,
+      "loadingAt": 29.40000000037253,
+      "firstVisibleAt": 129,
+      "visibleMs": 108.39999999850988,
+      "loadingMs": 8.799999998882413,
+      "loadingDurationMs": 99.59999999962747,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 23.800000000745058,
+          "instanceId": "b16fa026-8d0b-4ee7-b8fb-82e9ca3fabc4"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 74.30000000074506,
+          "instanceId": "b16fa026-8d0b-4ee7-b8fb-82e9ca3fabc4"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 16,
+      "triggerAt": 133.80000000074506,
+      "loadingAt": 145.7000000011176,
+      "firstVisibleAt": 229,
+      "visibleMs": 95.19999999925494,
+      "loadingMs": 11.900000000372529,
+      "loadingDurationMs": 83.29999999888241,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.90000000037253,
+          "instanceId": "9fddd8d2-159a-4b51-9209-273c5f45e2a6"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 162.40000000037253,
+          "instanceId": "9fddd8d2-159a-4b51-9209-273c5f45e2a6"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 16,
+      "triggerAt": 230.80000000074506,
+      "loadingAt": 245.80000000074506,
+      "firstVisibleAt": 329,
+      "visibleMs": 98.19999999925494,
+      "loadingMs": 15,
+      "loadingDurationMs": 83.19999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.40000000037253,
+          "instanceId": "eb9f1021-b5c9-4231-87f6-4c40f2f30f8b"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.6000000014901,
+          "instanceId": "eb9f1021-b5c9-4231-87f6-4c40f2f30f8b"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233.30000000074506,
+          "instanceId": "9fddd8d2-159a-4b51-9209-273c5f45e2a6"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 16,
+      "triggerAt": 331.1000000014901,
+      "loadingAt": 346.2000000011176,
+      "firstVisibleAt": 429.30000000074506,
+      "visibleMs": 98.19999999925494,
+      "loadingMs": 15.099999999627471,
+      "loadingDurationMs": 83.09999999962747,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.5,
+          "instanceId": "40921073-a92a-415c-8c9f-d060a62e5722"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 363.80000000074506,
+          "instanceId": "40921073-a92a-415c-8c9f-d060a62e5722"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.30000000074506,
+          "instanceId": "eb9f1021-b5c9-4231-87f6-4c40f2f30f8b"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 17,
+      "triggerAt": 20.40000000037253,
+      "loadingAt": 29.200000001117587,
+      "firstVisibleAt": 129.2000000011176,
+      "visibleMs": 108.80000000074506,
+      "loadingMs": 8.800000000745058,
+      "loadingDurationMs": 100,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 23.700000001117587,
+          "instanceId": "ce257301-9f34-43c2-8150-017d6afffe82"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 74.30000000074506,
+          "instanceId": "ce257301-9f34-43c2-8150-017d6afffe82"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 17,
+      "triggerAt": 133.60000000149012,
+      "loadingAt": 146,
+      "firstVisibleAt": 229.2000000011176,
+      "visibleMs": 95.59999999962747,
+      "loadingMs": 12.399999998509884,
+      "loadingDurationMs": 83.20000000111759,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.7000000011176,
+          "instanceId": "0b00d04b-a88a-4633-b295-fe255c9ffa6a"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 163.80000000074506,
+          "instanceId": "0b00d04b-a88a-4633-b295-fe255c9ffa6a"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 17,
+      "triggerAt": 231,
+      "loadingAt": 246.2000000011176,
+      "firstVisibleAt": 329.1000000014901,
+      "visibleMs": 98.10000000149012,
+      "loadingMs": 15.200000001117587,
+      "loadingDurationMs": 82.90000000037253,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.5,
+          "instanceId": "d9a211cf-8a36-419b-8148-c7e584e3cd82"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 262.7000000011176,
+          "instanceId": "d9a211cf-8a36-419b-8148-c7e584e3cd82"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233.30000000074506,
+          "instanceId": "0b00d04b-a88a-4633-b295-fe255c9ffa6a"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 17,
+      "triggerAt": 331.1000000014901,
+      "loadingAt": 345.90000000037253,
+      "firstVisibleAt": 429.30000000074506,
+      "visibleMs": 98.19999999925494,
+      "loadingMs": 14.799999998882413,
+      "loadingDurationMs": 83.40000000037253,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 333.90000000037253,
+          "instanceId": "fc4bc262-0e3d-4bcc-8c17-f04501723608"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 363.90000000037253,
+          "instanceId": "fc4bc262-0e3d-4bcc-8c17-f04501723608"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 333.80000000074506,
+          "instanceId": "d9a211cf-8a36-419b-8148-c7e584e3cd82"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 18,
+      "triggerAt": 20.299999998882413,
+      "loadingAt": 37.79999999888241,
+      "firstVisibleAt": 128.2999999988824,
+      "visibleMs": 108,
+      "loadingMs": 17.5,
+      "loadingDurationMs": 90.5,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 23.59999999962747,
+          "instanceId": "4af3b8f3-106d-4ff5-8166-3d0dccb12634"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 75.5,
+          "instanceId": "4af3b8f3-106d-4ff5-8166-3d0dccb12634"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 18,
+      "triggerAt": 133.19999999925494,
+      "loadingAt": 145,
+      "firstVisibleAt": 229.2999999988824,
+      "visibleMs": 96.09999999962747,
+      "loadingMs": 11.800000000745058,
+      "loadingDurationMs": 84.29999999888241,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 134.39999999850988,
+          "instanceId": "72889625-aef9-4991-9e37-1864b5fde591"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 167,
+          "instanceId": "72889625-aef9-4991-9e37-1864b5fde591"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 18,
+      "triggerAt": 230.89999999850988,
+      "loadingAt": 246,
+      "firstVisibleAt": 329.2999999988824,
+      "visibleMs": 98.40000000037253,
+      "loadingMs": 15.100000001490116,
+      "loadingDurationMs": 83.29999999888241,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.2999999988824,
+          "instanceId": "85114b05-e082-4c7a-989c-5c78ef5438b5"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.8999999985099,
+          "instanceId": "85114b05-e082-4c7a-989c-5c78ef5438b5"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233.19999999925494,
+          "instanceId": "72889625-aef9-4991-9e37-1864b5fde591"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 18,
+      "triggerAt": 331.5,
+      "loadingAt": 345.59999999962747,
+      "firstVisibleAt": 429.5,
+      "visibleMs": 98,
+      "loadingMs": 14.099999999627471,
+      "loadingDurationMs": 83.90000000037253,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 335,
+          "instanceId": "199d3572-7212-40d8-85d4-6542351394ed"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 364.09999999962747,
+          "instanceId": "199d3572-7212-40d8-85d4-6542351394ed"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.8999999985099,
+          "instanceId": "85114b05-e082-4c7a-989c-5c78ef5438b5"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 19,
+      "triggerAt": 20.40000000037253,
+      "loadingAt": 29.09999999962747,
+      "firstVisibleAt": 129.2999999988824,
+      "visibleMs": 108.89999999850988,
+      "loadingMs": 8.699999999254942,
+      "loadingDurationMs": 100.19999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 23.699999999254942,
+          "instanceId": "92257c16-eff0-4e1d-b1df-b93a6d56084a"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 73.59999999962747,
+          "instanceId": "92257c16-eff0-4e1d-b1df-b93a6d56084a"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 19,
+      "triggerAt": 133.7999999988824,
+      "loadingAt": 145.09999999962747,
+      "firstVisibleAt": 228.40000000037253,
+      "visibleMs": 94.60000000149012,
+      "loadingMs": 11.300000000745058,
+      "loadingDurationMs": 83.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 135,
+          "instanceId": "31bd5595-e370-4b3f-be4c-78407cb76177"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 162.7999999988824,
+          "instanceId": "31bd5595-e370-4b3f-be4c-78407cb76177"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 19,
+      "triggerAt": 230,
+      "loadingAt": 245,
+      "firstVisibleAt": 329.2999999988824,
+      "visibleMs": 99.29999999888241,
+      "loadingMs": 15,
+      "loadingDurationMs": 84.29999999888241,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 232.40000000037253,
+          "instanceId": "f7875a15-8552-4a04-8fcd-6c9c5b923d5b"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 263.09999999962747,
+          "instanceId": "f7875a15-8552-4a04-8fcd-6c9c5b923d5b"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 232.2999999988824,
+          "instanceId": "31bd5595-e370-4b3f-be4c-78407cb76177"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 19,
+      "triggerAt": 331.19999999925494,
+      "loadingAt": 346,
+      "firstVisibleAt": 430.19999999925494,
+      "visibleMs": 99,
+      "loadingMs": 14.800000000745058,
+      "loadingDurationMs": 84.19999999925494,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 334.5,
+          "instanceId": "aa051baf-5577-4a38-953c-45dd98df3a18"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 364.19999999925494,
+          "instanceId": "aa051baf-5577-4a38-953c-45dd98df3a18"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.5,
+          "instanceId": "f7875a15-8552-4a04-8fcd-6c9c5b923d5b"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "first-cold",
+      "iteration": 20,
+      "triggerAt": 20.90000000037253,
+      "loadingAt": 30.09999999962747,
+      "firstVisibleAt": 129.5,
+      "visibleMs": 108.59999999962747,
+      "loadingMs": 9.199999999254942,
+      "loadingDurationMs": 99.40000000037253,
+      "blankFrames": 0,
+      "loadingFrames": 6,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 24.199999999254942,
+          "instanceId": "2ad1e03c-99fe-40cf-9f5c-dac4591de44c"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 74.5,
+          "instanceId": "2ad1e03c-99fe-40cf-9f5c-dac4591de44c"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "repeat",
+      "iteration": 20,
+      "triggerAt": 134,
+      "loadingAt": 146.19999999925494,
+      "firstVisibleAt": 229.5,
+      "visibleMs": 95.5,
+      "loadingMs": 12.199999999254942,
+      "loadingDurationMs": 83.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 135.19999999925494,
+          "instanceId": "e30e06e2-1aad-4ae8-bb05-14e40205e6af"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 163.90000000037253,
+          "instanceId": "e30e06e2-1aad-4ae8-bb05-14e40205e6af"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "params",
+      "iteration": 20,
+      "triggerAt": 231.09999999962747,
+      "loadingAt": 247.5,
+      "firstVisibleAt": 329.5,
+      "visibleMs": 98.40000000037253,
+      "loadingMs": 16.40000000037253,
+      "loadingDurationMs": 82,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 233.7999999988824,
+          "instanceId": "f7eadc63-d096-4e2c-aa4d-a4e8cc91938a"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 264.09999999962747,
+          "instanceId": "f7eadc63-d096-4e2c-aa4d-a4e8cc91938a"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 233.69999999925494,
+          "instanceId": "e30e06e2-1aad-4ae8-bb05-14e40205e6af"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    },
+    {
+      "scenario": "query",
+      "iteration": 20,
+      "triggerAt": 331.59999999962747,
+      "loadingAt": 347.09999999962747,
+      "firstVisibleAt": 429.40000000037253,
+      "visibleMs": 97.80000000074506,
+      "loadingMs": 15.5,
+      "loadingDurationMs": 82.30000000074506,
+      "blankFrames": 0,
+      "loadingFrames": 5,
+      "events": [
+        {
+          "phase": "mount-requested",
+          "at": 335,
+          "instanceId": "923c03cd-14ba-4465-a554-3f710d577b4c"
+        },
+        {
+          "phase": "bridge-ready",
+          "at": 363.2999999988824,
+          "instanceId": "923c03cd-14ba-4465-a554-3f710d577b4c"
+        },
+        {
+          "phase": "cleanup-complete",
+          "at": 334.90000000037253,
+          "instanceId": "f7eadc63-d096-4e2c-aa4d-a4e8cc91938a"
+        }
+      ],
+      "failed": false,
+      "cancelled": false
+    }
+  ],
+  "provenance": {
+    "baseCommit": "e1b594c3a12816b05c4e7310bd2cf121fa6ae81d",
+    "worktreeChanges": true,
+    "artifactSha256": "ffb81eaaf597775d825a96d62390d17666ac640a8af942ed94114ca1c278e977"
+  }
+}

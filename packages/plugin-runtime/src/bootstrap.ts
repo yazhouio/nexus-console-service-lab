@@ -36,7 +36,7 @@ import {
   type PluginValidationIssue,
 } from './runtime-state';
 import {
-  createSurfaceDefinitionRegistry,
+  projectSurfaceDefinitions,
   type SurfaceDefinitionRegistry,
 } from './surface-definition';
 
@@ -426,7 +426,6 @@ export async function bootstrapPluginRuntime(
   );
   const capabilityController = createCapabilityRegistry();
   const contributionController = createContributionRegistry();
-  const surfaceController = createSurfaceDefinitionRegistry();
   const pluginStates = new Map<PluginId, PluginRuntimeState>();
   const validationIssues: PluginValidationIssue[] = [
     ...hostValidation.issues,
@@ -606,11 +605,6 @@ export async function bootstrapPluginRuntime(
       manifest.id,
       contributionValidation.references,
     );
-    const surfaceActivation = surfaceController.beginDeclaration(
-      manifest.id,
-      manifest.version,
-      manifest.surfaces,
-    );
     for (const route of declaration.routes) {
       contributionActivation.context.registerRoute(route);
     }
@@ -625,14 +619,11 @@ export async function bootstrapPluginRuntime(
 
     try {
       contributionActivation.validate();
-      surfaceActivation.validate();
       contributionActivation.apply();
-      surfaceActivation.apply();
       activeRestrictedRecords.set(manifest.id, declaration.record);
       pluginStates.set(manifest.id, Object.freeze({ state: 'ACTIVE' }));
     } catch (error) {
       contributionActivation.discard();
-      surfaceActivation.discard();
       const issue = manifestIssue({
         code: 'INVALID_CONTRIBUTION',
         message: `Restricted declarations for ${manifest.id} could not be committed.`,
@@ -667,7 +658,7 @@ export async function bootstrapPluginRuntime(
     }),
     capabilities: capabilityController.registry,
     contributions: contributionController.registry,
-    surfaces: surfaceController.registry,
+    surfaces: projectSurfaceDefinitions(contributionController.registry, owner => activeRestrictedRecords.get(owner)?.manifest.version),
     bridgeContracts,
     restrictedPlugins: readonlyMap(
       [...activeRestrictedRecords.entries()].sort(([left], [right]) =>

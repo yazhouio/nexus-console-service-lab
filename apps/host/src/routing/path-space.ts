@@ -48,20 +48,3 @@ export function relationship(a: PathSpace, b: PathSpace): {
   const ab = includes(a, b), ba = includes(b, a);
   return { kind: ab && ba ? 'EQUIVALENT' : ab ? 'CONTAINS' : ba ? 'WITHIN' : 'CROSSING', witness: '/' + witness.join('/') };
 }
-
-/** Decode once per segment, preserving encoded slashes inside parameters, like the pinned executor. */
-export function matchSpace(space: PathSpace, pathname: string): Record<string, string> | undefined {
-  if (!pathname.startsWith('/')) return;
-  let parts: string[];
-  try { parts = pathname.slice(1).replace(/\/+$/, '').split('/').map(decodeURIComponent); }
-  catch { return; }
-  if (parts.length === 1 && parts[0] === '') parts = [];
-  if (parts.length < space.segments.length || (!space.splat && parts.length !== space.segments.length)) return;
-  const params: Record<string, string> = Object.create(null);
-  for (const [i, segment] of space.segments.entries()) {
-    if (!parts[i] || (segment.kind === 'literal' && segment.value !== parts[i].replace(/[A-Z]/g, c => c.toLowerCase()))) return;
-    if (segment.kind === 'param') params[segment.name] = parts[i];
-  }
-  if (space.splat) params['*'] = parts.slice(space.segments.length).join('/');
-  return params;
-}

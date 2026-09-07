@@ -1,0 +1,190 @@
+diff --git a/packages/plugin-runtime/src/surface-definition.ts b/packages/plugin-runtime/src/surface-definition.ts
+index 78fae83..9ac36e9 100644
+--- a/packages/plugin-runtime/src/surface-definition.ts
++++ b/packages/plugin-runtime/src/surface-definition.ts
+@@ -1,7 +1,5 @@
+ import type { PluginId } from './identifiers';
+-import type { SandboxSurfaceDefinition } from './contribution';
+-import { PluginRuntimeContractError } from './runtime-state';
+-
++import type { ContributionRegistry, SandboxSurfaceDefinition } from './contribution';
+ export interface SurfaceDefinitionRecord {
+   readonly pluginId: PluginId;
+   readonly pluginVersion: string;
+@@ -16,112 +14,12 @@ export interface SurfaceDefinitionRegistry {
+   list(pluginId?: PluginId): readonly SurfaceDefinitionRecord[];
+ }
+ 
+-export interface SurfaceDefinitionActivation {
+-  validate(): void;
+-  apply(): void;
+-  discard(): void;
+-}
+-
+-export interface SurfaceDefinitionRegistryController {
+-  readonly registry: SurfaceDefinitionRegistry;
+-  beginDeclaration(
+-    pluginId: PluginId,
+-    pluginVersion: string,
+-    definitions: readonly SandboxSurfaceDefinition[],
+-  ): SurfaceDefinitionActivation;
+-}
+-
+-function key(pluginId: PluginId, surfaceId: string): string {
+-  return `${pluginId}\u0000${surfaceId}`;
+-}
+-
+-export function createSurfaceDefinitionRegistry(): SurfaceDefinitionRegistryController {
+-  const records = new Map<string, SurfaceDefinitionRecord>();
+-
+-  const registry: SurfaceDefinitionRegistry = Object.freeze({
+-    get(pluginId: PluginId, surfaceId: string) {
+-      return records.get(key(pluginId, surfaceId));
+-    },
+-    list(pluginId?: PluginId) {
+-      return Object.freeze(
+-        [...records.values()]
+-          .filter(record => pluginId === undefined || record.pluginId === pluginId)
+-          .sort(
+-            (left, right) =>
+-              left.pluginId.localeCompare(right.pluginId) ||
+-              left.definition.id.localeCompare(right.definition.id),
+-          ),
+-      );
+-    },
+-  });
+ 
+-  return {
+-    registry,
+-    beginDeclaration(pluginId, pluginVersion, definitions) {
+-      let active = true;
+-      let validated = false;
+-
+-      const assertActive = (): void => {
+-        if (!active) {
+-          throw new PluginRuntimeContractError({
+-            code: 'ACTIVATION_SCOPE_INACTIVE',
+-            stage: 'assertion',
+-            message: `Surface declaration for ${pluginId} is inactive.`,
+-            pluginId,
+-          });
+-        }
+-      };
+-
+-      return {
+-        validate() {
+-          assertActive();
+-          const localIds = new Set<string>();
+-          for (const definition of definitions) {
+-            if (
+-              typeof definition.id !== 'string' ||
+-              definition.id.length === 0 ||
+-              localIds.has(definition.id) ||
+-              records.has(key(pluginId, definition.id))
+-            ) {
+-              throw new PluginRuntimeContractError({
+-                code: 'INVALID_CONTRIBUTION',
+-                stage: 'assertion',
+-                message: `Surface ${definition.id} from ${pluginId} is invalid or duplicated.`,
+-                pluginId,
+-              });
+-            }
+-            localIds.add(definition.id);
+-          }
+-          validated = true;
+-        },
+-        apply() {
+-          assertActive();
+-          if (!validated) {
+-            throw new PluginRuntimeContractError({
+-              code: 'ACTIVATION_SCOPE_NOT_VALIDATED',
+-              stage: 'assertion',
+-              message: `Surface declaration for ${pluginId} was not validated.`,
+-              pluginId,
+-            });
+-          }
+-          for (const definition of definitions) {
+-            records.set(
+-              key(pluginId, definition.id),
+-              Object.freeze({
+-                pluginId,
+-                pluginVersion,
+-                definition: Object.freeze({ ...definition }),
+-              }),
+-            );
+-          }
+-          active = false;
+-        },
+-        discard() {
+-          active = false;
+-          validated = false;
+-        },
+-      };
+-    },
+-  };
++export function projectSurfaceDefinitions(registry: ContributionRegistry, versionOf: (owner: PluginId) => string | undefined): SurfaceDefinitionRegistry {
++  const list = (owner?: PluginId): readonly SurfaceDefinitionRecord[] => Object.freeze(registry.listUiSurfaces().flatMap(({ ownerPluginId, contribution }) => {
++    const version = versionOf(ownerPluginId);
++    if (version === undefined || contribution.target.kind !== 'sandbox-surface' || owner !== undefined && owner !== ownerPluginId) return [];
++    return [Object.freeze({ pluginId: ownerPluginId, pluginVersion: version, definition: Object.freeze({ id: contribution.id }) })];
++  }));
++  return Object.freeze({ list, get: (owner: PluginId, id: string) => list(owner).find(record => record.definition.id === id) });
+ }
+-
+diff --git a/packages/plugin-runtime/src/bootstrap.ts b/packages/plugin-runtime/src/bootstrap.ts
+index b5727c8..e005dbf 100644
+--- a/packages/plugin-runtime/src/bootstrap.ts
++++ b/packages/plugin-runtime/src/bootstrap.ts
+@@ -36,7 +36,7 @@ import {
+   type PluginValidationIssue,
+ } from './runtime-state';
+ import {
+-  createSurfaceDefinitionRegistry,
++  projectSurfaceDefinitions,
+   type SurfaceDefinitionRegistry,
+ } from './surface-definition';
+ 
+@@ -426,7 +426,6 @@ export async function bootstrapPluginRuntime(
+   );
+   const capabilityController = createCapabilityRegistry();
+   const contributionController = createContributionRegistry();
+-  const surfaceController = createSurfaceDefinitionRegistry();
+   const pluginStates = new Map<PluginId, PluginRuntimeState>();
+   const validationIssues: PluginValidationIssue[] = [
+     ...hostValidation.issues,
+@@ -606,11 +605,6 @@ export async function bootstrapPluginRuntime(
+       manifest.id,
+       contributionValidation.references,
+     );
+-    const surfaceActivation = surfaceController.beginDeclaration(
+-      manifest.id,
+-      manifest.version,
+-      manifest.surfaces,
+-    );
+     for (const route of declaration.routes) {
+       contributionActivation.context.registerRoute(route);
+     }
+@@ -625,14 +619,11 @@ export async function bootstrapPluginRuntime(
+ 
+     try {
+       contributionActivation.validate();
+-      surfaceActivation.validate();
+       contributionActivation.apply();
+-      surfaceActivation.apply();
+       activeRestrictedRecords.set(manifest.id, declaration.record);
+       pluginStates.set(manifest.id, Object.freeze({ state: 'ACTIVE' }));
+     } catch (error) {
+       contributionActivation.discard();
+-      surfaceActivation.discard();
+       const issue = manifestIssue({
+         code: 'INVALID_CONTRIBUTION',
+         message: `Restricted declarations for ${manifest.id} could not be committed.`,
+@@ -667,7 +658,7 @@ export async function bootstrapPluginRuntime(
+     }),
+     capabilities: capabilityController.registry,
+     contributions: contributionController.registry,
+-    surfaces: surfaceController.registry,
++    surfaces: projectSurfaceDefinitions(contributionController.registry, owner => activeRestrictedRecords.get(owner)?.manifest.version),
+     bridgeContracts,
+     restrictedPlugins: readonlyMap(
+       [...activeRestrictedRecords.entries()].sort(([left], [right]) =>

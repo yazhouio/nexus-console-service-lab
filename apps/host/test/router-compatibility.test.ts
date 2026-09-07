@@ -63,6 +63,17 @@ it('rejects the prototype-setting parameter name that the executor cannot bind',
   expect(model.routes[0].state).toBe('QUARANTINED');
 });
 
+it.each([
+  ['/x/value', 'CONFLICT'], ['/X/%61///', 'CONFLICT'],
+  ['/x/a%2Fb', 'CONFLICT'], ['/x/a%252Fb', 'CONFLICT'],
+  ['/x/%', 'NOT_FOUND'], ['//x/value', 'NOT_FOUND'],
+  ['/x//value', 'NOT_FOUND'], ['/x/value/extra', 'NOT_FOUND'],
+  ['/safe', 'MATCHED'],
+])('keeps quarantined URL membership consistent for %s', (url, state) => {
+  const model = createRouteModel({ routes: [route('a', '/x/:id'), route('b', '/x/:other'), route('safe', '/safe')], navigation: [] });
+  expect(model.resolve(url).state).toBe(state);
+});
+
 it('diagnostic placeholders cannot overwrite an available Layout parameter', () => {
   const model = createRouteModel({ routes: [
     route('parent', '/p/:id', { target: { kind: 'builtin', routeLayout: true, render: () => null } }),

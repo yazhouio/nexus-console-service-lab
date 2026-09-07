@@ -34,6 +34,7 @@ features:
 
 | 你要做什么 | 推荐阅读 |
 | --- | --- |
+| 理解 Console Core 插件化目标与实施边界 | [Console Core 插件化设计](./console-core-architecture) |
 | 编写一个 Restricted Plugin | [Plugin Author Guide](./plugin-author-guide) |
 | 查询公开 TypeScript API | [Plugin API Reference](./plugin-api-reference) |
 | 定义 Manifest 或 Host Contract | [Manifest / Contract Spec](./manifest-contract-spec) |
