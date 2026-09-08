@@ -1,0 +1,57 @@
+{
+  "recordedAt": "2026-09-08T09:21:01.609504+00:00",
+  "baselineCommit": "c4490fdc2e58db6cdabc216c32380866892486a7",
+  "scope": "Temporary static projection probes over existing local declarations; no production code mutation, no actual Docs Generator, no Runtime activation, no cross-repository experiment. Envelope is a probe-only wrapper, not an implementation of a new Declaration DSL.",
+  "sourceSha256": {
+    "packages/plugin-runtime/src/ui/point-compiler.ts": "90bae2dd523eefc7b677b62e59c9fb956e75cf686d25d3c96f4fd009d1132718",
+    "packages/console-core-api/src/index.ts": "a8531a083d4e787a2511239bf7e40862086a4e4dc5933b340518c339692bb2fd",
+    "packages/cluster-api/src/index.ts": "afe176e62303ffd556b44f78be7df55565929ffefa485c677f41d29ee9a4557a"
+  },
+  "results": [
+    {
+      "variant": "baseline",
+      "exitCode": 0,
+      "passed": 5,
+      "failed": 0,
+      "total": 5,
+      "failedTests": []
+    },
+    {
+      "variant": "no-json",
+      "exitCode": 0,
+      "passed": 5,
+      "failed": 0,
+      "total": 5,
+      "failedTests": []
+    },
+    {
+      "variant": "no-envelope",
+      "exitCode": 0,
+      "passed": 5,
+      "failed": 0,
+      "total": 5,
+      "failedTests": []
+    },
+    {
+      "variant": "no-catalog-kind",
+      "exitCode": 0,
+      "passed": 5,
+      "failed": 0,
+      "total": 5,
+      "failedTests": []
+    },
+    {
+      "variant": "no-compiler",
+      "exitCode": 1,
+      "passed": 2,
+      "failed": 3,
+      "total": 5,
+      "failedTests": [
+        "retains complete compiled projection and annotations",
+        "exposes concrete ResourceRef schema rather than parameter template",
+        "rejects a Point whose declared Ref binding is unavailable"
+      ]
+    }
+  ],
+  "probeSource": "import { expect, it } from 'vitest';\nimport { createPointCompiler } from '/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/ui/point-compiler.ts';\nimport { CONSOLE_EXTENSION_POINTS, CONSOLE_EXTENSION_POINT_CATALOG, CONSOLE_PROFILES, PLUGIN_REF_CONTRACT } from '/Users/yazhou/code/nexus-service/packages/console-core-api/src/index.ts';\nimport { CLUSTER_EXTENSION_POINTS, CLUSTER_EXTENSION_POINT_CATALOG, RESOURCE_REF_CONTRACT } from '/Users/yazhou/code/nexus-service/packages/cluster-api/src/index.ts';\n\nconst sources = [\n  { owner: 'console-core', points: CONSOLE_EXTENSION_POINTS, annotations: CONSOLE_EXTENSION_POINT_CATALOG },\n  { owner: 'cluster', points: CLUSTER_EXTENSION_POINTS, annotations: CLUSTER_EXTENSION_POINT_CATALOG },\n];\nconst contracts = { profiles: CONSOLE_PROFILES, refContracts: [PLUGIN_REF_CONTRACT, RESOURCE_REF_CONTRACT] };\nconst compile = createPointCompiler(contracts);\nconst variant = process.env.CONTRACT_ABLATION;\nfunction candidate(sources: any[]) {\n  let input: any = variant === 'no-envelope' ? sources : { plugins: sources };\n  if (variant !== 'no-json') input = JSON.parse(JSON.stringify(input));\n  const items = variant === 'no-envelope' ? input : input.plugins;\n  return items.flatMap((source: any) => {\n    const annotations = source.annotations.map((a: any) => variant === 'no-catalog-kind'\n      ? { ref: a.ref, title: a.title, description: a.description } : a);\n    return source.points.map((point: any) => {\n      const note = annotations.find((a: any) => a.ref.ownerPluginId === source.owner && a.ref.id === point.id && a.ref.contractMajor === point.contractMajor);\n      if (!note) throw Error('ANNOTATION_MISSING');\n      if (note.kind !== undefined && note.kind !== point.kind) throw Error('CATALOG_KIND_MISMATCH');\n      const resolved = variant === 'no-compiler' ? point : compile(point);\n      return { owner: source.owner, ...resolved, title: note.title, description: note.description };\n    });\n  }).sort((a: any,b: any) => `${a.owner}/${a.id}`.localeCompare(`${b.owner}/${b.id}`));\n}\nconst expected = sources.flatMap(s => s.points.map(p => {\n  const note = s.annotations.find(a => a.ref.id === p.id)!;\n  return { owner: s.owner, ...compile(p), title: note.title, description: note.description };\n})).sort((a,b) => `${a.owner}/${a.id}`.localeCompare(`${b.owner}/${b.id}`));\nit('retains all 9 owned Point identities and kinds', () => {\n  const identity = (p: any) => [p.owner,p.id,p.contractMajor,p.kind];\n  expect(candidate(sources).map(identity)).toEqual(expected.map(identity));\n  expect(candidate(sources)).toHaveLength(9);\n});\nit('retains complete compiled projection and annotations', () => {\n  expect(candidate(sources)).toEqual(expected);\n});\nit('exposes concrete ResourceRef schema rather than parameter template', () => {\n  const point = candidate(sources).find((p: any) => p.owner === 'cluster' && p.id === 'node.actions');\n  expect(point.contextSchema.properties.itemRef).toEqual(RESOURCE_REF_CONTRACT.schema);\n  expect(point.allowedPolicyDimensions).toContain('capability');\n});\nit('rejects a Point whose declared Ref binding is unavailable', () => {\n  const changed = structuredClone(sources) as any;\n  changed[1].points.find((p: any) => p.id === 'node.actions').bindings.itemRefContract = 'cluster.missing-ref@1';\n  expect(() => candidate(changed)).toThrow('REF_CONTRACT_MISSING');\n});\nit('is deterministic and leaves source data unchanged', () => {\n  const before = JSON.stringify(sources);\n  expect(candidate(sources)).toEqual(candidate(sources));\n  expect(JSON.stringify(sources)).toBe(before);\n});\n"
+}
