@@ -1,5 +1,5 @@
 import type { PluginDefinition } from '@nexus/plugin-runtime';
-import { CONSOLE_CORE_ID, CONSOLE_CORE_CAPABILITY, CONSOLE_ROOT_SURFACE, CORE_ROUTES_POINT, PRIMARY_NAVIGATION_POINT, HOME_CARDS_POINT, SETTINGS_SECTIONS_POINT, PLUGIN_DETAILS_ACTIONS_POINT, PLUGIN_REF_CONTRACT, consoleRoute, primaryNavigation } from '@nexus/console-core-api';
+import { CONSOLE_CORE_ID, CONSOLE_CORE_CAPABILITY, CONSOLE_ROOT_SURFACE, CONSOLE_EXTENSION_POINTS, PLUGIN_DETAILS_ACTIONS_POINT, consoleRoute, primaryNavigation } from '@nexus/console-core-api';
 import { ConsoleLayout } from './ConsoleLayout';
 import { Overview } from './Overview';
 import { Settings } from './Settings';
@@ -10,13 +10,7 @@ export const consoleCore: PluginDefinition = {
   provides: [CONSOLE_CORE_CAPABILITY],
   activate({ contributions, capabilities, actions }) {
     contributions.registerSurface({ id: CONSOLE_ROOT_SURFACE, target: { kind: 'builtin', render: ConsoleLayout } });
-    for (const [point, kind, profile] of [
-      [CORE_ROUTES_POINT,'route','console-core.routes@1'],
-      [PRIMARY_NAVIGATION_POINT,'navigation','console-core.navigation@1'],
-      [HOME_CARDS_POINT,'surface','console-core.home.cards@1'],
-      [SETTINGS_SECTIONS_POINT,'surface','console-core.settings.sections@1'],
-    ] as const) contributions.registerExtensionPoint({ id: point.id, kind, contractMajor: point.contractMajor, profile });
-    contributions.registerExtensionPoint({ id: PLUGIN_DETAILS_ACTIONS_POINT.id, kind: 'action', contractMajor: 1, profile: 'detail.actions@1', bindings: { itemRefContract: PLUGIN_REF_CONTRACT.id } });
+    for (const point of CONSOLE_EXTENSION_POINTS) contributions.registerExtensionPoint(point);
     actions.register('plugin-status', async ({ context, capabilities }) => {
       const id = (context as { itemRef: { id: string } }).itemRef.id;
       const plugins = await capabilities.invoke('plugins.query@1', 'list', null) as unknown as import('@nexus/plugin-runtime').PluginSummary[];

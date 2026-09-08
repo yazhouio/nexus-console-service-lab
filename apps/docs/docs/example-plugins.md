@@ -10,6 +10,7 @@
 | `packages/console-core-api/src/index.ts` | Console Point、Profile、PluginRef 和贡献构造器 |
 | `packages/cluster-api/src/index.ts` | Cluster Capability、ResourceRef 和节点 Point |
 | `apps/console/src/plugins/cluster.tsx` | Feature/Provider Builtin：Cluster 卡片、节点 Layout、Action/Tab Placement |
+| `apps/console/src/plugins/extension-demo.tsx` | Builtin Demo：只消费 Host 固定 Point，展示 Route、Navigation、Surface、Action、Tab 注册 |
 | `apps/console/src/plugins/kubeeye-installation.ts` | Restricted Manifest、Config 和 Cluster Bridge Contract |
 | `apps/example-restricted-plugin/src/App.tsx` | KubeEye Surface：读取、订阅和按 Route ID 导航 |
 | `apps/ui-composition-fixtures/src/ui-action.tsx` | 无 Surface 的 Restricted Action 入口，仅在验收构建使用 |
@@ -25,6 +26,12 @@
 Cluster 同时承担 Provider 与 Feature 角色，提供 `kubesphere.cluster@2`。它通过 Console API 构造器贡献 `/clusters/current` Route、导航和首页卡片，并拥有节点子 Route/Navigation、`node.actions` 和 `node.tabs` Point。
 
 节点操作 Point 使用同一个 `detail.actions@1` Profile，绑定 `cluster.resource-ref@1`。节点 Tab 初始不挂载，选择后复用 Surface 执行；切走卸载，重新选择产生新 Scope。Builtin Node Layout 的状态在子路由切换后保留。
+
+## Extension Demo Builtin
+
+`extension-demo` 是用于走读规范的 Host-side feature。Host 通过 Console Core 和 Cluster API 发布固定的 V1 Point 集合：`route`、`navigation`、`surface`、`action`、`tab`。Demo 不声明或注册新的 Extension Point，也不改变 Kind；它只使用公开 Point ref 和构造器注册六个贡献：`/extensions` 页面、侧边栏导航、Overview 卡片、Settings Section、Node Action 和 Node Tab。
+
+打开侧边栏的 **Extension points** 可以看到 Host 合同目录及每条 Contribution 的归属。这个页面中的“固定 Point”不是运行时自由注入的容器：Point owner 决定 Context/Profile，Host policy 决定跨 owner 接纳，插件只提交符合规范的声明。
 
 ## KubeEye Restricted
 

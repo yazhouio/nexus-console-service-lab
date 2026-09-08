@@ -9,16 +9,19 @@ export function ConsoleLayout() {
   const [failed, setFailed] = useState(false);
   if (failed) throw Error('Console presentation fixture failure');
   if (plugins.error || routes.error) throw plugins.error ?? routes.error;
-  return <div className="nexus-console" style={{ maxWidth: 1080, margin: '0 auto', padding: '32px 24px', fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif', color: '#172033' }}>
-    <header><p>Nexus Console</p>
-      <p>Runtime state: <strong data-testid="runtime-state">READY · {routes.value?.routes.length ?? 0} routes</strong></p>
-      {plugins.value?.filter(plugin => plugin.kind === 'restricted').map(plugin => <div key={plugin.id}>
-        <p>{plugin.label} Plugin: <strong data-testid={`plugin-state-${plugin.id}`}>{plugin.state}</strong></p>
-        <p>Runtime {plugin.label} version: <strong data-testid={`runtime-plugin-version-${plugin.id}`}>{plugin.version ?? 'NONE'}</strong></p>
-      </div>)}
-    </header>
-    {process.env.PUBLIC_TEST_FIXTURES === 'true' && <button onClick={() => setFailed(true)}>Crash Console presentation</button>}
-    {routes.value && <nav aria-label="Primary"><Navigation items={routes.value.navigation} current={routes.value.current} /></nav>}
-    <main><RouteOutlet /></main>
+  return <div className="nexus-console">
+    <aside className="nexus-sidebar">
+      <a className="nexus-brand" href="/" aria-label="Nexus Console home"><span className="nexus-brand__mark" aria-hidden="true"><span /><span /><span /></span><span><strong>Nexus</strong><small>Console</small></span></a>
+      <div className="nexus-sidebar__workspace"><span className="nexus-sidebar__label">WORKSPACE</span><button className="nexus-workspace-switcher"><span className="nexus-workspace-switcher__avatar">D</span><span><strong>Demo workspace</strong><small>Local cluster</small></span><span className="nexus-chevron">⌄</span></button></div>
+      {routes.value && <nav className="nexus-sidebar__nav" aria-label="Primary"><span className="nexus-sidebar__label">CONSOLE</span><Navigation items={routes.value.navigation} current={routes.value.current} /></nav>}
+      <div className="nexus-sidebar__footer"><div className="nexus-health-line"><span className="nexus-health-dot" />Host operational</div><small>v1.0.0 · {routes.value?.routes.length ?? 0} routes</small></div>
+    </aside>
+    <div className="nexus-console__body">
+      <header className="nexus-topbar"><div className="nexus-breadcrumb"><span>Console</span><span className="nexus-breadcrumb__separator">/</span><strong>Workspace overview</strong></div><div className="nexus-topbar__actions"><div className="nexus-runtime-badge"><span className="nexus-health-dot" />Runtime <strong data-testid="runtime-state">READY · {routes.value?.routes.length ?? 0} routes</strong></div>{plugins.value?.filter(plugin => plugin.kind === 'restricted').map(plugin => <div className="nexus-plugin-runtime-status" key={plugin.id}><span>{plugin.label}</span><strong data-testid={`plugin-state-${plugin.id}`}>{plugin.state}</strong><small data-testid={`runtime-plugin-version-${plugin.id}`}>{plugin.version ?? 'NONE'}</small></div>)}</div></header>
+      <main className="nexus-page-content">
+        {process.env.PUBLIC_TEST_FIXTURES === 'true' && <button className="nexus-test-trigger" onClick={() => setFailed(true)}>Crash Console presentation</button>}
+        <RouteOutlet />
+      </main>
+    </div>
   </div>;
 }

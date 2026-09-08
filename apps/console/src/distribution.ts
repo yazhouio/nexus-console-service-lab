@@ -3,6 +3,7 @@ import { consoleCore } from '@nexus/console-core';
 import { CONSOLE_CORE_ID, CONSOLE_PROFILES, PLUGIN_REF_CONTRACT, CORE_ROUTES_POINT, PRIMARY_NAVIGATION_POINT, consoleRoute } from '@nexus/console-core-api';
 import { RESOURCE_REF_CONTRACT } from '@nexus/cluster-api';
 import { cluster } from './plugins/cluster';
+import { extensionDemo } from './plugins/extension-demo';
 import { kubeeyeInstallation, kubeeyeInstallationV2, clusterBridgeContract } from './plugins/kubeeye-installation';
 import { uiFixtureBuiltin, uiFixtureInstallations, UiCompositionFixture } from './ui-fixtures';
 import { IndependentSurfacesFixture } from './fixtures';
@@ -16,7 +17,7 @@ const core = fixtures ? { ...consoleCore, activate(context: Parameters<typeof co
   context.contributions.registerRoute(consoleRoute({ id: 'test-independent-surfaces', path: '/__fixtures__/surfaces', target: { kind: 'builtin', render: IndependentSurfacesFixture } }));
 } } : consoleCore;
 export const distribution: BrowserDistribution = {
-  applicationLabel: 'Console', builtins: [core, cluster, ...(fixtures ? [uiFixtureBuiltin] : [])], coreRootIds: [CONSOLE_CORE_ID],
+  applicationLabel: 'Console', builtins: [core, cluster, extensionDemo, ...(fixtures ? [uiFixtureBuiltin] : [])], coreRootIds: [CONSOLE_CORE_ID],
   rootPresentation: { ownerPluginId: CONSOLE_CORE_ID, surfaceId: 'root' }, rootRoutePoint: CORE_ROUTES_POINT, navigationRootPoints: [PRIMARY_NAVIGATION_POINT],
   supportedHostApis: ['kubesphere.console@1'], bridgeContracts: [clusterBridgeContract], profiles: CONSOLE_PROFILES, refContracts: [PLUGIN_REF_CONTRACT, RESOURCE_REF_CONTRACT],
   policyBundle: contributionGovernance,

@@ -1,4 +1,4 @@
-import type { ExtensionPointRef, PointProfile, RefContract, RouteContribution, NavigationContribution, SurfaceContributionDefinition } from '@nexus/plugin-runtime';
+import type { ExtensionKind, ExtensionPointDefinition, ExtensionPointRef, PointProfile, RefContract, RouteContribution, NavigationContribution, SurfaceContributionDefinition } from '@nexus/plugin-runtime';
 
 export const CONSOLE_CORE_ID = 'console-core';
 export const CONSOLE_CORE_CAPABILITY = 'kubesphere.console-core@1';
@@ -16,6 +16,34 @@ export const PLUGIN_REF_CONTRACT = {
   schema: { type: 'object', properties: { id: { type: 'string', minLength: 1, maxLength: 200 } }, required: ['id'], additionalProperties: false },
   traits: { id: { field: 'id' } },
 } as const satisfies RefContract;
+
+/**
+ * Host-owned point declarations. The public author surface is the fixed V1
+ * Kind set; plugins consume these refs and register contributions against
+ * them. A plugin must not invent a new Kind or change the point contract.
+ */
+export type HostExtensionPointDefinition = ExtensionPointDefinition;
+export const CONSOLE_EXTENSION_POINTS = [
+  { id: CORE_ROUTES_POINT.id, kind: 'route', contractMajor: 1, profile: 'console-core.routes@1' },
+  { id: PRIMARY_NAVIGATION_POINT.id, kind: 'navigation', contractMajor: 1, profile: 'console-core.navigation@1' },
+  { id: HOME_CARDS_POINT.id, kind: 'surface', contractMajor: 1, profile: 'console-core.home.cards@1' },
+  { id: SETTINGS_SECTIONS_POINT.id, kind: 'surface', contractMajor: 1, profile: 'console-core.settings.sections@1' },
+  { id: PLUGIN_DETAILS_ACTIONS_POINT.id, kind: 'action', contractMajor: 1, profile: 'detail.actions@1', bindings: { itemRefContract: PLUGIN_REF_CONTRACT.id } },
+] as const satisfies readonly HostExtensionPointDefinition[];
+
+export interface ExtensionPointCatalogEntry {
+  readonly ref: ExtensionPointRef;
+  readonly kind: ExtensionKind;
+  readonly title: string;
+  readonly description: string;
+}
+export const CONSOLE_EXTENSION_POINT_CATALOG = [
+  { ref: CORE_ROUTES_POINT, kind: 'route', title: 'Routes', description: 'Add a page to the host route tree.' },
+  { ref: PRIMARY_NAVIGATION_POINT, kind: 'navigation', title: 'Primary navigation', description: 'Add a link or a navigation group to the host sidebar.' },
+  { ref: HOME_CARDS_POINT, kind: 'surface', title: 'Home cards', description: 'Place a lazily mounted surface on the overview dashboard.' },
+  { ref: SETTINGS_SECTIONS_POINT, kind: 'surface', title: 'Settings sections', description: 'Add a bounded settings section owned by a plugin.' },
+  { ref: PLUGIN_DETAILS_ACTIONS_POINT, kind: 'action', title: 'Plugin detail actions', description: 'Add a typed action to a host-owned plugin detail context.' },
+] as const satisfies readonly ExtensionPointCatalogEntry[];
 const constraints = { groups: ['primary','secondary','danger'], order: { min: -10_000, max: 10_000 }, cardinality: { min: 0, max: 100 } } as const;
 const detail = { type: 'object', properties: { itemRef: { $refContract: 'itemRefContract' } }, required: ['itemRef'], additionalProperties: false } as const;
 const empty = { type: 'object', additionalProperties: false } as const;

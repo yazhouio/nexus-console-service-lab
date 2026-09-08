@@ -2,7 +2,7 @@ import { useState, useSyncExternalStore } from 'react';
 import { ActionMenu, Tabs, useSurfaceContext, RouteOutlet, RouteLink, useRouteContext, useCapabilitySubscription } from '@nexus/plugin-runtime/react';
 import type { PluginDefinition, PublicNavigation, RoutesSnapshot } from '@nexus/plugin-runtime';
 import { CONSOLE_CORE_CAPABILITY, consoleRoute, primaryNavigation, homeCard } from '@nexus/console-core-api';
-import { NODE_CHILD_ROUTES_POINT, NODE_NAVIGATION_POINT, NODE_ACTIONS_POINT, NODE_TABS_POINT, RESOURCE_REF_CONTRACT, type ClusterCapability } from '@nexus/cluster-api';
+import { CLUSTER_EXTENSION_POINTS, NODE_CHILD_ROUTES_POINT, NODE_NAVIGATION_POINT, NODE_ACTIONS_POINT, NODE_TABS_POINT, type ClusterCapability } from '@nexus/cluster-api';
 
 function NodeLayout() {
   const routeContext = useRouteContext();
@@ -10,20 +10,19 @@ function NodeLayout() {
   const { value } = useCapabilitySubscription<RoutesSnapshot>('routes.query@1', 'watch');
   const find = (items: readonly PublicNavigation[]): PublicNavigation | undefined => items.find(item => item.id === 'node-navigation') ?? items.flatMap(item => item.children).find(item => item.id === 'node-navigation');
   const container = find(value?.navigation ?? []);
-  return <section>
-    <h1>Node {routeContext.params.node}</h1>
-    <button onClick={() => setExpanded(value => !value)}>Toggle node details</button>
-    {expanded && <p data-testid="node-details">Cluster: {routeContext.params.cluster}</p>}
-    {container && <nav aria-label="Node tabs"><ul>{container.children.map(item => <li key={item.id}>
+  return <section className="nexus-page">
+    <div className="nexus-page-heading"><div><span className="nexus-kicker">CLUSTER / NODE</span><h1>Node {routeContext.params.node}</h1><p>Resource details and plugin-provided operational views.</p></div><span className="nexus-status-chip nexus-status-chip--success"><span className="nexus-health-dot" />Connected</span></div>
+    <div className="nexus-toolbar"><button className="nexus-button nexus-button--secondary" onClick={() => setExpanded(value => !value)}>Toggle node details</button>{expanded && <p className="nexus-inline-note" data-testid="node-details">Cluster: {routeContext.params.cluster}</p>}</div>
+    {container && <nav className="nexus-subnav" aria-label="Node tabs"><ul>{container.children.map(item => <li key={item.id}>
       {item.state === 'LINK' && item.routeId ? <RouteLink routeId={item.routeId} params={item.params ?? {}}>{item.label}</RouteLink> : <span aria-disabled={item.state === 'DISABLED'}>{item.label}</span>}
     </li>)}</ul></nav>}
-    <ActionMenu point={NODE_ACTIONS_POINT} context={{ itemRef: { clusterId: routeContext.params.cluster, apiVersion: 'v1', kind: 'Node', name: routeContext.params.node } }} />
-    <Tabs id={NODE_TABS_POINT.id} label="Node extensions" contextKey={`${routeContext.params.cluster}/${routeContext.params.node}`} context={{ itemRef: { clusterId: routeContext.params.cluster, apiVersion: 'v1', kind: 'Node', name: routeContext.params.node } }} />
+    <section className="nexus-content-card"><div className="nexus-section-heading"><div><span className="nexus-kicker">ACTIONS</span><h2>Node actions</h2></div></div><ActionMenu point={NODE_ACTIONS_POINT} context={{ itemRef: { clusterId: routeContext.params.cluster, apiVersion: 'v1', kind: 'Node', name: routeContext.params.node } }} /></section>
+    <section className="nexus-content-card"><div className="nexus-section-heading"><div><span className="nexus-kicker">EXTENSIONS</span><h2>Node views</h2></div><span className="nexus-muted">Host-managed tabs</span></div><Tabs id={NODE_TABS_POINT.id} label="Node extensions" contextKey={`${routeContext.params.cluster}/${routeContext.params.node}`} context={{ itemRef: { clusterId: routeContext.params.cluster, apiVersion: 'v1', kind: 'Node', name: routeContext.params.node } }} /></section>
     <RouteOutlet />
   </section>;
 }
-function NodeSummary() { const context = useSurfaceContext(); return <pre aria-label="Resource summary">{JSON.stringify(context?.value)}</pre>; }
-function NodeEvents() { return <h2>Node events</h2>; }
+function NodeSummary() { const context = useSurfaceContext(); return <pre className="nexus-code-block" aria-label="Resource summary">{JSON.stringify(context?.value)}</pre>; }
+function NodeEvents() { return <section className="nexus-content-card"><span className="nexus-kicker">CLUSTER EVENTS</span><h2>Node events</h2><p className="nexus-muted">No new events in the demo cluster.</p></section>; }
 
 export const cluster: PluginDefinition = {
   id: 'cluster', version: '1.0.0', roles: ['provider','feature'], provenance: 'first-party', requires: [CONSOLE_CORE_CAPABILITY,'routes.query@1','routes.navigate@1'], provides: ['kubesphere.cluster@2'],
@@ -38,14 +37,10 @@ export const cluster: PluginDefinition = {
     capabilities.register('kubesphere.cluster@2', api);
     function ClusterOverview() {
       const selected = useSyncExternalStore(emit => api.watchCurrentCluster(emit).dispose, api.getCurrentCluster);
-      return <section><h1>Cluster Overview</h1>Current cluster: {selected}
-        <button onClick={() => api.setCurrentCluster(selected === 'demo-cluster' ? 'second-cluster' : 'demo-cluster')}>Switch Host cluster</button>
+      return <section className="nexus-page"><div className="nexus-page-heading"><div><span className="nexus-kicker">CLUSTER MANAGEMENT</span><h1>Cluster Overview</h1><p>Manage the active Kubernetes cluster exposed by the host capability.</p></div><span className="nexus-status-chip nexus-status-chip--success"><span className="nexus-health-dot" />Healthy</span></div><section className="nexus-cluster-hero"><div className="nexus-cluster-hero__icon">⌘</div><div><span className="nexus-kicker">CURRENT CLUSTER</span><strong>{selected}</strong><p>Connected through <code>kubesphere.cluster@2</code></p></div><button className="nexus-button nexus-button--primary" onClick={() => api.setCurrentCluster(selected === 'demo-cluster' ? 'second-cluster' : 'demo-cluster')}>Switch Host cluster</button></section>
       </section>;
     }
-    contributions.registerExtensionPoint({ id: NODE_CHILD_ROUTES_POINT.id, kind: 'route', contractMajor: 1, profile: 'console-core.routes@1' });
-    contributions.registerExtensionPoint({ id: NODE_NAVIGATION_POINT.id, kind: 'navigation', contractMajor: 1, profile: 'console-core.navigation@1' });
-    contributions.registerExtensionPoint({ id: NODE_ACTIONS_POINT.id, kind: 'action', contractMajor: 1, profile: 'detail.actions@1', bindings: { itemRefContract: RESOURCE_REF_CONTRACT.id } });
-    contributions.registerExtensionPoint({ id: NODE_TABS_POINT.id, kind: 'tab', contractMajor: 1, profile: 'detail.tabs@1', bindings: { itemRefContract: RESOURCE_REF_CONTRACT.id } });
+    for (const point of CLUSTER_EXTENSION_POINTS) contributions.registerExtensionPoint(point);
     contributions.registerSurface({ id: 'node-summary', target: { kind: 'builtin', render: NodeSummary } });
     contributions.registerExtension({ id: 'node-summary', kind: 'tab', tabId: 'summary', label: 'Resource summary', surfaceId: 'node-summary', point: NODE_TABS_POINT });
     contributions.registerRoute(consoleRoute({ id: 'cluster-overview-route', path: '/clusters/current', target: { kind: 'builtin', render: ClusterOverview } }));

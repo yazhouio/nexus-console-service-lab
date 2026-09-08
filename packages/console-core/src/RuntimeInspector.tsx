@@ -21,10 +21,10 @@ export function RuntimeInspector() {
     return () => { active = false; window.clearInterval(timer); };
   }, [client]);
   if (!snapshot) return <p role="status">{error ? 'Diagnostics unavailable.' : 'Loading diagnostics…'}</p>;
-  return <section aria-label="Runtime Inspector" style={{ marginTop: 32 }}>
-    <h2>Runtime Inspector</h2>
+  return <section className="nexus-section-block nexus-runtime-inspector" aria-label="Runtime Inspector">
+    <div className="nexus-section-heading"><div><span className="nexus-kicker">OBSERVABILITY</span><h2>Runtime Inspector</h2></div><span className="nexus-muted">Live runtime facts</span></div>
     {snapshot.bootstrapError && <p role="alert">{snapshot.bootstrapError.code}: {snapshot.bootstrapError.message}</p>}
-    <table style={{ textAlign: 'left', width: '100%' }}>
+    <table className="nexus-data-table">
       <thead><tr><th>Plugin</th><th>State</th><th>Execution</th><th>Core</th></tr></thead>
       <tbody>{snapshot.plugins.map(plugin => <tr key={plugin.id}>
         <td>{plugin.id} {plugin.version}
@@ -47,7 +47,7 @@ export function RuntimeInspector() {
         {instance.error && ` · ${instance.error.code}`}
       </li>)}</ul>
     </div>))}
-    <details><summary>Runtime snapshot</summary><pre data-testid="runtime-snapshot" style={{ overflow: 'auto' }}>{JSON.stringify(snapshot, null, 2)}</pre></details>
-    <details><summary>Bridge audit ({audit.length})</summary><pre data-testid="bridge-audit" style={{ overflow: 'auto' }}>{JSON.stringify(audit, null, 2)}</pre></details>
+    <details><summary>Runtime snapshot</summary><pre data-testid="runtime-snapshot">{JSON.stringify(snapshot, null, 2)}</pre></details>
+    <details><summary>Bridge audit ({audit.length})</summary><pre data-testid="bridge-audit">{JSON.stringify(audit, null, 2)}</pre></details>
   </section>;
 }
