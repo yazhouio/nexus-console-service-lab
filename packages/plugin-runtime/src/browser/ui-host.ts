@@ -1,3 +1,6 @@
+import { frozenCopy } from '../immutable';
+import { createActionRuntime } from '../action-runtime';
+import { createBrowserActionDriver } from './action-driver';
 import type { PluginRuntime } from '../bootstrap';
 import type { HostRenderTarget, JsonValue, RouteContext } from '../contribution';
 import type { BridgeInvocationContext } from '../bridge-contract';
@@ -10,12 +13,14 @@ import { createPluginBridgeSession } from './plugin-bridge';
 import type { WujiePluginAdapter } from './wujie-plugin-adapter';
 
 export interface UiHostOptions {
+  onAudit?: (entry: import('./plugin-bridge').BridgeAuditEntry) => void;
   onError?: (cause: unknown, attemptId: string) => void;
   runtime: PluginRuntime; restrictedAdapter: WujiePluginAdapter; policy: HostContributionPolicy;
   builtinPermissions?: Readonly<Record<string, readonly string[]>>;
   renderBuiltin(render: unknown, container: HTMLElement, client: UiClient, onFailure: (error: unknown) => void): UiMounted | Promise<UiMounted>;
 }
 export function createUiHost(options: UiHostOptions) {
+  options = { ...options, builtinPermissions: frozenCopy(options.builtinPermissions ?? {}) };
   // Wujie virtualizes HTML.parentNode; anchor ownership follows the physical Host DOM.
   const physicalParent = Object.getOwnPropertyDescriptor(window.Node.prototype, 'parentNode')!.get!;
   const bindings = new Map<string, string>();
@@ -39,6 +44,11 @@ export function createUiHost(options: UiHostOptions) {
   const metadata = new WeakMap<HTMLElement, { mountPointId: string; routeContext?: RouteContext }>();
   const rootCleanups = new Map<string, Promise<void>>();
   const permissions = (owner: string) => options.runtime.restrictedPlugins.get(owner)?.config.grantedPermissions ?? options.builtinPermissions?.[owner] ?? [];
+  const actions = createActionRuntime({ registry: options.runtime.contributions, policy: options.policy, driver: createBrowserActionDriver(options), canUseCapability(owner, id) {
+    const descriptor = options.runtime.candidates.find(p => p.descriptor.id === owner)?.descriptor;
+    const contract = options.runtime.bridgeContracts.get(id);
+    return !!descriptor?.requires.includes(id) && !!contract && Object.values(contract.actions).some(action => action.requiredPermissions.every(permission => permissions(owner).includes(permission)));
+  } });
   const candidate = (owner: string) => options.runtime.candidates.find(p => p.descriptor.id === owner)?.descriptor;
   const getRoot = (attemptId: string) => {
     const root = roots.get(attemptId)?.(); if (root) rootOwners.set(root, attemptId); return root;
@@ -70,7 +80,7 @@ export function createUiHost(options: UiHostOptions) {
           owned.delete(occurrenceId);
         }
       });
-      const delegate = createUiControl(core, attemptId, token => { resolved = resolveAnchor(attemptId, token); return resolved; }, () => readyCallbacks.get(attemptId)?.());
+      const delegate = createUiControl(core, attemptId, token => { resolved = resolveAnchor(attemptId, token); return resolved; }, () => readyCallbacks.get(attemptId)?.(), actions);
       const ingress = delegate(value => {
         const reply = value as { type?: string; ok?: boolean; result?: unknown };
         if (reply.type === 'ui:response' && reply.ok && typeof reply.result === 'string' && resolved) {
@@ -87,7 +97,7 @@ export function createUiHost(options: UiHostOptions) {
     const identity = core.identity(attemptId), owner = identity.ownerPluginId, descriptor = candidate(owner);
     const ports = new MessageChannel();
     bindings.set(attemptId, attemptId);
-    const session = createPluginBridgeSession({ runtime: options.runtime, port: ports.port1, identity: { pluginId: owner, pluginVersion: descriptor?.version ?? '1', surfaceId: 'builtin-presentation', surfaceInstanceId: attemptId, mountPointId: attemptId, protocolVersion: 1, requires: descriptor?.requires ?? [], grantedPermissions: permissions(owner) }, createUiControl: channel(attemptId), onSessionFailure: () => core.failAttempt(attemptId) });
+    const session = createPluginBridgeSession({ runtime: options.runtime, port: ports.port1, onAudit: options.onAudit, identity: { pluginId: owner, pluginVersion: descriptor?.version ?? '1', surfaceId: 'builtin-presentation', surfaceInstanceId: attemptId, mountPointId: attemptId, protocolVersion: 1, requires: descriptor?.requires ?? [], grantedPermissions: permissions(owner) }, createUiControl: channel(attemptId), onSessionFailure: () => core.failAttempt(attemptId) });
     const client = createUiClient(ports.port2); void client.refresh().catch(() => undefined);
     let disposed = false;
     const dispose = () => {
@@ -185,7 +195,7 @@ export function createUiHost(options: UiHostOptions) {
     },
   };
   return {
-    core, overlayCapability,
+    core, actions, overlayCapability,
     attachOwner(owner: string, container: HTMLElement) {
       const root = core.attachOwner(owner, container); roots.set(root.attemptId, () => container); rootOwners.set(container, root.attemptId);
       const local = localClient(root.attemptId);
@@ -203,7 +213,7 @@ export function createUiHost(options: UiHostOptions) {
         },
       };
     },
-    async dispose() { await core.dispose(); while (localCleanups.size) await Promise.allSettled([...localCleanups]); },
+    async dispose() { await actions.dispose(); await core.dispose(); while (localCleanups.size) await Promise.allSettled([...localCleanups]); },
   };
 }
 export type UiHost = ReturnType<typeof createUiHost>;

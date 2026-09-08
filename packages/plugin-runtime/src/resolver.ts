@@ -71,6 +71,10 @@ function descriptorIssue(candidate: PluginCandidate): ResolutionIssue | undefine
     });
   }
 
+  if (descriptor.roles !== undefined && (!Array.isArray(descriptor.roles) || new Set(descriptor.roles).size !== descriptor.roles.length || descriptor.roles.some(role => !['provider','feature'].includes(role))) || descriptor.provenance !== undefined && !['first-party','partner','third-party'].includes(descriptor.provenance)) {
+    return createIssue({ code: 'INVALID_PLUGIN_DESCRIPTOR', validationStage: 'descriptor', message: 'Plugin classification is invalid.', pluginId: descriptor.id });
+  }
+
   const invalidCapability = [...descriptor.requires, ...descriptor.provides].find(
     capability => !isCapabilityId(capability),
   );

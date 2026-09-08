@@ -182,3 +182,7 @@ export async function watchCurrentCluster(onValue: (name: string) => void): Prom
     throw error;
   }
 }
+
+export async function navigateToExampleNode(): Promise<void> {
+  await send(await connectedPort(), { type: 'request', capability: 'routes.navigate@1', action: 'navigate', payload: { routeId: 'node-detail', params: { cluster: 'demo', node: 'n1' } } });
+}

@@ -9,7 +9,10 @@ import { bootstrapPluginRuntime } from '@nexus/plugin-runtime';
 
 const runtime = await bootstrapPluginRuntime({
   builtins,
-  coreRootIds: ['console-shell'],
+  coreRootIds: ['console-core'],
+  rootPresentation: { ownerPluginId: 'console-core', surfaceId: 'root' },
+  profiles, refContracts,
+  rootRoutePoint, navigationRootPoints,
   installed,
   supportedHostApis: ['kubesphere.console@1'],
   bridgeContracts,
@@ -23,6 +26,11 @@ interface BootstrapPluginRuntimeOptions {
   installed?: readonly InstalledPluginRecord[];
   supportedHostApis?: readonly HostApiId[];
   bridgeContracts?: readonly BridgeCapabilityContract[];
+  rootPresentation?: { ownerPluginId: string; surfaceId: string };
+  profiles?: readonly PointProfile[];
+  refContracts?: readonly RefContract[];
+  rootRoutePoint?: ExtensionPointRef;
+  navigationRootPoints?: readonly ExtensionPointRef[];
 }
 ```
 
@@ -61,6 +69,7 @@ interface PluginDefinition extends PluginDescriptor {
 }
 
 interface PluginContext {
+  readonly actions: { register(id: string, handler: ActionHandler): void };
   readonly capabilities: {
     register<T>(id: CapabilityId, value: T): void;
     require<T>(id: CapabilityId): T;
@@ -244,3 +253,16 @@ const snapshot = inspect(runtime, {
 Inspector 的 `inspectUi: () => ui.core.inspect()` source 提供 relation、Scope tree、Attempt 与 occurrence 元数据，不包含 Context / Overlay 业务数据。失败执行的呈现资源被清理后，失败事实仍保留在有效 Scope 中供重试；已清理的 Surface Instance 不作为历史记录保留。
 
 完整用法与实际限制见 [UI 组合实现与作者 API](./cross-plugin-ui-composition-implementation.md)。
+
+
+## Console Core 公开组合入口
+
+`@nexus/plugin-runtime/react` 提供 `UiProvider/useUiClient`、`Slot`、`ActionMenu`、`Tabs`、`useSurfaceContext`、`RouteOutlet/useRouteContext`、`RouteLink` 与 `useCapabilitySubscription`。插件消费 Host 绑定的 client，不自行指定 owner 或 Attempt；只有 Browser adapter 使用 Provider 装配接口。
+
+`@nexus/plugin-runtime/client` 提供 Surface 的 `connectUiHost`、Action-only 入口的 `connectActionHost` 和 `createUiClient`。UiClient 的 `invoke/observe` 走 Capability 协议；`actions.query/start` 走 Point 所有权检查，二者授权独立。
+
+Runtime 层公开 `createRouteModel`、`createActionRuntime`、`createContributionPolicy` 与 `resolveRootPresentation`。Registry 公开 `listExtensionPoints/listActions/listExtensions/listUiSurfaces`；Point 为编译后的只读契约，Builtin Action handler 的索引同样从成功接纳事务生成。
+
+Browser Host 的 `BrowserHost` 接收 `BrowserDistribution`：发行版提供插件、根、契约、policy bundle、权限、安装存储和恢复操作。Host 不导入任何 Console 业务实现。`@nexus/browser-host/testing` 仅供 Distribution 验收 harness 使用，Feature 不可依赖。
+
+Platform 的七个 Capability、动作和权限见 [Capability Catalog](./capability-catalog.md)。具体 Point/Ref/Action/Tab 声明示例见 [Author Guide](./plugin-author-guide.md)。

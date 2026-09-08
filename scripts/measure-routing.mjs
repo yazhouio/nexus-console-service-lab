@@ -99,7 +99,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const report = await measureRouting(options);
   if (configPath === '--local') {
     const hash = createHash('sha256');
-    for (const root of ['apps/host/dist-validation', 'apps/example-restricted-plugin/dist']) {
+    for (const root of ['apps/console/dist-validation', 'apps/example-restricted-plugin/dist']) {
       for (const file of (await readdir(root, { recursive: true, withFileTypes: true })).filter(file => file.isFile()).sort((a, b) => (a.parentPath + a.name).localeCompare(b.parentPath + b.name))) {
         hash.update(file.parentPath + '/' + file.name); hash.update(await readFile(file.parentPath + '/' + file.name));
       }

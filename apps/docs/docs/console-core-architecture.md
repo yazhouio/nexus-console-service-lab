@@ -1,8 +1,8 @@
 # Console Core 插件化设计
 
-状态：2026-09-07，grill-with-docs 会话 Q1–Q60 已确认的目标设计。本文落实本轮决策，供后续实施与验收使用；不表示物理拆包、Action/Tab Adapter 或新 Capability 已实现。术语见仓库 `CONTEXT.md`，架构取舍见 `docs/adr/0017-console-composition-runtime-boundaries.md` 和 `docs/adr/0018-parameterized-point-profiles.md`。
+状态：2026-09-08，Q1–Q60 目标设计已落到实现；具体入口和验收对应关系见第 8 节。术语见仓库 `CONTEXT.md`，架构取舍见 `docs/adr/0017-console-composition-runtime-boundaries.md` 和 `docs/adr/0018-parameterized-point-profiles.md`。
 
-同日根据两轮架构消融与实施结果补充：统一声明真源、准入编译阶段和执行机制复用，并更新第 8 节实现现状。整体分层及既有授权、版本与资源寿命约束保持成立；下文明确区分已实现机制和待闭合的目标设计。
+实现沿用两轮架构消融确认的统一声明真源、准入编译阶段和执行机制复用。整体分层及既有授权、版本与资源寿命约束保持成立。
 
 ## 1. 目标与边界（Q1–Q14、Q22–Q23）
 
@@ -37,7 +37,7 @@ Core activation 只做本地声明、依赖、Capability 和 UI 定义注册，�
 
 Distribution 显式提供 `rootPresentation: { ownerPluginId, surfaceId }`。Runtime 校验 Owner、Core Closure 成员身份和 Surface 声明；Host 经公开执行入口挂载。根声明缺失或执行失败进入 break-glass，Host 不通过硬编码插件名发现根页面。
 
-根呈现与 Builtin Route Layout 的 React 承载方式仍需在物理拆分前闭合。当前独立 Surface renderer 使用 `createRoot`，不能自动继承原树的 Router Context 和 Outlet；不能直接以它替换所有 Builtin Route 渲染。目标是由 React route adapter 在 Router 树内承载受 Runtime 管理的执行，明确公开的 Route Context / Outlet 接口，并保持父 Layout 在子路由切换时的状态。树内呈现与独立容器可使用不同 Adapter，但执行身份、失败归属和清理语义须一致，插件不能靠导入 Host Context 或手动补 owner 身份接入。具体承载方式尚未实现，不因移动文件或拆包而视为完成。
+根呈现与 Builtin Route Layout 通过 Browser Host 的 `ManagedBuiltin` 在 Router 树内承载。Runtime driver 仍创建和结束执行，React adapter 在 commit 后确认呈现，公开 `useRouteContext / RouteOutlet` 给插件使用。父 Layout 在子路由切换时保留状态；独立 Slot 容器仍用独立 `createRoot`。两种承载都使用相同 Scope / Attempt、UiClient 和清理语义，插件不导入 Host Context，也不手动补 owner。
 
 Break-glass 使用独立的最小渲染路径，不依赖插件 Route、主题、Point、Core Capability 或 Runtime 成功启动。允许查看/导出诊断、回退或禁用最近变更的非 Core Restricted 安装配置、清理损坏本地安装状态和 reload；不允许修改 Core pins、grants、静态 policy。正常态插件管理和 Settings 属于 console-core，KubeEye 等插件专属设置由插件贡献。
 
@@ -73,7 +73,7 @@ Profile 可显式定义 `itemRefContract` 等参数位。Point 绑定已注册 R
 
 领域 API 包定义带命名空间的 `contractId@major`、schema 与字段语义；Distribution 汇集，Runtime 验证并冻结。同一身份出现不同定义时拒绝接受，禁止按加载顺序覆盖。
 
-目标是在声明接纳阶段完成 Profile / Ref Contract 的绑定、约束收窄校验和 Point 契约编译，冻结最终 Context/Payload schema 与允许的策略维度。执行阶段消费编译后的 Point 契约并校验每次输入，不在每次 Slot 更新或 Action 调用时重新解释绑定关系。保留原始契约身份、Major 和绑定元数据用于兼容断言、诊断与发布检查；无需为这些静态定义另建可变的运行期管理层。该编译机制属于待实现设计。
+目标是在声明接纳阶段完成 Profile / Ref Contract 的绑定、约束收窄校验和 Point 契约编译，冻结最终 Context/Payload schema 与允许的策略维度。执行阶段消费编译后的 Point 契约并校验每次输入，不在每次 Slot 更新或 Action 调用时重新解释绑定关系。保留原始契约身份、Major 和绑定元数据用于兼容断言、诊断与发布检查；无需为这些静态定义另建可变的运行期管理层。该编译机制由接纳事务中的 `createPointCompiler` 实现。
 
 例如同一个 `list.actions@1` 可分别绑定 ResourceRef@1 和 PluginRef@1；还可使用 AuditRecordRef、UserRef 等领域契约。ResourceRef 包含 `clusterId / apiVersion / kind / namespace? / name / uid?`，clusterId 是稳定不透明集群身份。需要实例身份保证的 Action Owner 必须要求 uid 并经业务 Capability 校验；缺少 uid 时拒绝这类操作。
 
@@ -89,7 +89,7 @@ Runtime 实现通用 Policy Engine，Point Owner 定义准入契约，Distributi
 
 V1 policy bundle 静态、版本化，在 Runtime 生命周期内冻结，修改后 reload。Contribution grants 与 Capability 调用权限保持独立语义，不能相互代替。
 
-静态准入在声明接纳完成后编译，执行与观察消费冻结的关系事实；Context、selection、Action 可用条件和每次 Capability 调用权限仍在相应时点处理，不随静态准入一起缓存。当前 Surface UI runtime 创建时快照 Point、Surface 和 Contribution，对每个跨 Owner 关系求值一次无副作用的 policy。policy 求值异常只拒绝相应关系，并在 inspection 中报告 `POLICY_ERROR`，不泄露异常内容或阻断健康贡献；不能通过修改 callback 捕获值或追加声明改变已有 Runtime。此实现尚不代表 Route / Navigation 的版本化 Point 准入已经统一。
+静态准入在声明接纳完成后编译，执行与观察消费冻结的关系事实；Context、selection、Action 可用条件和每次 Capability 调用权限仍在相应时点处理，不随静态准入一起缓存。当前 Surface UI runtime 创建时快照 Point、Surface 和 Contribution，对每个跨 Owner 关系求值一次无副作用的 policy。policy 求值异常只拒绝相应关系，并在 inspection 中报告 `POLICY_ERROR`，不泄露异常内容或阻断健康贡献；不能通过修改 callback 捕获值或追加声明改变已有 Runtime。Route / Navigation、Action 和 Surface / Tab 均消费相同版本化准入函数；没有旧版无 Point 授权分支。
 
 Platform Capability 按小契约拆分：`routes.query@1`、`routes.navigate@1`、`plugins.query@1`、`plugins.manage@1`、`diagnostics.query@1`、`diagnostics.export@1`、`audit.query@1`。Builtin/Restricted 使用同一 ID、版本、schema 和语义，通过不同 Adapter 调用，权限由 Distribution 显式授予。
 
@@ -113,21 +113,30 @@ V1 visible/disabled 条件仅支持 selection count、Capability 条件和 Ref C
 
 Tab 声明稳定 tabId、元数据和 Owner 自有 Surface 引用，选中后惰性执行。Tab 默认不是 Route；映射到 URL 由页面 Owner 的 Route 模型决定。V1 切走结束 Tab Execution Scope 并卸载，重新进入创建新 Scope，不支持 keep-alive。
 
-Tab 的执行职责复用现有 Slot selection 与 Surface Scope / Attempt：选中项映射为贡献引用，切走移出 selection，重入建立新执行。这里的 Tab Execution Scope 是所选 Surface 的执行寿命，不是新增 Scope 类型；不建立独立 Tab 执行内核或 Tab Session。Tab Kind 仍负责自己的声明验证和元数据，页面负责交互与可访问性。现有机制已通过最小生命周期探针验证，但完整 Tab 作者协议与 UI 尚未实现。
+Tab 的执行职责复用现有 Slot selection 与 Surface Scope / Attempt：选中项映射为贡献引用，切走移出 selection，重入建立新执行。这里的 Tab Execution Scope 是所选 Surface 的执行寿命，不是新增 Scope 类型；不建立独立 Tab 执行内核或 Tab Session。Tab Kind 仍负责自己的声明验证和元数据，页面负责交互与可访问性。公开 `Tabs` 组件提供单选、键盘焦点操作和 tabpanel；Builtin 与 Restricted Surface 的真实浏览器测试验证切走卸载及重入新建。
 
 Execution Session 是 Surface Execution Attempt / Action Invocation 的通信寿命上位概念；Restricted Adapter 以 BridgeSession 实现。每个 Session 只归属一次执行，不建立永久 plugin-wide session。既有 Scope / Attempt / occurrence / DOM Anchor 的身份和资源所有权区分继续成立。
 
 ## 8. 现状、迁移与验收
 
-当前实现已有 console-shell Core Root、home.cards、统一 Contribution Registry 和 Surface Adapter；Console 页面、Host Context 与业务插件仍耦合在 apps/host。本轮替代性消融已落实以下机制：
+当前物理边界为 `apps/console`、`packages/browser-host`、`packages/plugin-runtime`、`packages/console-core`、`packages/console-core-api`，并以 `packages/cluster-api` 演示独立领域引用契约。旧 `apps/host` 已移除，运行时只使用 `console-core` ID。
 
-- Restricted Surface 统一声明接纳，删除第二份注册事务，保留只读派生查询索引。
-- URL 成员匹配复用 React Router，保留路径语言、所有权冲突治理、祖先关系和非法编码拒绝。
-- Surface UI 准入在创建 UI runtime 时编译并冻结；policy 异常按贡献关系隔离。
+| 实现入口 | 已实现行为 |
+| --- | --- |
+| `apps/console/src/distribution.ts` | 固定 Core roots、根 Surface、契约目录、grants、安装目录和恢复配置 |
+| `packages/browser-host/src/ManagedBuiltin.tsx` | Router 树内受管理的根与 Layout 呈现，父布局连续性 |
+| `packages/browser-host/src/BreakGlass.tsx` | 独立诊断导出、最近配置禁用/回退、清理和 reload |
+| `packages/plugin-runtime/src/ui/point-compiler.ts` | 接纳期绑定 Profile/Ref Contract、收窄约束、冻结最终契约 |
+| `packages/plugin-runtime/src/routing/route-model.ts` | Route/Navigation 版本化 Point 准入、结构冲突、参数校验和稳定排序 |
+| `packages/plugin-runtime/src/platform.ts` | 七个小粒度 Platform Capability；Builtin/Restricted 使用相同权限入口 |
+| `packages/plugin-runtime/src/action-runtime.ts` | 无 Surface 的单次 Invocation、不可变输入、取消/超时/终态与有限条件 |
+| `packages/plugin-runtime/src/browser/action-driver.ts` | Builtin 本地 Bridge 与 Restricted 惰性 Wujie 的 Action 执行 |
+| `packages/plugin-runtime/src/ui-react.tsx` | `RouteOutlet`、`RouteLink`、`ActionMenu`、`Tabs` 与受绑定 UiClient |
+| `scripts/check-boundaries.mjs` | workspace 依赖、静态/动态 import、re-export 和私有路径检查；接入 typecheck/CI |
 
-Profile / Ref Contract 编译、Action/Tab Kind、新 Platform Capability、Route / Navigation 版本化 Point 接纳，以及根呈现与 Router 树内执行的统一，仍是目标设计，当前作者 API 不因此自动可用。最近实现验证通过 155 项 Runtime、49 项 Host 测试、24 项真实浏览器验收及 workspace 类型检查；这些结果不代表未实现目标已验收。
+作者声明采用 contribution contract version 3；`check:plugin-contract` 拒绝将新 Kind、Profile 或 Point 路由发布到 1/2 目标。Bridge 的握手字段保持已有线协议，Session 的 `execution` 元数据区分 Surface 与 Action；Action 不声明、不分配 Surface Scope。`connectActionHost` 在插件本地复制并冻结启动数据后调用 handler。
 
-后续实施先明确公共契约与 Router 树内的受管理执行方案，验证 Outlet、父布局连续性和根失败路径；再迁移 Route/Policy 机制与 Distribution 配置，落实物理依赖并抽离 console-core。随后接入 Profile/Ref Contract 的接纳期编译、无 Surface 的 Action 装载与 Invocation，以及复用 Surface 执行的 Tab。实施时需要同步 manifest、SDK、fixture、作者文档和测试；不保留 console-shell 双 ID 兼容层。
+新增验证覆盖 `root-presentation`、`point-profiles`、`route-admission`、`action-runtime`、`builtin-action`、`tab-runtime`、`platform`，真实浏览器入口为 `e2e/console-core.spec.ts` 和 `e2e/action-tab.spec.ts`。原有 Surface、路由冲突、订阅和安装配置回归保留。测试命令为 `pnpm test`、`pnpm test:e2e`、`pnpm typecheck`；生产优化构建使用 `pnpm build:routing-validation` 与 `pnpm test:e2e:preview`。
 
 验收至少覆盖以下可观察结果：
 
@@ -144,10 +153,13 @@ Profile / Ref Contract 编译、Action/Tab Kind、新 Platform Capability、Rout
 - Action 无 Surface 时可调用；timeout/cancel 后资源回收且不自动重试；Tab 切走卸载、重入新建。
 - Restricted Route 导航仅接收 Route ID 和校验参数；根配置与 break-glass 不依赖私有业务接口。
 
-除已明确记录的机制和 `POLICY_ERROR` 外，新增 Kind 的具体 schema 文件、错误码、超时数值、trait/predicate 白名单和 lint 工具选择仍属于实施细化；其选择必须满足本文边界，不应被描述为本轮已确认的数值或已实现能力。
+实施细化：Action 默认超时 30 秒，可在 1–300,000 毫秒内指定；最多 128 个并发 Invocation，保留 200 条不含业务结果的终态诊断。输入遵守 64 KiB、32 层、10,000 节点与 100 个引用上限。条件比较操作为 `eq/ne/gt/gte/lt/lte/in/present`，字段只能来自 Ref Contract 发布的顶层 trait。尺寸约束和 Tab 单选在 Placement 输入阶段校验；无效输入不创建部分 occurrence。上述数值属于实现选择。
 
 ## 9. 与既有文档的关系
 
 本文及 ADR 0017–0018 是本轮后续设计，对四层职责、Core 归属、受权 Route Capability、Profile/Ref Contract 和新增 Kind 的冲突规定优先。ADR 0001 已由 ADR 0017 正式 supersede；ADR 0008 的 Point/Slot 区分、ADR 0012 的同 Major 冻结、ADR 0013–0015 的资源寿命与 Adapter 语义继续适用，其中平台执行职责按本轮术语归 Plugin Runtime。
 
 早期技术方案、路由设计和 UI 契约保留其历史与已实现状态。阅读其中 Host-owned 执行机制、仅 Surface Kind、Surface-only BridgeSession 或禁止 Restricted 主动导航等描述时，以本文区分目标变更；未被本轮改变的协议约束继续有效。
+
+
+V1 约束适用范围：`group/order` 适用于各 Kind。`cardinality` 对 Surface/Tab 表示当前 Placement 选中的贡献数量，对 Action 表示一次调用的执行数量（固定为 1，范围不含 1 时贡献不可调用）；Route/Navigation 不接收该维度。`sizing/presentations` 仅适用于 Surface/Tab；Point Surface 支持 `inline`，Tab 支持 `tab`。Overlay 的 modal/drawer 是独立协议，不属于 Point 的呈现方式。尚无执行语义的维度或方式在声明接纳时明确拒绝，不作为无效限制静默保存。

@@ -36,3 +36,23 @@ it('preserves the highest Host Overlay progress while events race the subscripti
   expect(seen).toEqual([8, 10, 11]);
   stop(); client.dispose();
 });
+
+it('calls versioned capabilities without a UI snapshot and scopes subscriptions to the client session', async () => {
+  let receive: (event: MessageEvent) => void = () => undefined;
+  const sent: any[] = [];
+  const client = createUiClient({ postMessage(value) { sent.push(value); }, addEventListener(_type, listener) { receive = listener; }, removeEventListener() {}, start() {} });
+  const emit = (data: unknown) => receive({ data } as MessageEvent);
+  const pending = client.invoke('routes.query@1', 'list', null);
+  expect(sent[0]).toMatchObject({ type: 'request', capability: 'routes.query@1', action: 'list', payload: null });
+  emit({ type: 'response', requestId: sent[0].requestId, ok: true, result: [] });
+  expect(await pending).toEqual([]);
+  const values: unknown[] = [];
+  const opening = client.observe('plugins.query@1', 'watch', null, value => values.push(value));
+  emit({ type: 'event', subscriptionId: 'plugins', payload: ['new'] });
+  emit({ type: 'response', requestId: sent[1].requestId, ok: true, result: { subscriptionId: 'plugins', snapshot: ['old'] } });
+  const stop = await opening;
+  expect(values).toEqual([['old'], ['new']]);
+  stop();
+  expect(sent.at(-1)).toMatchObject({ type: 'unsubscribe', subscriptionId: 'plugins' });
+  client.dispose();
+});

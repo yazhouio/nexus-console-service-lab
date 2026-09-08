@@ -4,7 +4,11 @@ V1 frontend plugin runtime workspace described by the normative documents in `sp
 
 ## Workspace
 
-- `apps/host`: React 19 host application built with Rsbuild.
+- `apps/console`: Console Distribution, static plugin pins, grants and installation configuration.
+- `packages/browser-host`: reusable browser boot, history and recovery adapters.
+- `packages/console-core`: required Console plugin with layout, navigation, Home and Settings.
+- `packages/console-core-api`: versioned Console Points, parameterized Profiles and PluginRef.
+- `packages/cluster-api`: Cluster contracts and ResourceRef.
 - `apps/example-restricted-plugin`: React 19 restricted-plugin fixture built directly with Rspack.
 - `apps/docs`: independent Rspress 2 documentation workspace.
 - `packages/plugin-runtime`: build-tool-independent TypeScript runtime model.
@@ -52,12 +56,14 @@ configuration reload, and Runtime Inspector facts. It also explicitly verifies t
 same-origin Wujie plugins can access `window.parent`: this is
 **cooperative-isolation**, not a hostile-code security boundary.
 
-The implementation covers tickets 01–12 in
+The implementation also follows [Console Core architecture](apps/docs/docs/console-core-architecture.md), including managed Router-tree rendering, versioned Point admission, Action-only execution and lazy Tabs. `pnpm check:boundaries` enforces package and author import boundaries and runs as part of type checking.
+
+The original runtime covers tickets 01–12 in
 [the V1 ticket set](.scratch/frontend-plugin-runtime-v1/issues/).
 
 ## Bridge sessions
 
-Every Surface Instance owns its MessagePort, request IDs, pending calls,
+Every Surface Execution Attempt or Action Invocation owns its MessagePort, request IDs, pending calls,
 subscriptions, limits, and cleanup. Unary and subscription actions share the
 Host contract validation and permission pipeline. Subscription responses contain
 an atomic `{ subscriptionId, snapshot }`; events emitted while opening are
@@ -100,7 +106,7 @@ selectVersion, setEnabled, and uninstall all return `{ reloadRequired: true }`.
 `store.list()` supplies the next `bootstrapPluginRuntime` input. Existing Runtime
 catalogs and contribution metadata remain immutable.
 
-The Host fixture uses localStorage and demonstrates install, enable, disable,
+The Console Distribution uses localStorage and demonstrates install, enable, disable,
 uninstall, upgrade, and rollback. **Reload page** rebuilds from static Builtins
 and the stored selection. Both fixture versions use the same development bundle
 under versioned URLs; this exercises version selection without pretending to

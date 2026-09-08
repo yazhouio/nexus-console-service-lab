@@ -44,6 +44,8 @@ export type {
   PluginDefinition,
   PluginKind,
   PluginContext,
+  PluginRole,
+  PluginProvenance,
   RejectedPlugin,
   Resolution,
   ResolutionErrorCode,
@@ -103,3 +105,23 @@ export { createUiRuntime, UiError } from './ui/runtime';
 export type { UiRuntime, UiRuntimeOptions, UiDriver, UiMounted, UiSizing, UiExecution, SlotInput, SlotObservation, ContextSnapshot, UiObservation, OverlaySnapshot, OverlayObservation, UiInspection } from './ui/runtime';
 export { UI_OVERLAY_CAPABILITY, UI_OVERLAY_PERMISSION, uiOverlayBridgeContract } from './ui/overlay-capability';
 export type { UiOverlayCapability } from './ui/overlay-capability';
+export { resolveRootPresentation } from './root-presentation';
+export type { RootPresentation } from './bootstrap';
+
+export { createRouteModel } from './routing/route-model';
+export type { RouteModel, ResolvedRoute, ResolvedNavigation, UrlResolution, NavigationDestination, ContributionPolicyRequest } from './routing/route-model';
+
+export type { ExtensionKind, ContractId, PointConstraints, PointProfile, RefContract, PolicyDimension, CompiledExtensionPointDefinition } from './ui/definitions';
+export type { PointContracts } from './ui/point-compiler';
+
+export { createActionRuntime } from './action-runtime';
+export type { ActionHandler, ActionRuntime, ActionDriver, ActionSession, ActionOutcome, ActionInput } from './action-runtime';
+export type { ActionDefinition, ActionContributionDefinition, TabContributionDefinition, ExtensionContributionDefinition, PointContributionMetadata } from './ui/definitions';
+
+export type { ActionCondition, ComparisonOperator } from './ui/definitions';
+
+export { createPlatformPlugin, platformBridgeContracts, PLATFORM_PLUGIN_ID, PLATFORM_CAPABILITIES } from './platform';
+export type { PlatformEnvironment, PlatformCapabilityId, PlatformCatalogEntry, PublicRoute, PublicRouteLocation, PublicNavigation, RoutesSnapshot, PluginSummary } from './platform';
+export { createContributionPolicy } from './policy';
+export type { ContributionPolicyBundle } from './policy';
+export { createUiOverlayPlugin } from './ui/overlay-capability';

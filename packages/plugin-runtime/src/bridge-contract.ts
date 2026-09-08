@@ -7,6 +7,7 @@ export interface RuntimeSchema<T> {
 }
 
 export interface BridgeInvocationContext {
+  readonly execution?: import('./browser/wujie-plugin-adapter').ExecutionReference;
   readonly pluginId: PluginId;
   readonly surfaceId: string;
   readonly surfaceInstanceId: string;

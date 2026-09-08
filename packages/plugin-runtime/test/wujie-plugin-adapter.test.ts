@@ -25,7 +25,7 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 
-async function runtime() {
+async function runtime(actionOnly = false) {
   const contract: BridgeCapabilityContract = {
     id: 'kubesphere.cluster@2',
     actions: {
@@ -48,7 +48,8 @@ async function runtime() {
         requires: ['kubesphere.cluster@2'],
         provides: [],
         permissions: ['cluster.read'],
-        surfaces: [{ id: 'overview' }],
+        surfaces: actionOnly ? [] : [{ id: 'overview' }],
+        actions: [{ id: 'check' }],
         contributions: {},
       },
       config: {
@@ -64,7 +65,7 @@ async function runtime() {
   return bootstrapPluginRuntime({
     builtins: [
       {
-        id: 'console-shell',
+        id: 'console-core',
         version: '1.0.0',
         requires: [],
         provides: [],
@@ -80,7 +81,7 @@ async function runtime() {
         },
       },
     ],
-    coreRootIds: ['console-shell'],
+    coreRootIds: ['console-core'],
     installed: [installed],
     supportedHostApis: ['kubesphere.console@1'],
     bridgeContracts: [contract],
@@ -516,4 +517,26 @@ it('projects session failure only on the owning instance and preserves earlier s
     await Promise.all(adapter.listInstances().map(instance => adapter.unmount(instance.identity.surfaceInstanceId)));
     first.port2.close(); second.port2.close();
   }
+});
+
+
+it('loads an Action-only owner without a Surface and closes its per-invocation bridge', async () => {
+  const ports = new MessageChannel();
+  let props: any;
+  const destroyed = vi.fn();
+  const adapter = createWujiePluginAdapter({ runtime: await runtime(true), hostWindow: hostWindow(), handshake: successfulHandshake([ports.port1]), driver: {
+    async startApp(options) { props = options.props; ports.port2.postMessage({ type: 'ui:request', requestId: 1, action: 'action.ready', payload: null }); }, async destroyApp() { destroyed(); },
+  } });
+  ports.port2.addEventListener('message', event => {
+    if (event.data.type === 'action:execute') ports.port2.postMessage({ type: 'ui:request', requestId: 2, action: 'action.complete', payload: { ok: true, result: { checked: true } } });
+  });
+  ports.port2.start();
+  const session = await adapter.connectAction({ ownerPluginId: 'kubeeye', actionId: 'check', invocationId: 'invocation-1', context: { itemRef: 'a' }, payload: null, signal: new AbortController().signal }, container);
+  expect(props.surface).toBeUndefined();
+  expect(props.action).toMatchObject({ actionId: 'check', invocationId: 'invocation-1', context: { itemRef: 'a' } });
+  expect(await session.invoke()).toEqual({ checked: true });
+  await session.dispose();
+  expect(adapter.listInstances()).toEqual([]);
+  expect(destroyed).toHaveBeenCalledOnce();
+  ports.port2.close();
 });

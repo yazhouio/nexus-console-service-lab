@@ -1,3 +1,5 @@
+import type { ActionInput, ActionSession } from '../action-runtime';
+import { createActionExecutionChannel } from './action-session';
 import type { CreateUiControl } from './ui-control';
 import {
   validateBridgeBootstrapDescriptor,
@@ -34,7 +36,9 @@ export type SurfaceFailureStage =
   | 'render'
   | 'bridge';
 
+export type ExecutionReference = { readonly kind: 'surface'; readonly surfaceId: string } | { readonly kind: 'action'; readonly actionId: string; readonly invocationId: string };
 export interface SurfaceInstanceIdentity {
+  readonly execution?: ExecutionReference;
   readonly pluginId: PluginId;
   readonly pluginVersion: string;
   readonly surfaceId: string;
@@ -108,6 +112,7 @@ export interface MountedSurface {
 
 export interface WujiePluginAdapter {
   mount(input: MountRestrictedSurfaceInput): Promise<MountedSurface>;
+  connectAction(input: ActionInput, container: HTMLElement): Promise<ActionSession>;
   unmount(surfaceInstanceId: string): Promise<void>;
   getInstance(surfaceInstanceId: string): SurfaceInstanceRecord | undefined;
   listInstances(): readonly SurfaceInstanceRecord[];
@@ -247,8 +252,7 @@ export function createWujiePluginAdapter(
     return instance.cleanupTask;
   };
 
-  const adapter: WujiePluginAdapter = {
-    async mount(input: MountRestrictedSurfaceInput): Promise<MountedSurface> {
+  async function startExecution(input: MountRestrictedSurfaceInput, action?: ActionInput): Promise<MountedSurface> {
       const record = options.runtime.restrictedPlugins.get(input.pluginId);
       const pluginState = options.runtime.plugins.get(input.pluginId);
       const surface = options.runtime.surfaces.get(
@@ -266,7 +270,7 @@ export function createWujiePluginAdapter(
       if (
         record === undefined ||
         pluginState?.state !== 'ACTIVE' ||
-        surface === undefined
+        (action ? !options.runtime.contributions.listActions().some(entry => entry.ownerPluginId === input.pluginId && entry.contribution.id === action.actionId) : surface === undefined)
       ) {
         throw new Error(
           `Restricted Surface ${input.pluginId}/${input.surfaceId} is not ACTIVE.`,
@@ -293,8 +297,9 @@ export function createWujiePluginAdapter(
       issuedInstanceIds.add(surfaceInstanceId);
 
       const identity = freezeIdentity({
+        execution: action ? { kind: 'action', actionId: action.actionId, invocationId: action.invocationId } : { kind: 'surface', surfaceId: input.surfaceId },
         pluginId: input.pluginId,
-        pluginVersion: surface.pluginVersion,
+        pluginVersion: record.manifest.version,
         surfaceId: input.surfaceId,
         surfaceInstanceId,
         mountPointId: input.mountPointId,
@@ -398,13 +403,13 @@ export function createWujiePluginAdapter(
               id: record.manifest.id,
               version: record.manifest.version,
             }),
-            surface: Object.freeze({
+            ...(action ? { action: { actionId: action.actionId, invocationId: action.invocationId, context: action.context, payload: action.payload } } : { surface: Object.freeze({
               id: input.surfaceId,
               ...(input.layout === undefined ? {} : { layout: input.layout }),
               ...(input.initialParameters === undefined
                 ? {}
                 : { initialParameters: input.initialParameters }),
-            }),
+            }) }),
             ...(input.routeContext === undefined ? {} : { routeContext: input.routeContext }),
             bridge: descriptor,
           })),
@@ -489,8 +494,18 @@ export function createWujiePluginAdapter(
         await cleanup(instance).catch(() => undefined);
         throw mountError;
       }
+  }
+  const adapter: WujiePluginAdapter = {
+    mount: input => startExecution(input),
+    async connectAction(input, container) {
+      const channel = createActionExecutionChannel(input.signal);
+      let mounted: MountedSurface | undefined;
+      try {
+        mounted = await startExecution({ pluginId: input.ownerPluginId, surfaceId: input.actionId, mountPointId: input.invocationId, container, signal: input.signal, createUiControl: channel.control }, input);
+        await channel.ready;
+        return { invoke: channel.invoke, cancel: channel.cancel, async dispose() { channel.dispose(); await mounted!.unmount(); } };
+      } catch (error) { channel.dispose(); await mounted?.unmount(); throw error; }
     },
-
     async unmount(surfaceInstanceId: string): Promise<void> {
       const instance = instances.get(surfaceInstanceId);
       if (instance === undefined) {

@@ -65,17 +65,17 @@ describe('resolvePluginSet', () => {
   it('resolves provider edges and places providers before consumers', () => {
     const resolution = resolvePluginSet(
       [
-        plugin('console-shell', { requires: ['kubesphere.cluster@2'] }),
+        plugin('console-core', { requires: ['kubesphere.cluster@2'] }),
         plugin('cluster', { provides: ['kubesphere.cluster@2'] }),
       ],
-      ['console-shell'],
+      ['console-core'],
     );
 
-    expect(resolution.order).toEqual(['cluster', 'console-shell']);
-    expect([...resolution.coreClosure]).toEqual(['cluster', 'console-shell']);
+    expect(resolution.order).toEqual(['cluster', 'console-core']);
+    expect([...resolution.coreClosure]).toEqual(['cluster', 'console-core']);
     expect(resolution.dependencies).toEqual([
       {
-        consumer: 'console-shell',
+        consumer: 'console-core',
         capability: 'kubesphere.cluster@2',
         provider: 'cluster',
       },
@@ -85,16 +85,16 @@ describe('resolvePluginSet', () => {
 
   it('uses pluginId as a deterministic topological tie-breaker', () => {
     const candidates = [
-      plugin('console-shell', { requires: ['kubesphere.cluster@2'] }),
+      plugin('console-core', { requires: ['kubesphere.cluster@2'] }),
       plugin('cluster', { provides: ['kubesphere.cluster@2'] }),
       plugin('zeta'),
       plugin('alpha'),
     ];
 
-    const forward = resolvePluginSet(candidates, ['console-shell']);
-    const reverse = resolvePluginSet([...candidates].reverse(), ['console-shell']);
+    const forward = resolvePluginSet(candidates, ['console-core']);
+    const reverse = resolvePluginSet([...candidates].reverse(), ['console-core']);
 
-    expect(forward.order).toEqual(['alpha', 'cluster', 'console-shell', 'zeta']);
+    expect(forward.order).toEqual(['alpha', 'cluster', 'console-core', 'zeta']);
     expect(reverse.order).toEqual(forward.order);
     expect(reverse.dependencies).toEqual(forward.dependencies);
   });
@@ -102,14 +102,14 @@ describe('resolvePluginSet', () => {
   it('treats a capability major mismatch as missing for a non-core consumer', () => {
     const resolution = resolvePluginSet(
       [
-        plugin('console-shell'),
+        plugin('console-core'),
         plugin('cluster-v1', { provides: ['kubesphere.cluster@1'] }),
         plugin('workloads', { requires: ['kubesphere.cluster@2'] }),
       ],
-      ['console-shell'],
+      ['console-core'],
     );
 
-    expect(resolution.order).toEqual(['cluster-v1', 'console-shell']);
+    expect(resolution.order).toEqual(['cluster-v1', 'console-core']);
     expect(resolution.skipped.get('workloads')).toMatchObject({
       code: 'MISSING_CAPABILITY',
       capability: 'kubesphere.cluster@2',
@@ -119,15 +119,15 @@ describe('resolvePluginSet', () => {
   it('skips every non-core duplicate provider and its consumers', () => {
     const resolution = resolvePluginSet(
       [
-        plugin('console-shell'),
+        plugin('console-core'),
         plugin('cluster-a', { provides: ['kubesphere.cluster@2'] }),
         plugin('cluster-b', { provides: ['kubesphere.cluster@2'] }),
         plugin('workloads', { requires: ['kubesphere.cluster@2'] }),
       ],
-      ['console-shell'],
+      ['console-core'],
     );
 
-    expect(resolution.order).toEqual(['console-shell']);
+    expect(resolution.order).toEqual(['console-core']);
     expect(resolution.skipped.get('cluster-a')?.code).toBe(
       'DUPLICATE_CAPABILITY_PROVIDER',
     );
@@ -143,17 +143,17 @@ describe('resolvePluginSet', () => {
     const error = captureResolutionError(() =>
       resolvePluginSet(
         [
-          plugin('console-shell', { requires: ['kubesphere.cluster@2'] }),
+          plugin('console-core', { requires: ['kubesphere.cluster@2'] }),
           plugin('cluster-a', { provides: ['kubesphere.cluster@2'] }),
           plugin('cluster-b', { provides: ['kubesphere.cluster@2'] }),
         ],
-        ['console-shell'],
+        ['console-core'],
       ),
     );
 
     expect(error.issue).toMatchObject({
       code: 'DUPLICATE_CAPABILITY_PROVIDER',
-      pluginId: 'console-shell',
+      pluginId: 'console-core',
       capability: 'kubesphere.cluster@2',
     });
   });
@@ -162,7 +162,7 @@ describe('resolvePluginSet', () => {
     const error = captureResolutionError(() =>
       resolvePluginSet(
         [
-          plugin('console-shell', {
+          plugin('console-core', {
             requires: ['capability.cluster@1'],
             provides: ['capability.shell@1'],
           }),
@@ -171,18 +171,18 @@ describe('resolvePluginSet', () => {
             provides: ['capability.cluster@1'],
           }),
         ],
-        ['console-shell'],
+        ['console-core'],
       ),
     );
 
     expect(error.issue).toMatchObject({
       code: 'CIRCULAR_DEPENDENCY',
       path: [
-        'console-shell',
+        'console-core',
         'capability.cluster@1',
         'cluster',
         'capability.shell@1',
-        'console-shell',
+        'console-core',
       ],
     });
   });
@@ -190,7 +190,7 @@ describe('resolvePluginSet', () => {
   it('skips a non-core cycle and returns its complete dependency path', () => {
     const resolution = resolvePluginSet(
       [
-        plugin('console-shell'),
+        plugin('console-core'),
         plugin('alpha', {
           requires: ['capability.beta@1'],
           provides: ['capability.alpha@1'],
@@ -200,10 +200,10 @@ describe('resolvePluginSet', () => {
           provides: ['capability.beta@1'],
         }),
       ],
-      ['console-shell'],
+      ['console-core'],
     );
 
-    expect(resolution.order).toEqual(['console-shell']);
+    expect(resolution.order).toEqual(['console-core']);
     expect(resolution.skipped.get('alpha')).toMatchObject({
       code: 'CIRCULAR_DEPENDENCY',
       path: [
@@ -221,13 +221,13 @@ describe('resolvePluginSet', () => {
     const error = captureResolutionError(() =>
       resolvePluginSet(
         [
-          plugin('console-shell', { requires: ['kubesphere.cluster@2'] }),
+          plugin('console-core', { requires: ['kubesphere.cluster@2'] }),
           plugin('external-cluster-provider', {
             kind: 'restricted',
             provides: ['kubesphere.cluster@2'],
           }),
         ],
-        ['console-shell'],
+        ['console-core'],
       ),
     );
 
@@ -235,7 +235,7 @@ describe('resolvePluginSet', () => {
       code: 'CORE_DEPENDENCY_NOT_BUILTIN',
       pluginId: 'external-cluster-provider',
       path: [
-        'console-shell',
+        'console-core',
         'kubesphere.cluster@2',
         'external-cluster-provider',
       ],
@@ -244,24 +244,24 @@ describe('resolvePluginSet', () => {
 
   it('fails when a Core root is missing', () => {
     const error = captureResolutionError(() =>
-      resolvePluginSet([], ['console-shell']),
+      resolvePluginSet([], ['console-core']),
     );
 
     expect(error.issue).toMatchObject({
       code: 'CORE_ROOT_MISSING',
-      pluginId: 'console-shell',
-      path: ['console-shell'],
+      pluginId: 'console-core',
+      path: ['console-core'],
     });
   });
 
   it('keeps a Builtin when a Restricted plugin collides with its id', () => {
     const resolution = resolvePluginSet(
-      [plugin('console-shell'), plugin('console-shell', { kind: 'restricted' })],
-      ['console-shell'],
+      [plugin('console-core'), plugin('console-core', { kind: 'restricted' })],
+      ['console-core'],
     );
 
-    expect(resolution.order).toEqual(['console-shell']);
-    expect(resolution.skipped.has('console-shell')).toBe(false);
+    expect(resolution.order).toEqual(['console-core']);
+    expect(resolution.skipped.has('console-core')).toBe(false);
     expect(resolution.rejected).toHaveLength(1);
     expect(resolution.rejected[0].candidate.kind).toBe('restricted');
     expect(resolution.rejected[0].issue.code).toBe('PLUGIN_ID_COLLISION');
@@ -270,8 +270,8 @@ describe('resolvePluginSet', () => {
   it('treats duplicate Builtin ids as a Host build error', () => {
     const error = captureResolutionError(() =>
       resolvePluginSet(
-        [plugin('console-shell'), plugin('console-shell')],
-        ['console-shell'],
+        [plugin('console-core'), plugin('console-core')],
+        ['console-core'],
       ),
     );
 
@@ -283,11 +283,11 @@ describe('resolvePluginSet', () => {
       requires: ['kubesphere.cluster@^2' as CapabilityId],
     });
     const resolution = resolvePluginSet(
-      [plugin('console-shell'), invalid],
-      ['console-shell'],
+      [plugin('console-core'), invalid],
+      ['console-core'],
     );
 
-    expect(resolution.order).toEqual(['console-shell']);
+    expect(resolution.order).toEqual(['console-core']);
     expect(resolution.skipped.get('invalid')?.code).toBe(
       'INVALID_PLUGIN_DESCRIPTOR',
     );
@@ -304,15 +304,15 @@ describe('resolvePluginSet', () => {
   it('recursively skips consumers of a skipped provider in one resolution', () => {
     const resolution = resolvePluginSet(
       [
-        plugin('console-shell'),
+        plugin('console-core'),
         plugin('broken-provider', { requires: ['missing.input@1'], provides: ['shared.value@1'] }),
         plugin('consumer', { requires: ['shared.value@1'], provides: ['consumer.value@1'] }),
         plugin('downstream', { requires: ['consumer.value@1'] }),
       ],
-      ['console-shell'],
+      ['console-core'],
     );
 
-    expect(resolution.order).toEqual(['console-shell']);
+    expect(resolution.order).toEqual(['console-core']);
     expect(resolution.skipped.get('broken-provider')?.code).toBe('MISSING_CAPABILITY');
     expect(resolution.skipped.get('consumer')?.path).toEqual([
       'consumer',

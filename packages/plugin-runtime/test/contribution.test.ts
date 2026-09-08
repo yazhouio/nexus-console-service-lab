@@ -65,7 +65,7 @@ describe('ContributionRegistry', () => {
 
   it('allows Navigation to reference an ACTIVE owner route and parent', () => {
     const controller = createContributionRegistry();
-    const shell = controller.beginActivation('console-shell');
+    const shell = controller.beginActivation('console-core');
     shell.context.registerRoute({
       id: 'home-route',
       path: '/',

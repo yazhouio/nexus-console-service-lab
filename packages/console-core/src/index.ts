@@ -1,0 +1,1 @@
+export { consoleCore } from './plugin';

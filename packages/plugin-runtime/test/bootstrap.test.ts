@@ -21,12 +21,12 @@ describe('bootstrapPluginRuntime', () => {
       },
     };
     const shell: PluginDefinition = {
-      id: 'console-shell',
+      id: 'console-core',
       version: '1.0.0',
       requires: ['kubesphere.cluster@2'],
       provides: ['kubesphere.shell@1'],
       activate(context) {
-        activationOrder.push('console-shell');
+        activationOrder.push('console-core');
         expect(
           context.capabilities.require<{ current: string }>(
             'kubesphere.cluster@2',
@@ -38,16 +38,16 @@ describe('bootstrapPluginRuntime', () => {
 
     const runtime = await bootstrapPluginRuntime({
       builtins: [shell, cluster],
-      coreRootIds: ['console-shell'],
+      coreRootIds: ['console-core'],
     });
 
-    expect(activationOrder).toEqual(['cluster', 'console-shell']);
+    expect(activationOrder).toEqual(['cluster', 'console-core']);
     expect(runtime.ready).toBe(true);
     expect(runtime.plugins.get('cluster')).toEqual({ state: 'ACTIVE' });
-    expect(runtime.plugins.get('console-shell')).toEqual({ state: 'ACTIVE' });
+    expect(runtime.plugins.get('console-core')).toEqual({ state: 'ACTIVE' });
     expect(runtime.capabilities.list()).toEqual([
       { id: 'kubesphere.cluster@2', providerPluginId: 'cluster' },
-      { id: 'kubesphere.shell@1', providerPluginId: 'console-shell' },
+      { id: 'kubesphere.shell@1', providerPluginId: 'console-core' },
     ]);
   });
 
@@ -60,20 +60,20 @@ describe('bootstrapPluginRuntime', () => {
       bootstrapPluginRuntime({
         builtins: [
           {
-            id: 'console-shell',
+            id: 'console-core',
             version: '1.0.0',
             requires: [],
             provides: [],
             activate,
           },
         ],
-        coreRootIds: ['console-shell'],
+        coreRootIds: ['console-core'],
       }),
     ).rejects.toMatchObject({
       issue: expect.objectContaining({
         code: 'PLUGIN_ACTIVATION_FAILED',
         stage: 'activate',
-        pluginId: 'console-shell',
+        pluginId: 'console-core',
       }),
     });
     expect(activate).toHaveBeenCalledOnce();
@@ -84,20 +84,20 @@ describe('bootstrapPluginRuntime', () => {
       bootstrapPluginRuntime({
         builtins: [
           {
-            id: 'console-shell',
+            id: 'console-core',
             version: '1.0.0',
             requires: [],
             provides: ['kubesphere.shell@1'],
             activate() {},
           },
         ],
-        coreRootIds: ['console-shell'],
+        coreRootIds: ['console-core'],
       }),
     ).rejects.toMatchObject({
       issue: expect.objectContaining({
         code: 'DECLARED_CAPABILITY_MISSING',
         stage: 'assertion',
-        pluginId: 'console-shell',
+        pluginId: 'console-core',
       }),
     });
   });
@@ -106,7 +106,7 @@ describe('bootstrapPluginRuntime', () => {
     const runtime = await bootstrapPluginRuntime({
       builtins: [
         {
-          id: 'console-shell',
+          id: 'console-core',
           version: '1.0.0',
           requires: [],
           provides: [],
@@ -132,7 +132,7 @@ describe('bootstrapPluginRuntime', () => {
           },
         },
       ],
-      coreRootIds: ['console-shell'],
+      coreRootIds: ['console-core'],
     });
 
     expect(runtime.ready).toBe(true);
@@ -149,7 +149,7 @@ describe('bootstrapPluginRuntime', () => {
     const runtime = await bootstrapPluginRuntime({
       builtins: [
         {
-          id: 'console-shell',
+          id: 'console-core',
           version: '1.0.0',
           requires: [],
           provides: [],
@@ -172,7 +172,7 @@ describe('bootstrapPluginRuntime', () => {
           activate: consumerActivate,
         },
       ],
-      coreRootIds: ['console-shell'],
+      coreRootIds: ['console-core'],
     });
 
     expect(runtime.ready).toBe(true);

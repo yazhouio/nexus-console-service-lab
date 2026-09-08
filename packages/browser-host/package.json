@@ -1,0 +1,25 @@
+{
+  "name": "@nexus/browser-host",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nexus/plugin-runtime": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/react": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react-dom": "catalog:"
+  }
+}

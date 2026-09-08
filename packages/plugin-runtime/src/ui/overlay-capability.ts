@@ -19,3 +19,17 @@ export const uiOverlayBridgeContract: BridgeCapabilityContract = {
       open(capability, payload, context, emit) { return (capability as UiOverlayCapability).observe(payload, context, emit); } },
   },
 };
+
+export function createUiOverlayPlugin() {
+  let service: UiOverlayCapability | undefined;
+  const plugin: import('../plugin').PluginDefinition = {
+    id: 'nexus-ui-overlay', version: '1.0.0', requires: [], provides: [UI_OVERLAY_CAPABILITY],
+    activate({ capabilities }) {
+      capabilities.register<UiOverlayCapability>(UI_OVERLAY_CAPABILITY, {
+        invoke(action, payload, context) { if (!service) throw Error('UI_NOT_BOUND'); return service.invoke(action, payload, context); },
+        observe(payload, context, emit) { if (!service) throw Error('UI_NOT_BOUND'); return service.observe(payload, context, emit); },
+      });
+    },
+  };
+  return { plugin, bind(value: UiOverlayCapability) { if (service) throw Error('UI_ALREADY_BOUND'); service = value; } };
+}

@@ -1,7 +1,11 @@
 import type { CapabilityId, PluginId } from './identifiers';
 import type { PluginContributionContext } from './contribution';
 
+export type PluginRole = 'provider' | 'feature';
+export type PluginProvenance = 'first-party' | 'partner' | 'third-party';
 export interface PluginDescriptor {
+  readonly roles?: readonly PluginRole[];
+  readonly provenance?: PluginProvenance;
   readonly id: PluginId;
   readonly version: string;
   readonly requires: readonly CapabilityId[];
@@ -14,6 +18,7 @@ export interface PluginCapabilityContext {
 }
 
 export interface PluginContext {
+  readonly actions: { register(id: string, handler: import('./action-runtime').ActionHandler): void };
   readonly capabilities: PluginCapabilityContext;
   readonly contributions: PluginContributionContext;
 }

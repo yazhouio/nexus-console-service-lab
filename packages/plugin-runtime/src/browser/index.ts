@@ -16,6 +16,7 @@ export {
   type MountRestrictedSurfaceInput,
   type SurfaceFailureStage,
   type SurfaceInstanceIdentity,
+  type ExecutionReference,
   type SurfaceInstanceRecord,
   type SurfaceInstanceState,
   type SurfaceMountErrorCode,

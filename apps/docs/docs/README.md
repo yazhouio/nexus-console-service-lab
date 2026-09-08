@@ -26,7 +26,7 @@ V1 的规范性来源是仓库中的 `spec/技术落地方案.md`。本目录是
 
 跨插件 UI 容器协议是 2026-09-04 后续确认的设计，按 [首期 UI 契约](./cross-plugin-ui-composition-contract.md) 与 ADR 0007–0015 执行；它取代早期 UI Extension 的全局 slot string、局部唯一性和直接挂载假设，其他既有 V1 约束继续有效。
 
-Console Core 插件化是 2026-09-07 后续确认的目标设计，按 [Console Core 插件化设计](./console-core-architecture.md) 与 ADR 0017–0018 执行；其中明确变更的职责、导航和扩展契约优先于早期方案。新增能力尚待实施，现有 API 文档仍反映当前实现。
+Console Core 插件化是 2026-09-07 后续确认的目标设计，按 [Console Core 插件化设计](./console-core-architecture.md) 与 ADR 0017–0018 执行；其中明确变更的职责、导航和扩展契约优先于早期方案。该设计已于 2026-09-08 落实为物理拆包、受管理根呈现、Platform Capability、参数化 Point 与 Action/Tab 作者 API。
 
 1. 除上述后续决策明确变更的范围外，如果本目录与 V1 规范冲突，以 V1 规范为准。
 2. 如果实现与规范冲突，应修复实现或明确记录偏差，不通过文档默默改变 Contract。

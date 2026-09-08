@@ -1,4 +1,4 @@
-import { assertPoint, assertSurfaceContribution, type ExtensionPointDefinition } from './ui/definitions';
+import { assertPoint, assertPointRef, assertExtensionContribution, type ExtensionPointRef, type ContractId, type ExtensionPointDefinition } from './ui/definitions';
 import { assertContributionContractCompatible } from './contribution-compatibility';
 import { frozenCopy } from './immutable';
 import { isCapabilityId, isHostApiId } from './identifiers';
@@ -26,6 +26,7 @@ export interface RestrictedPluginManifest extends PluginDescriptor {
   readonly hostApi: HostApiId;
   readonly permissions: readonly PermissionId[];
   readonly surfaces: readonly SandboxSurfaceDefinition[];
+  readonly actions?: readonly { readonly id: string }[];
   readonly extensionPoints?: readonly ExtensionPointDefinition[];
   readonly contributions: RestrictedContributions;
 }
@@ -45,7 +46,7 @@ export interface InstalledPluginRecord {
 export interface RestrictedInstallValidationOptions {
   readonly isEntryAllowed: (entry: string) => boolean;
   /** Explicit installation/publishing target capability, not automatic negotiation. */
-  readonly contributionContractVersion?: 1 | 2;
+  readonly contributionContractVersion?: 1 | 2 | 3;
 }
 
 export interface RestrictedManifestValidationIssue {
@@ -137,7 +138,17 @@ function extensionMetadata(value: Record<string, unknown>, pluginId: string) {
   if (value.acceptsChildren !== undefined && typeof value.acceptsChildren !== 'boolean') {
     invalid('acceptsChildren must be a boolean.', pluginId);
   }
-  return value.acceptsChildren === undefined ? {} : { acceptsChildren: value.acceptsChildren as boolean };
+  const pointRefs: { point?: ExtensionPointRef; childPoint?: ExtensionPointRef } = {};
+  for (const key of ['point', 'childPoint'] as const) if (value[key] !== undefined) {
+    try { assertPointRef(value[key] as ExtensionPointRef); } catch { invalid(`Invalid ${key}.`, pluginId); }
+    pointRefs[key] = frozenCopy(value[key] as ExtensionPointRef);
+  }
+  const assertions: { expectedProfile?: ContractId; expectedRefContract?: ContractId } = {};
+  for (const key of ['expectedProfile','expectedRefContract'] as const) if (value[key] !== undefined) {
+    if (!isCapabilityId(value[key])) invalid(`Invalid ${key}.`, pluginId);
+    assertions[key] = value[key] as ContractId;
+  }
+  return { ...pointRefs, ...assertions, ...(value.acceptsChildren === undefined ? {} : { acceptsChildren: value.acceptsChildren as boolean }) };
 }
 
 function optionalOrder(
@@ -228,7 +239,7 @@ function parseRoutes(
       const route = record(routeValue, `Route ${index}`, pluginId);
       assertClosed(
         route,
-        ['id', 'path', 'surfaceId', 'layout', 'initialParameters', 'parentRouteId', 'acceptsChildren'],
+        ['id', 'path', 'surfaceId', 'layout', 'initialParameters', 'parentRouteId', 'acceptsChildren', 'point', 'childPoint', 'expectedProfile', 'expectedRefContract'],
         `Route ${index}`,
         pluginId,
       );
@@ -288,7 +299,7 @@ function parseNavigation(
       );
       assertClosed(
         navigation,
-        ['id', 'label', 'parentId', 'routeId', 'order', 'acceptsChildren'],
+        ['id', 'label', 'parentId', 'routeId', 'order', 'acceptsChildren', 'point', 'childPoint', 'expectedProfile', 'expectedRefContract', 'group'],
         `Navigation ${index}`,
         pluginId,
       );
@@ -329,6 +340,7 @@ function parseNavigation(
         ...(parentId === undefined ? {} : { parentId }),
         ...(routeId === undefined ? {} : { routeId }),
         ...(order === undefined ? {} : { order }),
+        ...(navigation.group === undefined ? {} : { group: nonEmptyString(navigation.group, 'Navigation group', pluginId) }),
       });
     }),
   );
@@ -362,7 +374,7 @@ function parseContributions(
   return Object.freeze({
     routes: parseRoutes(contributions.routes, surfaceIds, pluginId),
     navigation: parseNavigation(contributions.navigation, pluginId),
-    extensions: parseUiDefinitions(contributions.extensions, assertSurfaceContribution, 'Surface contribution', pluginId),
+    extensions: parseUiDefinitions(contributions.extensions, assertExtensionContribution, 'Extension contribution', pluginId),
   });
 }
 
@@ -380,12 +392,15 @@ function parseManifest(
     [
       'id',
       'version',
+      'roles',
+      'provenance',
       'requires',
       'provides',
       'entry',
       'hostApi',
       'permissions',
       'surfaces',
+      'actions',
       'extensionPoints',
       'contributions',
     ],
@@ -395,6 +410,9 @@ function parseManifest(
 
   const id = nonEmptyString(manifest.id, 'Manifest id', pluginId);
   const version = nonEmptyString(manifest.version, 'Manifest version', id);
+  const roles = manifest.roles === undefined ? undefined : uniqueStrings(manifest.roles, 'Manifest roles', (value): value is import('./plugin').PluginRole => value === 'provider' || value === 'feature', id);
+  const provenance = manifest.provenance;
+  if (provenance !== undefined && !['first-party','partner','third-party'].includes(provenance as string)) invalid('Invalid plugin provenance.', id);
   const requires = uniqueStrings(
     manifest.requires,
     'Manifest requires',
@@ -437,11 +455,14 @@ function parseManifest(
     id,
     version,
     requires,
+    ...(roles ? { roles: roles as readonly import('./plugin').PluginRole[] } : {}),
+    ...(provenance ? { provenance: provenance as import('./plugin').PluginProvenance } : {}),
     provides: Object.freeze([]) as readonly [],
     entry,
     hostApi,
     permissions,
     surfaces,
+    actions: manifest.actions === undefined ? Object.freeze([]) : parseSurfaces(manifest.actions, id),
     extensionPoints: parseUiDefinitions(manifest.extensionPoints, assertPoint, 'Extension Point', id),
     contributions,
   });
@@ -485,7 +506,7 @@ export function validateRestrictedInstallRecord(
 ): InstalledPluginRecord {
   const installRecord = record(value, 'Installed plugin record');
   assertClosed(installRecord, ['manifest', 'config'], 'Installed plugin record');
-  assertContributionContractCompatible(installRecord.manifest, options.contributionContractVersion ?? 2);
+  assertContributionContractCompatible(installRecord.manifest, options.contributionContractVersion ?? 3);
   const manifest = parseManifest(installRecord.manifest, options);
   const config = parseConfig(installRecord.config, manifest.id);
 

@@ -157,7 +157,7 @@ describe('validateRestrictedInstallRecord', () => {
   it('defers well-formed Surface references to contribution relation validation', () => {
     const input = validRecord();
     input.manifest.contributions.extensions[0].surfaceId = 'missing';
-    expect(validateRestrictedInstallRecord(input, validationOptions).manifest.contributions.extensions?.[0].surfaceId).toBe('missing');
+    expect(validateRestrictedInstallRecord(input, validationOptions).manifest.contributions.extensions?.[0]).toMatchObject({ kind: 'surface', surfaceId: 'missing' });
   });
 
   it('rejects duplicate contribution IDs even across different points', () => {
@@ -169,7 +169,7 @@ describe('validateRestrictedInstallRecord', () => {
       order: 200,
     });
 
-    expectInvalid(input, 'Duplicate Surface contribution id');
+    expectInvalid(input, 'Duplicate Extension contribution id');
   });
 
   it('rejects duplicate contribution IDs', () => {
@@ -177,7 +177,7 @@ describe('validateRestrictedInstallRecord', () => {
     input.manifest.contributions.extensions.push({
       ...input.manifest.contributions.extensions[0],
     });
-    expectInvalid(input, 'Duplicate Surface contribution id');
+    expectInvalid(input, 'Duplicate Extension contribution id');
   });
 
   it('rejects non-serializable mount parameters', () => {

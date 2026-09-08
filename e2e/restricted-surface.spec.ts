@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 async function ready(page: Page) {
   await page.goto('/__fixtures__/surfaces');
   await expect(page.getByTestId('runtime-state')).toContainText('READY');
-  await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('ACTIVE');
 }
 
 async function mount(page: Page) {
@@ -57,7 +57,7 @@ test('artifact failure affects the Surface only', async ({ page }) => {
   await page.getByRole('button', { name: 'Open KubeEye Surface' }).click();
   await expect(page.getByTestId('surface-state')).toHaveText('ERROR');
   await expect(page.getByTestId('failure-stage')).toHaveText('artifact');
-  await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('ACTIVE');
   await expect(page.getByTestId('runtime-state')).toContainText('READY');
   await expect(page.locator('iframe')).toHaveCount(0);
   await page.getByRole('button', { name: 'Close KubeEye Surface' }).click();
@@ -91,7 +91,7 @@ test('runtime rendering errors are local and dispose the Surface resources', asy
   });
   await expect(page.getByTestId('surface-state')).toHaveText('ERROR');
   await expect(page.getByTestId('failure-stage')).toHaveText('render');
-  await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('ACTIVE');
   await expect(page.locator('iframe')).toHaveCount(0);
   await expect(page.locator('wujie-app')).toHaveCount(0);
 });
@@ -100,7 +100,7 @@ test('mounts Route and Extension independently, isolates failure, and unmounts i
   await ready(page);
   await mount(page);
   await page.getByRole('button', { name: 'Open KubeEye Card' }).click();
-  await expect(page.getByTestId('extension-state')).toHaveText('MOUNTED');
+  await expect(page.getByTestId('extension-state-kubeeye')).toHaveText('MOUNTED');
   const route = page.getByTestId('surface-container');
   const card = page.getByTestId('extension-container');
   await expect(page.locator('iframe')).toHaveCount(2);
@@ -119,12 +119,12 @@ test('mounts Route and Extension independently, isolates failure, and unmounts i
 
   await page.evaluate(() => document.querySelector('iframe')?.contentWindow?.dispatchEvent(new ErrorEvent('error', { message: 'route failed' })));
   await expect(page.getByTestId('surface-state')).toHaveText('ERROR');
-  await expect(page.getByTestId('extension-state')).toHaveText('MOUNTED');
-  await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
+  await expect(page.getByTestId('extension-state-kubeeye')).toHaveText('MOUNTED');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('ACTIVE');
   await card.getByRole('button', { name: 'Read current cluster' }).click();
   await expect(card.getByTestId('current-cluster')).toHaveText('demo-cluster');
   await page.getByRole('button', { name: 'Close KubeEye Card' }).click();
-  await expect(page.getByTestId('extension-state')).toHaveText('UNMOUNTED');
+  await expect(page.getByTestId('extension-state-kubeeye')).toHaveText('UNMOUNTED');
   await expect(page.getByTestId('surface-state')).toHaveText('ERROR');
   await page.getByRole('button', { name: 'Close KubeEye Surface' }).click();
   await expect(page.getByTestId('surface-state')).toHaveText('UNMOUNTED');
@@ -136,7 +136,7 @@ test('streams Host cluster changes to independent sessions and exposes safe Runt
   await expect(page.getByTestId('runtime-snapshot')).toBeAttached();
   await mount(page);
   await page.getByRole('button', { name: 'Open KubeEye Card' }).click();
-  await expect(page.getByTestId('extension-state')).toHaveText('MOUNTED');
+  await expect(page.getByTestId('extension-state-kubeeye')).toHaveText('MOUNTED');
   const route = page.getByTestId('surface-container');
   const card = page.getByTestId('extension-container');
   await route.getByRole('button', { name: 'Watch current cluster' }).click();
@@ -169,38 +169,45 @@ test('keeps mounted runtime unchanged until configuration Reload', async ({ page
   await expect(page.getByRole('button', { name: 'Install KubeEye 2.0.0' })).toBeVisible();
   await page.getByRole('button', { name: 'Install KubeEye 2.0.0' }).click();
   await expect(page.getByTestId('configuration-status')).toContainText('Reload Required');
-  await expect(page.getByTestId('runtime-plugin-version')).toHaveText('1.0.0');
+  await expect(page.getByTestId('runtime-plugin-version-kubeeye')).toHaveText('1.0.0');
   await expect(page.getByTestId('surface-state')).toHaveText('MOUNTED');
   await page.getByRole('button', { name: 'Reload page' }).click();
-  await expect(page.getByTestId('runtime-plugin-version')).toHaveText('2.0.0');
+  await expect(page.getByTestId('runtime-plugin-version-kubeeye')).toHaveText('2.0.0');
   await mount(page);
   await page.getByRole('button', { name: 'Roll back to 1.0.0' }).click();
-  await expect(page.getByTestId('runtime-plugin-version')).toHaveText('2.0.0');
+  await expect(page.getByTestId('configuration-status')).toContainText('Reload Required');
+  await expect(page.getByTestId('runtime-plugin-version-kubeeye')).toHaveText('2.0.0');
   await page.getByRole('button', { name: 'Reload page' }).click();
-  await expect(page.getByTestId('runtime-plugin-version')).toHaveText('1.0.0');
+  await expect(page.getByTestId('runtime-plugin-version-kubeeye')).toHaveText('1.0.0');
   await page.getByRole('button', { name: 'Disable KubeEye' }).click();
-  await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
+  await expect(page.getByTestId('configuration-status')).toContainText('Reload Required');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('ACTIVE');
   await page.getByRole('button', { name: 'Reload page' }).click();
-  await expect(page.getByTestId('plugin-state')).toHaveText('MISSING');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('MISSING');
   await page.getByRole('button', { name: 'Enable KubeEye' }).click();
-  await expect(page.getByTestId('plugin-state')).toHaveText('MISSING');
+  await expect(page.getByTestId('configuration-status')).toContainText('Reload Required');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('MISSING');
   await page.getByRole('button', { name: 'Reload page' }).click();
-  await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('ACTIVE');
   await page.getByRole('button', { name: 'Uninstall KubeEye' }).click();
-  await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
+  await expect(page.getByTestId('configuration-status')).toContainText('Reload Required');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('ACTIVE');
   await page.getByRole('button', { name: 'Reload page' }).click();
-  await expect(page.getByTestId('plugin-state')).toHaveText('MISSING');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('MISSING');
   await page.getByRole('button', { name: 'Install KubeEye 1.0.0' }).click();
-  await expect(page.getByTestId('plugin-state')).toHaveText('MISSING');
+  await expect(page.getByTestId('configuration-status')).toContainText('Reload Required');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('MISSING');
   await page.getByRole('button', { name: 'Reload page' }).click();
-  await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('ACTIVE');
 });
 
 test('Bridge grants do not authorize same-origin network access; the Backend enforces its own permissions', async ({ page, context, baseURL }) => {
   await context.addCookies([{ name: 'fixture-session', value: 'reader', url: baseURL! }]);
   await ready(page);
   await page.getByRole('button', { name: 'Disable KubeEye' }).click();
+  await expect(page.getByTestId('configuration-status')).toContainText('Reload Required');
   await page.getByRole('button', { name: 'Enable KubeEye' }).click();
+  await expect(page.getByTestId('configuration-status')).toContainText('Reload Required');
   await page.evaluate(() => {
     const key = 'nexus.plugin-installations.v1';
     const saved = JSON.parse(localStorage.getItem(key)!);

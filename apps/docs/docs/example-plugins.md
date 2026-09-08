@@ -1,94 +1,44 @@
 # Example Plugins
 
-## 1. 示例组成
+## 示例组成
 
 | 路径 | 作用 |
 | --- | --- |
-| `apps/host/src/plugins/console-shell.ts` | Core Builtin，提供 Console Capability |
-| `apps/host/src/plugins/cluster.tsx` | Non-core Builtin，提供 Cluster Capability 和 Host UI |
-| `apps/host/src/plugins/kubeeye-installation.ts` | Restricted Manifest、Config 和 Bridge Contract |
-| `apps/example-restricted-plugin/src/App.tsx` | Restricted Surface UI |
-| `apps/example-restricted-plugin/src/host-bridge.ts` | Fixture-local Bridge client |
-| `e2e/restricted-surface.spec.ts` | Browser lifecycle / security regression tests |
+| `apps/console/src/distribution.ts` | Console 发行版：固定插件、Core roots、契约、grants 与恢复 |
+| `packages/browser-host/src/App.tsx` | 通用 Browser Host 启动、Router adapter 和 break-glass |
+| `packages/console-core/src/plugin.ts` | Console Core：根布局、导航、Home、Settings 和 PluginRef Action Point |
+| `packages/console-core-api/src/index.ts` | Console Point、Profile、PluginRef 和贡献构造器 |
+| `packages/cluster-api/src/index.ts` | Cluster Capability、ResourceRef 和节点 Point |
+| `apps/console/src/plugins/cluster.tsx` | Feature/Provider Builtin：Cluster 卡片、节点 Layout、Action/Tab Placement |
+| `apps/console/src/plugins/kubeeye-installation.ts` | Restricted Manifest、Config 和 Cluster Bridge Contract |
+| `apps/example-restricted-plugin/src/App.tsx` | KubeEye Surface：读取、订阅和按 Route ID 导航 |
+| `apps/ui-composition-fixtures/src/ui-action.tsx` | 无 Surface 的 Restricted Action 入口，仅在验收构建使用 |
 
-## 2. Core Builtin：Console Shell
+## Console Core
 
-`console-shell` 没有依赖，是 Host 的 Core Root：
+`console-core` 是 Distribution 明确保证存在的 Core root，依赖七个 Platform Capability。activate 只注册声明、Action handler 与本地 Capability，不等待页面业务数据。它拥有 `root` Surface，经受管理的 Router 树内 adapter 挂载；Layout 使用 `RouteOutlet`，正常态插件管理通过 `plugins.query/manage`。
 
-```ts
-export const consoleShell: PluginDefinition = {
-  id: 'console-shell',
-  version: '1.0.0',
-  requires: [],
-  provides: ['kubesphere.console-shell@1'],
-  activate(context) {
-    context.capabilities.register('kubesphere.console-shell@1', {
-      name: 'Nexus Console',
-    });
-  },
-};
-```
+它发布 `routes`、`primary-navigation`、`home.cards`、`settings.sections`、`plugin-details.actions`。后者绑定通用 `detail.actions@1` Profile 与 `console-core.plugin-ref@1`；“Check plugin status”通过授权的 `plugins.query` 执行。Core 不导入 Cluster 实现或 Host 私有 Context。
 
-它演示了 owner-bound `PluginContext` 与声明的 `provides` 必须一致。
+## Cluster Builtin
 
-## 3. Non-core Builtin：Cluster
+Cluster 同时承担 Provider 与 Feature 角色，提供 `kubesphere.cluster@2`。它通过 Console API 构造器贡献 `/clusters/current` Route、导航和首页卡片，并拥有节点子 Route/Navigation、`node.actions` 和 `node.tabs` Point。
 
-`cluster` 依赖 Console Shell：
+节点操作 Point 使用同一个 `detail.actions@1` Profile，绑定 `cluster.resource-ref@1`。节点 Tab 初始不挂载，选择后复用 Surface 执行；切走卸载，重新选择产生新 Scope。Builtin Node Layout 的状态在子路由切换后保留。
 
-```ts
-requires: ['kubesphere.console-shell@1']
-provides: ['kubesphere.cluster@2']
-```
+## KubeEye Restricted
 
-它同时注册：
+KubeEye 声明 Cluster read 与 Route query/navigate 依赖及权限，始终 manifest-first。Runtime 标记 ACTIVE 仅表示声明接纳，Wujie 制品仍在 Surface 挂载时加载。首页卡片与 Route 可以同时执行同一个 Surface Definition，它们持有独立 Attempt 和 BridgeSession。
 
-- `ClusterCapability`；
-- `/clusters/current` Route；
-- `Cluster Overview` Navigation；
-- 指向 `console-shell / home.cards@1` 的 Surface Contribution。
+“Read current cluster”执行 unary 请求；“Watch current cluster”打开带快照的订阅；“Open example node”只提交 `node-detail` Route ID 和 `{ cluster, node }`，URL 由 Runtime/Host 解析并留审计。
 
-它的 `watchCurrentCluster` 返回当前 Snapshot 和 disposer，正好符合 Subscription Contract 的 Host 侧模型。
+## Action-only 与 Tab 验收插件
 
-## 4. Restricted Manifest：KubeEye
+测试构建安装 `ui-action`，Manifest 的 `surfaces` 是空数组。`connectActionHost` 接收每次调用的冻结 Context、invocationId 和授权 client，执行普通或可取消的延迟检查。终态结束后卸载 Wujie 并关闭 Bridge。
 
-KubeEye 只消费 `kubesphere.cluster@2`，不提供 Capability：
+`ui-c` 为节点贡献 Tab Surface。`e2e/action-tab.spec.ts` 验证惰性挂载、键盘选择、切走卸载、重入新建、Action 成功/取消、Builtin PluginRef Action 和 Restricted 导航。`e2e/console-core.spec.ts` 验证父 Layout 连续性和根呈现失败后的独立恢复路径。
 
-```ts
-manifest: {
-  id: 'kubeeye',
-  version: '1.0.0',
-  entry: '/plugins/kubeeye/1.0.0/',
-  hostApi: 'kubesphere.console@1',
-  requires: ['kubesphere.cluster@2'],
-  provides: [],
-  permissions: ['cluster.read'],
-  surfaces: [{ id: 'overview' }],
-  contributions: { routes, navigation, extensions },
-}
-```
-
-Host 先调用 `validateRestrictedInstallRecord`，再将合法记录交给 `bootstrapPluginRuntime`。因此 KubeEye 被标记 `ACTIVE` 时，代码仍可能尚未加载。
-
-## 5. Restricted Surface：KubeEye UI
-
-Surface 启动时：
-
-1. 读取 Wujie 提供的 Bootstrap Descriptor。
-2. 向 Host 发起 `nexus:bridge:connect`。
-3. 校验 Host 返回的 Protocol、Surface Instance 和 MessagePort。
-4. 使用专用 Port 调用 `getCurrentCluster` 或打开 `watchCurrentCluster`。
-5. 在 React unmount 时执行 Subscription disposer。
-
-Fixture 的两个操作对应两个 Action：
-
-```ts
-await getCurrentCluster();
-await watchCurrentCluster(onValue);
-```
-
-`watchCurrentCluster` 的取消函数最终发送当前 Session 的 Unsubscribe 消息。
-
-## 6. 运行示例
+## 运行与验证
 
 ```bash
 pnpm install
@@ -96,25 +46,15 @@ pnpm dev:plugin
 pnpm dev:host
 ```
 
-打开 `http://localhost:3000` 后：
-
-1. Runtime 应显示 `READY`。
-2. KubeEye Plugin 应显示 `ACTIVE`。
-3. 首次打开 Route 或 Home Card 才会创建 Wujie 实例。
-4. Route 和 Card 同时打开时应有两个独立 Surface Instance。
-5. 切换 Host Cluster 时，两个订阅都会收到更新。
-6. 关闭一个实例不会影响另一个实例。
-
-## 7. 对应测试
+在两个终端启动插件与 Console，再打开 `http://localhost:3000`。测试 fixtures 由 `NEXUS_TEST_FIXTURES=true` 显式启用，正常构建不开放测试页面或 Action owner。
 
 ```bash
+pnpm check:boundaries
+pnpm typecheck
+pnpm test
 pnpm test:e2e
+pnpm build:routing-validation
+pnpm test:e2e:preview
 ```
 
-E2E 覆盖 Lazy Mount、Unary Bridge、Subscription、Route / Extension 独立实例、Failure Isolation、Cleanup / Remount、Configuration Reload、Runtime Inspector 以及 Backend Authorization。
-
-## 8. 最小递归验收示例
-
-`apps/ui-composition-fixtures` 将 A 页面、B Card、C Chart 构建成三个独立入口。A/B 各自使用声明的 Slot，B/C 分别贡献自有 Surface；还包含一个走本地 adapter 的 Builtin Card。测试开关开启后访问 `/__fixtures__/ui-composition`。
-
-`pnpm test:e2e` 自动启动所有 fixture 服务，包含递归、Context、hidden / unmount、A → B → A、Scope / Attempt 和 Overlay 浏览器验收。详细命令与边界见 [UI 组合实现](./cross-plugin-ui-composition-implementation.md)。
+cooperative isolation 的安全边界保持不变：同源 Wujie 不能被当作敌对代码沙箱。Builtin/来源标签不产生隐式权限；Point grant 和 Capability permission 是两套独立检查。

@@ -1,6 +1,7 @@
 import type { ContributionRegistry, HostRenderTarget, JsonValue } from '../contribution';
+import { admitContribution, comparePointContributions } from './admission';
 import { frozenCopy } from '../immutable';
-import { uiKey, type ContributionRef, type ExtensionPointDefinition, type HostContributionPolicy, type SurfaceContributionDefinition } from './definitions';
+import { uiKey, type ContributionRef, type CompiledExtensionPointDefinition, type HostContributionPolicy, type SurfaceContributionDefinition, type TabContributionDefinition } from './definitions';
 import { assertUiJson, matchesContext, canonicalJson } from './schema';
 
 export class UiError extends Error { constructor(readonly code: string) { super(code); this.name = 'UiError'; } }
@@ -8,11 +9,11 @@ export interface UiSizing { readonly mode: 'content-sized' | 'bounded'; readonly
 export interface SlotInput { readonly id: string; readonly contextKey: string; readonly context: JsonValue; readonly hidden?: boolean; readonly selected?: readonly ContributionRef[]; readonly sizing?: UiSizing }
 export interface ContextSnapshot { readonly contextKey: string; readonly revision: number; readonly value: JsonValue }
 export interface UiExecution { readonly phase: 'starting' | 'ready' | 'failed'; readonly attemptId: string; readonly error?: string; readonly stage?: 'artifact' | 'wujie-bootstrap' | 'handshake' | 'render' | 'bridge'; readonly retryTarget?: string }
-export interface UiRelation { readonly ref: ContributionRef; readonly definition: SurfaceContributionDefinition; readonly authorized: boolean; readonly availability: 'available' | 'unavailable'; readonly reason?: string }
+export interface UiRelation { readonly ref: ContributionRef; readonly definition: SurfaceContributionDefinition | TabContributionDefinition; readonly authorized: boolean; readonly availability: 'available' | 'unavailable'; readonly reason?: string }
 export interface SlotObservation {
   readonly occurrenceId: string; readonly pointId: string; readonly runtimeError?: string; readonly lifecycle: 'active'; readonly visibility: 'visible' | 'hidden';
   readonly input: { readonly submittedKey: string; readonly acceptance: 'accepted' | 'rejected'; readonly error?: string; readonly lastAccepted: ContextSnapshot | null; readonly effective: ContextSnapshot | null };
-  readonly contributions: readonly { readonly ref: ContributionRef; readonly availability: 'available' | 'unavailable'; readonly reason?: string; readonly selected: boolean; readonly execution?: UiExecution }[];
+  readonly contributions: readonly { readonly ref: ContributionRef; readonly label?: string; readonly initiallySelected?: boolean; readonly tabId?: string; readonly availability: 'available' | 'unavailable'; readonly reason?: string; readonly selected: boolean; readonly execution?: UiExecution }[];
 }
 export interface UiObservation { readonly streamId: string; readonly progress: number; readonly initialContext: ContextSnapshot | null; readonly context: ContextSnapshot | null; readonly overlayInput: JsonValue | null; readonly occurrences: readonly SlotObservation[] }
 export interface OverlayObservation { readonly handle: string; readonly surfaceId: string; readonly input: JsonValue; readonly outcome: { readonly state: 'pending' | 'completed' | 'cancelled'; readonly result?: JsonValue }; readonly execution?: UiExecution }
@@ -27,7 +28,7 @@ export interface UiDriver {
 }
 interface Scope { id: string; owner: string; kind: 'root' | 'contribution' | 'overlay'; parent?: Scope; guardOccurrence?: string; active: boolean; children: Set<Scope>; attempt?: Attempt; surfaceId?: string; target?: HostRenderTarget; placement: unknown; release?: () => void; context: ContextSnapshot | null; overlays: Set<Overlay>; overlay?: Overlay; changed?: () => void }
 interface Attempt { id: string; scope: Scope; valid: boolean; signal: AbortController; initial: ContextSnapshot | null; pinned: boolean; occurrences: Set<Occurrence>; execution: UiExecution; task: Promise<void>; mounted?: UiMounted; cleanup?: Promise<void> }
-interface Occurrence { id: string; attempt: Attempt; point: ExtensionPointDefinition; anchor: unknown; input: SlotInput; lastAccepted: ContextSnapshot | null; effective: ContextSnapshot | null; error?: string; runtimeError?: string; executions: Map<string, Scope>; active: boolean }
+interface Occurrence { id: string; attempt: Attempt; point: CompiledExtensionPointDefinition; anchor: unknown; input: SlotInput; lastAccepted: ContextSnapshot | null; effective: ContextSnapshot | null; error?: string; runtimeError?: string; executions: Map<string, Scope>; active: boolean }
 interface Overlay { id: string; owner: Scope; surfaceId: string; input: JsonValue; outcome: OverlayObservation['outcome']; execution: Scope; view: ReturnType<UiDriver['overlay']> }
 export interface UiRuntimeOptions {
   /** Supply completed declarations; this runtime snapshots them at construction. */
@@ -49,7 +50,7 @@ export interface UiRuntimeOptions {
 export function createUiRuntime(options: UiRuntimeOptions) {
   const { driver } = options;
   const points = frozenCopy(options.registry.listExtensionPoints());
-  const extensions = frozenCopy(options.registry.listExtensions());
+  const extensions = frozenCopy(options.registry.listExtensions().filter((entry): entry is import('../contribution').OwnedContribution<SurfaceContributionDefinition | TabContributionDefinition> => entry.contribution.kind !== 'action'));
   const surfaces = frozenCopy(options.registry.listUiSurfaces());
   const pointsById = new Map(points.map(point => [uiKey(point.ownerPluginId, point.contribution.id), point]));
   const surfacesById = new Map(surfaces.map(surface => [uiKey(surface.ownerPluginId, surface.contribution.id), surface]));
@@ -142,21 +143,17 @@ export function createUiRuntime(options: UiRuntimeOptions) {
     const baseline = frozenCopy(s.context);
     const a = start(s, baseline, endAttempt(old), false, true); s.changed?.(); return a.id;
   }
-  function compileRelations(pointOwner: string, point: ExtensionPointDefinition): UiRelation[] {
-    return extensions.filter(({ contribution: c }) => c.point.ownerPluginId === pointOwner && c.point.id === point.id).map(({ ownerPluginId, contribution: c }) => {
-      let authorized = ownerPluginId === pointOwner;
-      let policyFailed = false;
-      if (!authorized) {
-        try { authorized = options.policy({ kind: 'surface', contributorId: ownerPluginId, ownerPluginId: pointOwner, targetId: point.id, contractMajor: c.point.contractMajor }); }
-        catch { policyFailed = true; }
-      }
+  function compileRelations(pointOwner: string, point: CompiledExtensionPointDefinition): UiRelation[] {
+    return extensions.filter(({ contribution: c }) => c.point.ownerPluginId === pointOwner && c.point.id === point.id).sort((a,b) => comparePointContributions(point, a, b)).map(({ ownerPluginId, contribution: c }) => {
+      const admission = admitContribution(ownerPluginId, c, point, options.policy);
+      const { authorized } = admission;
       const surface = surfacesById.get(uiKey(ownerPluginId, c.surfaceId));
-      const reason = policyFailed ? 'POLICY_ERROR' : !authorized ? 'POLICY_DENIED' : c.point.contractMajor !== point.contractMajor ? 'CONTRACT_MISMATCH' : c.kind !== point.kind ? 'KIND_MISMATCH' : !surface ? 'SURFACE_MISSING' : undefined;
+      const reason = admission.reason ?? (!surface ? 'SURFACE_MISSING' : undefined);
       return { ref: { ownerPluginId, id: c.id }, definition: c, authorized, availability: reason ? 'unavailable' : 'available', ...(reason ? { reason } : {}) };
     });
   }
   const relationTable = new Map(points.map(({ ownerPluginId, contribution }) => [uiKey(ownerPluginId, contribution.id), frozenCopy(compileRelations(ownerPluginId, contribution))]));
-  function relations(owner: string, point: ExtensionPointDefinition): readonly UiRelation[] { return relationTable.get(uiKey(owner, point.id)) ?? []; }
+  function relations(owner: string, point: CompiledExtensionPointDefinition): readonly UiRelation[] { return relationTable.get(uiKey(owner, point.id)) ?? []; }
   function endOccurrence(o: Occurrence) {
     if (!o.active) return;
     o.active = false; occurrences.delete(o.id); o.attempt.occurrences.delete(o);
@@ -174,8 +171,32 @@ export function createUiRuntime(options: UiRuntimeOptions) {
       if ((size.minWidth ?? 0) > (size.maxWidth ?? Infinity) || (size.minHeight ?? 0) > (size.maxHeight ?? Infinity)) throw new UiError('INVALID_SIZING');
     }
   }
-  function reconcile(o: Occurrence, input: SlotInput) {
+  function pointInput(owner: string, point: CompiledExtensionPointDefinition, input: SlotInput): SlotInput {
     validateInput(input);
+    if (point.kind !== 'surface' && point.kind !== 'tab') throw new UiError('POINT_KIND_MISMATCH');
+    if (point.kind === 'tab') {
+      if ((input.selected?.length ?? 0) > 1) throw new UiError('TAB_SELECTION_INVALID');
+      input = { ...input, selected: input.selected ?? [] };
+    }
+    const selected = relations(owner, point).filter(r => r.availability === 'available' && (input.selected === undefined || input.selected.some(ref => uiKey(ref.ownerPluginId, ref.id) === uiKey(r.ref.ownerPluginId, r.ref.id))));
+    if (point.constraints?.presentations && !point.constraints.presentations.includes(point.kind === 'tab' ? 'tab' : 'inline')) throw new UiError('POINT_PRESENTATION_INVALID');
+    const limits = point.constraints?.cardinality;
+    if (limits && (selected.length < limits.min || selected.length > limits.max)) throw new UiError('POINT_CARDINALITY_INVALID');
+    const bounds = point.constraints?.sizing;
+    if (bounds) {
+      const { modes, ...dimensions } = bounds;
+      const size = input.sizing ?? { mode: modes[0], ...dimensions };
+      if (!modes.includes(size.mode)) throw new UiError('POINT_SIZING_INVALID');
+      for (const name of ['Width','Height'] as const) {
+        const min = `min${name}` as const, max = `max${name}` as const;
+        if (bounds[min] !== undefined && (size[min] ?? 0) < bounds[min]! || bounds[max] !== undefined && (size[max] ?? Infinity) > bounds[max]!) throw new UiError('POINT_SIZING_INVALID');
+      }
+      input = { ...input, sizing: size };
+    }
+    return input;
+  }
+  function reconcile(o: Occurrence, input: SlotInput) {
+    input = pointInput(o.attempt.scope.owner, o.point, input);
     if (input.id !== o.point.id) throw new UiError('POINT_CHANGED');
     const keyChanged = input.contextKey !== o.input.contextKey;
     if (keyChanged) { for (const s of o.executions.values()) endScope(s); o.executions.clear(); o.effective = null; }
@@ -220,7 +241,7 @@ export function createUiRuntime(options: UiRuntimeOptions) {
       input: { submittedKey: o.input.contextKey, acceptance: o.error ? 'rejected' : 'accepted', ...(o.error ? { error: o.error } : {}), lastAccepted: o.lastAccepted, effective: o.effective },
       contributions: relations(o.attempt.scope.owner, o.point).filter(r => r.authorized).map(r => {
         const s = o.executions.get(uiKey(r.ref.ownerPluginId, r.ref.id));
-        return { ref: r.ref, availability: r.availability, ...(r.reason ? { reason: r.reason } : {}), selected: o.input.selected === undefined || o.input.selected.some(ref => ref.ownerPluginId === r.ref.ownerPluginId && ref.id === r.ref.id), ...(s?.attempt ? { execution: s.attempt.execution } : {}) };
+        return { ref: r.ref, ...(r.definition.label ? { label: r.definition.label } : {}), ...(r.definition.kind === 'tab' ? { tabId: r.definition.tabId } : r.definition.initiallySelected === undefined ? {} : { initiallySelected: r.definition.initiallySelected }), availability: r.availability, ...(r.reason ? { reason: r.reason } : {}), selected: o.input.selected === undefined || o.input.selected.some(ref => ref.ownerPluginId === r.ref.ownerPluginId && ref.id === r.ref.id), ...(s?.attempt ? { execution: s.attempt.execution } : {}) };
       }),
     };
   }
@@ -249,6 +270,7 @@ export function createUiRuntime(options: UiRuntimeOptions) {
       if (a.occurrences.size >= 32) throw new UiError('UI_RESOURCE_LIMIT');
       const point = pointsById.get(uiKey(a.scope.owner, input.id))?.contribution;
       if (!point) throw new UiError('POINT_NOT_OWNED');
+      input = pointInput(a.scope.owner, point, input);
       const o: Occurrence = { id: id('occurrence'), attempt: a, point, anchor, input: frozenCopy(input), active: true, lastAccepted: null, effective: null, executions: new Map() };
       occurrences.set(o.id, o); a.occurrences.add(o); reconcile(o, input); return o.id;
     },

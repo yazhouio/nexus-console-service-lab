@@ -89,7 +89,7 @@ function coreAndCluster(
 ): readonly PluginDefinition[] {
   return [
     {
-      id: 'console-shell',
+      id: 'console-core',
       version: '1.0.0',
       requires: [],
       provides: [],
@@ -114,7 +114,7 @@ function coreAndCluster(
 describe('Restricted Manifest-first bootstrap', () => {
   it('preserves optional routing metadata through validation, normalization and inspection', async () => {
     const runtime = await bootstrapPluginRuntime({
-      builtins: [coreAndCluster()[0]], coreRootIds: ['console-shell'],
+      builtins: [coreAndCluster()[0]], coreRootIds: ['console-core'],
       installed: [installed('alpha', { requires: [], permissions: [], contributions: {
         routes: [{ id: 'alerts', parentRouteId: 'node', path: 'alerts', surfaceId: 'overview', acceptsChildren: false }],
         navigation: [{ id: 'alerts-nav', label: 'Alerts', routeId: 'alerts', acceptsChildren: true }],
@@ -130,7 +130,7 @@ describe('Restricted Manifest-first bootstrap', () => {
   it('publishes ACTIVE declarations without loading plugin code', async () => {
     const runtime = await bootstrapPluginRuntime({
       builtins: coreAndCluster(),
-      coreRootIds: ['console-shell'],
+      coreRootIds: ['console-core'],
       installed: [installed('kubeeye')],
       supportedHostApis: ['kubesphere.console@1'],
       bridgeContracts: [bridgeContract()],
@@ -161,7 +161,7 @@ describe('Restricted Manifest-first bootstrap', () => {
   it('skips a capability that is not Bridge-exposed at Manifest stage', async () => {
     const runtime = await bootstrapPluginRuntime({
       builtins: coreAndCluster(),
-      coreRootIds: ['console-shell'],
+      coreRootIds: ['console-core'],
       installed: [installed('kubeeye')],
       supportedHostApis: ['kubesphere.console@1'],
       bridgeContracts: [],
@@ -186,7 +186,7 @@ describe('Restricted Manifest-first bootstrap', () => {
   it('skips unsupported Host API majors', async () => {
     const runtime = await bootstrapPluginRuntime({
       builtins: coreAndCluster(),
-      coreRootIds: ['console-shell'],
+      coreRootIds: ['console-core'],
       installed: [installed('kubeeye')],
       supportedHostApis: ['kubesphere.console@2'],
       bridgeContracts: [bridgeContract()],
@@ -202,7 +202,7 @@ describe('Restricted Manifest-first bootstrap', () => {
   it('skips permissions unknown to required Bridge Contracts', async () => {
     const runtime = await bootstrapPluginRuntime({
       builtins: coreAndCluster(),
-      coreRootIds: ['console-shell'],
+      coreRootIds: ['console-core'],
       installed: [installed('kubeeye', { permissions: ['workload.read'] })],
       supportedHostApis: ['kubesphere.console@1'],
       bridgeContracts: [bridgeContract()],
@@ -219,7 +219,7 @@ describe('Restricted Manifest-first bootstrap', () => {
       builtins: coreAndCluster(() => {
         throw new Error('cluster activation failed');
       }),
-      coreRootIds: ['console-shell'],
+      coreRootIds: ['console-core'],
       installed: [installed('kubeeye')],
       supportedHostApis: ['kubesphere.console@1'],
       bridgeContracts: [bridgeContract()],
@@ -236,7 +236,7 @@ describe('Restricted Manifest-first bootstrap', () => {
 
   it('drops the whole Restricted declaration group on a global collision', async () => {
     const shell: PluginDefinition = {
-      id: 'console-shell',
+      id: 'console-core',
       version: '1.0.0',
       requires: [],
       provides: [],
@@ -250,7 +250,7 @@ describe('Restricted Manifest-first bootstrap', () => {
     };
     const runtime = await bootstrapPluginRuntime({
       builtins: [shell, coreAndCluster()[1]],
-      coreRootIds: ['console-shell'],
+      coreRootIds: ['console-core'],
       installed: [installed('kubeeye')],
       supportedHostApis: ['kubesphere.console@1'],
       bridgeContracts: [bridgeContract()],
@@ -298,7 +298,7 @@ describe('Restricted Manifest-first bootstrap', () => {
 
     const runtime = await bootstrapPluginRuntime({
       builtins: [coreAndCluster()[0]],
-      coreRootIds: ['console-shell'],
+      coreRootIds: ['console-core'],
       installed: [alpha, zeta],
       supportedHostApis: ['kubesphere.console@1'],
     });
@@ -312,7 +312,7 @@ describe('Restricted Manifest-first bootstrap', () => {
 });
 
 it('joins Host diagnostics to ACTIVE plugin contributions without leaking policy data', async () => {
-  const runtime = await bootstrapPluginRuntime({ builtins: [coreAndCluster()[0]], coreRootIds: ['console-shell'], installed: [installed('alpha', { requires: [], permissions: [] })], supportedHostApis: ['kubesphere.console@1'] });
+  const runtime = await bootstrapPluginRuntime({ builtins: [coreAndCluster()[0]], coreRootIds: ['console-core'], installed: [installed('alpha', { requires: [], permissions: [] })], supportedHostApis: ['kubesphere.console@1'] });
   const snapshot = inspect(runtime, { listHostContributions: () => [{ ownerPluginId: 'alpha', kind: 'route', contributionId: 'alpha-route', state: 'QUARANTINED', declaredPath: '/alpha', fullPath: '/alpha', diagnostics: [{ code: 'ROUTE_CONFLICT', witness: '/alpha', secret: 'policy-token' }], secret: 'policy-token' }] });
   expect(snapshot.plugins[0]).toMatchObject({ id: 'alpha', state: 'ACTIVE' });
   expect(snapshot.contributions.routes[0]).toMatchObject({ host: { state: 'QUARANTINED', diagnostics: [{ code: 'ROUTE_CONFLICT' }] } });

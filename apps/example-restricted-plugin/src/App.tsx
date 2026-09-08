@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { getCurrentCluster, hostConnectionPromise, watchCurrentCluster } from './host-bridge';
+import { getCurrentCluster, hostConnectionPromise, watchCurrentCluster, navigateToExampleNode } from './host-bridge';
 
 const cardStyle = {
   padding: 24,
@@ -14,6 +14,7 @@ const cardStyle = {
 export function App() {
   const [bridgeState, setBridgeState] = useState('CONNECTING');
   const [parentAccessible, setParentAccessible] = useState(false);
+  const [navigationError, setNavigationError] = useState('');
   const [cluster, setCluster] = useState('Not requested');
   const [watchedCluster, setWatchedCluster] = useState('Not subscribed');
   const [watching, setWatching] = useState(false);
@@ -65,6 +66,8 @@ export function App() {
           if (!disposedRef.current) { setWatching(false); setWatchedCluster(error instanceof Error ? error.message : 'FAILED'); }
         }
       }}>{watching ? 'Stop watching' : 'Watch current cluster'}</button>
+      <button disabled={bridgeState !== 'CONNECTED'} onClick={() => { void navigateToExampleNode().catch(error => setNavigationError(error.message)); }}>Open example node</button>
+      {navigationError && <p role="alert">{navigationError}</p>}
       <p>Watched cluster: <strong data-testid="watched-cluster">{watchedCluster}</strong></p>
       <p>Current cluster: <strong data-testid="current-cluster">{cluster}</strong></p>
     </section>

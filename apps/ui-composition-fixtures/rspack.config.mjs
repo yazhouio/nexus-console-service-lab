@@ -1,5 +1,5 @@
 import { rspack } from '@rspack/core';
-const owners = ['ui-a', 'ui-b', 'ui-c'];
+const owners = ['ui-a', 'ui-b', 'ui-c', 'ui-action'];
 export default {
   entry: Object.fromEntries(owners.map(owner => [owner, `./src/${owner}.tsx`])),
   output: { filename: 'plugins/[name]/1.0.0/main.js', publicPath: '/', clean: true },

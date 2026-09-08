@@ -28,6 +28,7 @@ async function instance(page: import('@playwright/test').Page) {
 test('preserves parent Layout state while changing siblings and remounting only the leaf context', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Install KubeEye 2.0.0' }).click();
+  await expect(page.getByTestId('configuration-status')).toContainText('Reload Required');
   await page.reload();
   await page.goto('/clusters/demo/nodes/n1/alert-messages');
   await expect(page.getByTestId('surface-state')).toHaveText('MOUNTED');
@@ -63,10 +64,10 @@ test('shows a retryable Surface error without redirecting or failing plugin boot
   await page.route('**/plugins/kubeeye/1.0.0/**', route => route.fulfill({ status: 503, body: 'unavailable' }));
   await page.goto('/kubeeye');
   await expect(page.getByTestId('surface-state')).toHaveText('ERROR');
-  await expect(page.getByTestId('plugin-state')).toHaveText('ACTIVE');
+  await expect(page.getByTestId('plugin-state-kubeeye')).toHaveText('ACTIVE');
   await expect(page).toHaveURL(/\/kubeeye$/);
   await page.unroute('**/plugins/kubeeye/1.0.0/**');
-  await page.getByRole('button', { name: 'Retry KubeEye Surface' }).click();
+  await page.getByRole('button', { name: 'Retry Plugin view' }).click();
   await expect(page.getByTestId('surface-state')).toHaveText('MOUNTED');
 });
 
@@ -86,11 +87,12 @@ test('leaving during artifact loading cannot resurrect a late Route Surface', as
 test('conflicting child diagnostics preserve the parent, siblings, and ACTIVE inspection axis', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Install KubeEye 2.0.0' }).click();
+  await expect(page.getByTestId('configuration-status')).toContainText('Reload Required');
   await page.evaluate(() => {
     const key = 'nexus.plugin-installations.v1';
     const snapshot = JSON.parse(localStorage.getItem(key)!);
     const record = snapshot.records.find((r: { manifest: { version: string } }) => r.manifest.version === '2.0.0');
-    record.manifest.contributions.routes.push({ id: 'conflicting-alerts', parentRouteId: 'node-detail', path: 'alert-messages', surfaceId: 'overview' });
+    record.manifest.contributions.routes.push({ id: 'conflicting-alerts', parentRouteId: 'node-detail', point: { ownerPluginId: 'cluster', id: 'node.children', contractMajor: 1 }, path: 'alert-messages', surfaceId: 'overview' });
     localStorage.setItem(key, JSON.stringify(snapshot));
   });
   await page.goto('/clusters/demo/nodes/n1/alert-messages');

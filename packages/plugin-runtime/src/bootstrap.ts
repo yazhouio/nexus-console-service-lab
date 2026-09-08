@@ -1,3 +1,6 @@
+import type { ActionHandler } from './action-runtime';
+import { uiKey, type ExtensionPointRef } from './ui/definitions';
+import type { PointContracts } from './ui/point-compiler';
 import { frozenCopy, readonlyMap, readonlySet } from './immutable';
 import {
   createCapabilityRegistry,
@@ -40,7 +43,16 @@ import {
   type SurfaceDefinitionRegistry,
 } from './surface-definition';
 
+export interface RootPresentation {
+  readonly ownerPluginId: PluginId;
+  readonly surfaceId: string;
+}
+
 export interface PluginRuntime {
+  readonly builtinActions: ReadonlyMap<string, ActionHandler>;
+  readonly rootPresentation?: RootPresentation;
+  readonly rootRoutePoint?: ExtensionPointRef;
+  readonly navigationRootPoints?: readonly ExtensionPointRef[];
   readonly ready: true;
   readonly candidates: readonly PluginCandidate[];
   readonly installations: readonly InstalledPluginRecord[];
@@ -54,7 +66,10 @@ export interface PluginRuntime {
   readonly plugins: ReadonlyMap<PluginId, PluginRuntimeState>;
 }
 
-export interface BootstrapPluginRuntimeOptions {
+export interface BootstrapPluginRuntimeOptions extends PointContracts {
+  readonly rootPresentation?: RootPresentation;
+  readonly rootRoutePoint?: ExtensionPointRef;
+  readonly navigationRootPoints?: readonly ExtensionPointRef[];
   readonly builtins: readonly PluginDefinition[];
   readonly coreRootIds: readonly PluginId[];
   readonly installed?: readonly InstalledPluginRecord[];
@@ -223,6 +238,10 @@ function normalizeRestrictedContributions(
         Object.freeze({
           id: route.id,
           path: route.path,
+          ...(route.point ? { point: route.point } : {}),
+          ...(route.childPoint ? { childPoint: route.childPoint } : {}),
+          ...(route.expectedProfile ? { expectedProfile: route.expectedProfile } : {}),
+          ...(route.expectedRefContract ? { expectedRefContract: route.expectedRefContract } : {}),
           ...(route.parentRouteId === undefined ? {} : { parentRouteId: route.parentRouteId }),
           ...(route.acceptsChildren === undefined ? {} : { acceptsChildren: route.acceptsChildren }),
           target: normalizeTarget(route),
@@ -425,7 +444,8 @@ export async function bootstrapPluginRuntime(
     options.builtins.map(definition => [definition.id, definition]),
   );
   const capabilityController = createCapabilityRegistry();
-  const contributionController = createContributionRegistry();
+  const contributionController = createContributionRegistry(options);
+  const builtinActions = new Map<string, ActionHandler>();
   const pluginStates = new Map<PluginId, PluginRuntimeState>();
   const validationIssues: PluginValidationIssue[] = [
     ...hostValidation.issues,
@@ -507,8 +527,14 @@ export async function bootstrapPluginRuntime(
     const contributionActivation =
       contributionController.beginActivation(pluginId);
 
+    const stagedActions = new Map<string, ActionHandler>();
     try {
       await definition.activate({
+        actions: { register(id, handler) {
+          if (typeof handler !== 'function') throw Error('INVALID_ACTION_HANDLER');
+          contributionActivation.context.registerAction({ id });
+          stagedActions.set(uiKey(pluginId, id), handler);
+        } },
         capabilities: activation.context,
         contributions: contributionActivation.context,
       });
@@ -516,6 +542,7 @@ export async function bootstrapPluginRuntime(
       contributionActivation.validate();
       activation.apply();
       contributionActivation.apply();
+      for (const [key, handler] of stagedActions) builtinActions.set(key, handler);
       pluginStates.set(pluginId, Object.freeze({ state: 'ACTIVE' }));
     } catch (error) {
       activation.discard();
@@ -612,6 +639,7 @@ export async function bootstrapPluginRuntime(
       contributionActivation.context.registerNavigation(item);
     }
     for (const point of manifest.extensionPoints ?? []) contributionActivation.context.registerExtensionPoint(point);
+    for (const action of manifest.actions ?? []) contributionActivation.context.registerAction(action);
     for (const surface of manifest.surfaces) contributionActivation.context.registerSurface({ id: surface.id, target: { kind: 'sandbox-surface', surfaceId: surface.id } });
     for (const extension of declaration.extensions) {
       contributionActivation.context.registerExtension(extension);
@@ -643,9 +671,14 @@ export async function bootstrapPluginRuntime(
 
   return Object.freeze({
     ready: true,
+    builtinActions: readonlyMap(builtinActions),
+    rootPresentation: frozenCopy(options.rootPresentation),
+    rootRoutePoint: frozenCopy(options.rootRoutePoint),
+    navigationRootPoints: frozenCopy(options.navigationRootPoints),
     candidates: frozenCopy([
       ...options.builtins.map(definition => ({ kind: 'builtin' as const, descriptor: {
         id: definition.id, version: definition.version, requires: definition.requires, provides: definition.provides,
+        ...(definition.roles ? { roles: definition.roles } : {}), ...(definition.provenance ? { provenance: definition.provenance } : {}),
       } })),
       ...(options.installed ?? []).filter(record => record.config.enabled).map(record => ({ kind: 'restricted' as const, descriptor: record.manifest })),
     ]),

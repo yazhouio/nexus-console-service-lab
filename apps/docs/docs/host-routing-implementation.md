@@ -6,7 +6,7 @@
 
 - Runtime 的 `RouteContribution` 和 Restricted Route 增加可选 `parentRouteId`、`acceptsChildren`；Navigation 增加可选 `acceptsChildren`。Builtin target 的 `routeLayout: true` 标明 Host realm 的 Layout，组件负责渲染 `<Outlet />`。Restricted target 始终作为叶 Surface。
 - `RouteContext` 为 `{ routeId, pathname, params, search }`，通过独立的 Wujie `props.routeContext` 传入；不改变 `surface.initialParameters` 和 Bridge protocol。父 Layout 仅得到自己 ancestry 的参数；叶 Surface 得到完整祖先和自身参数。
-- `apps/host/src/routing/route-model.ts` 集中解析 ancestry、授权、匹配空间、quarantine、URL 和导航。`path-space.ts` 对模板段及长度集合判断相交/包含/等价，冲突例证由结构构造，不用 URL 抽样或 Router score 决策。
+- `packages/plugin-runtime/src/routing/route-model.ts` 集中解析 ancestry、授权、匹配空间、quarantine、URL 和导航。`path-space.ts` 对模板段及长度集合判断相交/包含/等价，冲突例证由结构构造，不用 URL 抽样或 Router score 决策。
 - 正常 executor projection 仅含 AVAILABLE Route。呈现层另有诊断占位投影，保留仍合法的父 Layout，绝不执行不可用 target；冲突地址不会静默落到更宽的 Route。
 - `AVAILABLE / QUARANTINED / UNREACHABLE`、`MATCHED / NOT_FOUND / CONFLICT`、`MOUNTING / MOUNTED / ERROR` 分属三层。启动失败保持单独状态；Runtime ACTIVE 不因 Host quarantine 改变。
 
@@ -45,7 +45,7 @@ pnpm build:routing-validation
 pnpm test:e2e:preview
 ```
 
-最后两项使用生产优化构建和真实 Wujie，输出到 `apps/host/dist-validation`。`/__fixtures__/surfaces` 仅在显式测试构建启用，用于保留同 Surface Definition 的 Route/Extension 双实例、BridgeSession/Subscription 和故障隔离覆盖；正常构建不开放该页面。
+最后两项使用生产优化构建和真实 Wujie，输出到 `apps/console/dist-validation`。`/__fixtures__/surfaces` 仅在显式测试构建启用，用于保留同 Surface Definition 的 Route/Extension 双实例、BridgeSession/Subscription 和故障隔离覆盖；正常构建不开放该页面。
 
 本地性能原始记录在仓库 `docs/validation/host-routing-performance-2026-09-04.json`，包含每种场景 20 个样本、设备/浏览器/缓存条件、构建产物 hash、导航触发、mount、Bridge ready、旧实例清理和首个有效内容可见的时刻。p50/p95 是本次样本的经验统计，不能外推为生产稳定分位数。另保留修复 loading 间隙前的原始记录，便于审查差异。
 
@@ -75,3 +75,6 @@ pnpm build:routing-release
 ```
 
 `.github/workflows/routing-release.yml` 从 GitHub 目标 environment 的 `ROUTING_RELEASE_CONFIG` 读取可信配置，要求候选版本等于 workflow commit，运行 smoke 后才生成并上传验证过的 release artifact。它不执行部署。普通 `pnpm build` 会生成启用路由的生产产物；`pnpm build:routing-release` 额外要求目标配置和真实证据。
+
+
+2026-09-08：Route Model 已迁入 Runtime，所有根与子 Route/Navigation 都要求版本化 Point；`acceptsChildren` 不再授权。React Router/browser history 属于 Browser Host，Navigation UI 属于 Console Core。当前声明与迁移说明见 [Console Core 架构](./console-core-architecture.md)。

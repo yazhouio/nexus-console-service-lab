@@ -24,6 +24,21 @@
       ],
       "@nexus/plugin-runtime/react": [
         "./packages/plugin-runtime/src/ui-react.tsx"
+      ],
+      "@nexus/browser-host": [
+        "./packages/browser-host/src/index.ts"
+      ],
+      "@nexus/console-core": [
+        "./packages/console-core/src/index.ts"
+      ],
+      "@nexus/console-core-api": [
+        "./packages/console-core-api/src/index.ts"
+      ],
+      "@nexus/browser-host/testing": [
+        "./packages/browser-host/src/testing.ts"
+      ],
+      "@nexus/cluster-api": [
+        "./packages/cluster-api/src/index.ts"
       ]
     },
     "resolveJsonModule": true,

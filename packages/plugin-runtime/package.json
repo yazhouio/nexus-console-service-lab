@@ -30,7 +30,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "wujie": "catalog:"
+    "wujie": "catalog:",
+    "react-router": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",

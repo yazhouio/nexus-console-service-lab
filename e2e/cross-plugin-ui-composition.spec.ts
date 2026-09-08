@@ -1,6 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const inspect = async (page: Page) => JSON.parse(await page.getByTestId('ui-inspection').innerText());
+const inspect = async (page: Page) => {
+  const snapshot = JSON.parse(await page.getByTestId('ui-inspection').innerText());
+  // Fixture lifetime assertions exclude the persistent Console root and its Route Scope.
+  return { ...snapshot, scopes: snapshot.scopes.filter((scope: { owner: string }) => scope.owner !== 'console-core') };
+};
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
 async function visit(page: Page) {
   await page.goto('/__fixtures__/ui-composition');

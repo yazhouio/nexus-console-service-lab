@@ -86,7 +86,7 @@ export function createInstallationStore(options: InstallationStoreOptions): Inst
     const contracts = new Map<string, string>();
     for (const record of values) for (const point of record.manifest.extensionPoints ?? []) {
       const key = JSON.stringify([record.manifest.id, point.id, point.contractMajor]);
-      const schema = canonicalJson(point.contextSchema);
+      const schema = canonicalJson(point);
       if (contracts.has(key) && contracts.get(key) !== schema) throw new PluginInstallationError('CONTEXT_MAJOR_FROZEN');
       contracts.set(key, schema);
     }

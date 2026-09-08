@@ -188,6 +188,55 @@ importers:
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
+  apps/console:
+    dependencies:
+      '@nexus/browser-host':
+        specifier: workspace:*
+        version: link:../../packages/browser-host
+      '@nexus/cluster-api':
+        specifier: workspace:*
+        version: link:../../packages/cluster-api
+      '@nexus/console-core':
+        specifier: workspace:*
+        version: link:../../packages/console-core
+      '@nexus/console-core-api':
+        specifier: workspace:*
+        version: link:../../packages/console-core-api
+      '@nexus/plugin-runtime':
+        specifier: workspace:*
+        version: link:../../packages/plugin-runtime
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@rsbuild/core':
+        specifier: 'catalog:'
+        version: 2.2.2
+      '@rsbuild/plugin-react':
+        specifier: 'catalog:'
+        version: 2.1.0(@rsbuild/core@2.2.2)(@rspack/core@2.2.2(@swc/helpers@0.5.23))
+      '@types/node':
+        specifier: 'catalog:'
+        version: 22.20.1
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.5(@types/react@19.2.18)
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.11(@types/node@22.20.1)(vite@8.2.2(@types/node@22.20.1))
 
   apps/docs:
     devDependencies:
@@ -238,43 +287,6 @@ importers:
         specifier: 'catalog:'
         version: 7.0.2
 
-  apps/host:
-    dependencies:
-      '@nexus/plugin-runtime':
-        specifier: workspace:*
-        version: link:../../packages/plugin-runtime
-      react:
-        specifier: 'catalog:'
-        version: 19.2.8
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.2.8(react@19.2.8)
-      react-router:
-        specifier: 'catalog:'
-        version: 8.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-    devDependencies:
-      '@rsbuild/core':
-        specifier: 'catalog:'
-        version: 2.2.2
-      '@rsbuild/plugin-react':
-        specifier: 'catalog:'
-        version: 2.1.0(@rsbuild/core@2.2.2)(@rspack/core@2.2.2(@swc/helpers@0.5.23))
-      '@types/node':
-        specifier: 'catalog:'
-        version: 22.20.1
-      '@types/react':
-        specifier: 'catalog:'
-        version: 19.2.18
-      '@types/react-dom':
-        specifier: 'catalog:'
-        version: 19.2.5(@types/react@19.2.18)
-      typescript:
-        specifier: 'catalog:'
-        version: 7.0.2
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.11(@types/node@22.20.1)(vite@8.2.2(@types/node@22.20.1))
-
   apps/ui-composition-fixtures:
     dependencies:
       '@nexus/plugin-runtime':
@@ -306,8 +318,81 @@ importers:
         specifier: 'catalog:'
         version: 7.0.2
 
+  packages/browser-host:
+    dependencies:
+      '@nexus/plugin-runtime':
+        specifier: workspace:*
+        version: link:../plugin-runtime
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.8(react@19.2.8)
+      react-router:
+        specifier: 'catalog:'
+        version: 8.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 22.20.1
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.5(@types/react@19.2.18)
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
+  packages/cluster-api:
+    dependencies:
+      '@nexus/plugin-runtime':
+        specifier: workspace:*
+        version: link:../plugin-runtime
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
+  packages/console-core:
+    dependencies:
+      '@nexus/console-core-api':
+        specifier: workspace:*
+        version: link:../console-core-api
+      '@nexus/plugin-runtime':
+        specifier: workspace:*
+        version: link:../plugin-runtime
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 22.20.1
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.18
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
+  packages/console-core-api:
+    dependencies:
+      '@nexus/plugin-runtime':
+        specifier: workspace:*
+        version: link:../plugin-runtime
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
   packages/plugin-runtime:
     dependencies:
+      react-router:
+        specifier: 'catalog:'
+        version: 8.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       wujie:
         specifier: 'catalog:'
         version: 2.1.0

@@ -1,3 +1,4 @@
+import { bindInvocationContext } from '../invocation-authority';
 import type { CreateUiControl } from './ui-control';
 import type { PluginRuntime } from '../bootstrap';
 import type { BridgeSubscriptionActionContract, OpenedBridgeSubscription } from '../bridge-contract';
@@ -191,6 +192,7 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     pluginId: identity.pluginId, pluginVersion: identity.pluginVersion,
     surfaceId: identity.surfaceId, surfaceInstanceId: identity.surfaceInstanceId,
     mountPointId: identity.mountPointId,
+    ...(identity.execution ? { execution: Object.freeze({ ...identity.execution }) } : {}),
   });
   let state: 'ACTIVE' | 'DISPOSED' = 'ACTIVE';
   const pending = new Set<AbortController>();
@@ -386,11 +388,12 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
       try {
         const invocation = Promise.resolve().then(async () => {
             if (controller.signal.aborted) throw controller.signal.reason;
-            const context = {
+            const context = bindInvocationContext({
               pluginId: identity.pluginId, surfaceId: identity.surfaceId,
               surfaceInstanceId: identity.surfaceInstanceId, mountPointId: identity.mountPointId,
               signal: controller.signal,
-            };
+              ...(identity.execution ? { execution: identity.execution } : {}),
+            }, actionRequest.capability, actionRequest.action);
             const capability = runtime.capabilities.require(actionRequest.capability);
             if (action.kind === 'request') return action.invoke(capability, payload, context);
             const opened = await action.open(capability, payload, context, event => emitEvent(subscription!, event));

@@ -55,6 +55,8 @@ export interface ContributionSnapshot {
 }
 export interface RuntimeSnapshot {
   readonly ui?: UiInspection;
+  readonly actions?: ReturnType<import('./action-runtime').ActionRuntime['inspect']>;
+  readonly points?: ReturnType<PluginRuntime['contributions']['listExtensionPoints']>;
   readonly ready: boolean;
   readonly bootstrapError?: RuntimeErrorSnapshot;
   readonly plugins: readonly PluginSnapshot[];
@@ -147,6 +149,7 @@ function projectHostFact(fact: HostContributionFact): HostContributionFact {
 }
 export interface InspectionSource {
   inspectUi?(): UiInspection;
+  inspectActions?(): ReturnType<import('./action-runtime').ActionRuntime['inspect']>;
   listInstances?(): readonly SurfaceInstanceRecord[];
   listHostContributions?(): readonly HostContributionFact[];
 }
@@ -175,6 +178,7 @@ export function inspect(
     const installed = runtime.installations.find(record => record.manifest.id === id);
     return {
       id, version: descriptor.version, requires: descriptor.requires, provides: descriptor.provides,
+      ...(descriptor.roles ? { roles: descriptor.roles } : {}), ...(descriptor.provenance ? { provenance: descriptor.provenance } : {}),
       kind, executionMode: kind === 'builtin' ? 'direct' : 'wujie',
       securityPosture: kind === 'builtin' ? 'full-trust' : 'cooperative-isolation',
       core: kind === 'builtin' && runtime.resolution.coreClosure.has(id), state: state.state,
@@ -184,7 +188,7 @@ export function inspect(
         requestedPermissions: installed.manifest.permissions, grantedPermissions: installed.config.grantedPermissions,
         surfaces: [...installed.manifest.surfaces].sort((a, b) => a.id.localeCompare(b.id)).map(surface => ({
           id: surface.id,
-          instances: instances.filter(instance => instance.identity.pluginId === id && instance.identity.surfaceId === surface.id)
+          instances: instances.filter(instance => instance.identity.pluginId === id && instance.identity.execution?.kind !== 'action' && instance.identity.surfaceId === surface.id)
             .sort((a, b) => a.identity.surfaceInstanceId.localeCompare(b.identity.surfaceInstanceId)).map(instance => ({
               surfaceInstanceId: instance.identity.surfaceInstanceId, mountPointId: instance.identity.mountPointId,
               wujieName: instance.wujieName, state: instance.state.state,
@@ -198,13 +202,15 @@ export function inspect(
   return frozenCopy({
     ready: true, plugins: plugins.sort((a, b) => a.id.localeCompare(b.id)),
     ...(source?.inspectUi ? { ui: source.inspectUi() } : {}),
+    ...(source?.inspectActions ? { actions: source.inspectActions() } : {}),
+    points: runtime.contributions.listExtensionPoints(),
     coreClosure: [...runtime.resolution.coreClosure].sort(), dependencies: runtime.resolution.dependencies,
     capabilities: runtime.capabilities.list(),
     contributions: {
       routes: runtime.contributions.listRoutes().map(({ ownerPluginId, contribution }) => ({ ownerPluginId, ...host(ownerPluginId, 'route', contribution.id), id: contribution.id, path: contribution.path, ...(contribution.parentRouteId === undefined ? {} : { parentRouteId: contribution.parentRouteId }), ...(contribution.acceptsChildren === undefined ? {} : { acceptsChildren: contribution.acceptsChildren }), target: target(contribution.target) })),
       navigation: runtime.contributions.listNavigation().map(({ ownerPluginId, contribution }) => ({ ownerPluginId, ...host(ownerPluginId, 'navigation', contribution.id), id: contribution.id, ...(contribution.acceptsChildren === undefined ? {} : { acceptsChildren: contribution.acceptsChildren }), ...(contribution.routeId ? { routeId: contribution.routeId } : {}), ...(contribution.parentId ? { parentId: contribution.parentId } : {}) })),
       extensions: runtime.contributions.listExtensions().map(({ ownerPluginId, contribution }) => {
-        const surface = runtime.contributions.listUiSurfaces().find(s => s.ownerPluginId === ownerPluginId && s.contribution.id === contribution.surfaceId);
+        const surface = contribution.kind === 'action' ? undefined : runtime.contributions.listUiSurfaces().find(s => s.ownerPluginId === ownerPluginId && s.contribution.id === contribution.surfaceId);
         return { ownerPluginId, id: contribution.id, point: contribution.point, ...(surface ? { target: target(surface.contribution.target) } : {}) };
       }),
     },
