@@ -1,20 +1,9 @@
+import { extensionDemoDescriptor, extensionDemoRoutes, extensionDemoNavigation, extensionDemoExtensions } from './extension-demo-data';
 import { useState } from 'react';
 import { useRouteContext, useSurfaceContext } from '@nexus/plugin-runtime/react';
 import type { PluginDefinition, JsonValue } from '@nexus/plugin-runtime';
-import {
-  CONSOLE_CORE_CAPABILITY,
-  CONSOLE_EXTENSION_POINT_CATALOG,
-  consoleRoute,
-  homeCard,
-  primaryNavigation,
-  settingsSection,
-  PLUGIN_DETAILS_ACTIONS_POINT,
-} from '@nexus/console-core-api';
-import {
-  CLUSTER_EXTENSION_POINT_CATALOG,
-  NODE_ACTIONS_POINT,
-  NODE_TABS_POINT,
-} from '@nexus/cluster-api';
+import { CONSOLE_EXTENSION_POINT_CATALOG,  } from '@nexus/console-core-api';
+import { CLUSTER_EXTENSION_POINT_CATALOG,  } from '@nexus/cluster-api';
 
 const pointCatalog = [...CONSOLE_EXTENSION_POINT_CATALOG, ...CLUSTER_EXTENSION_POINT_CATALOG];
 
@@ -93,8 +82,7 @@ function ExtensionPointGallery() {
 }
 
 export const extensionDemo: PluginDefinition = {
-  id: 'extension-demo', version: '1.0.0', roles: ['feature'], provenance: 'first-party',
-  requires: [CONSOLE_CORE_CAPABILITY], provides: [],
+  ...extensionDemoDescriptor,
   activate({ contributions, actions }) {
     actions.register('node-health-check', async ({ context }) => ({ state: 'healthy', checkedBy: 'extension-demo', context } as unknown as JsonValue));
     actions.register('plugin-contract-check', async ({ context }) => ({ state: 'registered', context } as unknown as JsonValue));
@@ -103,12 +91,12 @@ export const extensionDemo: PluginDefinition = {
     contributions.registerSurface({ id: 'extension-demo-settings', target: { kind: 'builtin', render: ExtensionDemoSettings } });
     contributions.registerSurface({ id: 'extension-demo-node-health', target: { kind: 'builtin', render: NodeHealthTab } });
 
-    contributions.registerRoute(consoleRoute({ id: 'extension-demo-route', path: '/extensions', target: { kind: 'builtin', render: ExtensionPointGallery } }));
-    contributions.registerNavigation(primaryNavigation({ id: 'extension-demo-navigation', label: 'Extension points', routeId: 'extension-demo-route', group: 'secondary', order: 800 }));
-    contributions.registerExtension(homeCard({ id: 'extension-demo-home-card', label: 'Extension Demo', surfaceId: 'extension-demo-card', order: 10, initiallySelected: false }));
-    contributions.registerExtension(settingsSection({ id: 'extension-demo-settings-section', label: 'Demo preferences', surfaceId: 'extension-demo-settings', order: 10 }));
-    contributions.registerExtension({ id: 'extension-demo-plugin-action', kind: 'action', actionId: 'plugin-contract-check', label: 'Check extension contract', point: PLUGIN_DETAILS_ACTIONS_POINT, order: 50, group: 'secondary', expectedProfile: 'detail.actions@1', expectedRefContract: 'console-core.plugin-ref@1' });
-    contributions.registerExtension({ id: 'extension-demo-node-action', kind: 'action', actionId: 'node-health-check', label: 'Check node health', point: NODE_ACTIONS_POINT, order: 50, expectedProfile: 'detail.actions@1', expectedRefContract: 'cluster.resource-ref@1' });
-    contributions.registerExtension({ id: 'extension-demo-node-health-tab', kind: 'tab', tabId: 'health', label: 'Health', surfaceId: 'extension-demo-node-health', point: NODE_TABS_POINT, order: -50, expectedProfile: 'detail.tabs@1', expectedRefContract: 'cluster.resource-ref@1' });
+    contributions.registerRoute({ ...extensionDemoRoutes['extension-demo-route'], target: { kind: 'builtin', render: ExtensionPointGallery } });
+    contributions.registerNavigation(extensionDemoNavigation['extension-demo-navigation']);
+    contributions.registerExtension(extensionDemoExtensions['extension-demo-home-card']);
+    contributions.registerExtension(extensionDemoExtensions['extension-demo-settings-section']);
+    contributions.registerExtension(extensionDemoExtensions['extension-demo-plugin-action']);
+    contributions.registerExtension(extensionDemoExtensions['extension-demo-node-action']);
+    contributions.registerExtension(extensionDemoExtensions['extension-demo-node-health-tab']);
   },
 };

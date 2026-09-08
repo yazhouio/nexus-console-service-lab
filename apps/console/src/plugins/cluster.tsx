@@ -1,8 +1,9 @@
+import { clusterDescriptor, clusterRoutes, clusterNavigation, clusterExtensions } from './cluster-data';
 import { useState, useSyncExternalStore } from 'react';
 import { ActionMenu, Tabs, useSurfaceContext, RouteOutlet, RouteLink, useRouteContext, useCapabilitySubscription } from '@nexus/plugin-runtime/react';
 import type { PluginDefinition, PublicNavigation, RoutesSnapshot } from '@nexus/plugin-runtime';
-import { CONSOLE_CORE_CAPABILITY, consoleRoute, primaryNavigation, homeCard } from '@nexus/console-core-api';
-import { CLUSTER_EXTENSION_POINTS, NODE_CHILD_ROUTES_POINT, NODE_NAVIGATION_POINT, NODE_ACTIONS_POINT, NODE_TABS_POINT, type ClusterCapability } from '@nexus/cluster-api';
+
+import { CLUSTER_EXTENSION_POINTS, NODE_ACTIONS_POINT, NODE_TABS_POINT, type ClusterCapability } from '@nexus/cluster-api';
 
 function NodeLayout() {
   const routeContext = useRouteContext();
@@ -25,7 +26,7 @@ function NodeSummary() { const context = useSurfaceContext(); return <pre classN
 function NodeEvents() { return <section className="nexus-content-card"><span className="nexus-kicker">CLUSTER EVENTS</span><h2>Node events</h2><p className="nexus-muted">No new events in the demo cluster.</p></section>; }
 
 export const cluster: PluginDefinition = {
-  id: 'cluster', version: '1.0.0', roles: ['provider','feature'], provenance: 'first-party', requires: [CONSOLE_CORE_CAPABILITY,'routes.query@1','routes.navigate@1'], provides: ['kubesphere.cluster@2'],
+  ...clusterDescriptor,
   activate({ contributions, capabilities }) {
     let current = 'demo-cluster';
     const listeners = new Set<(name: string) => void>();
@@ -42,14 +43,14 @@ export const cluster: PluginDefinition = {
     }
     for (const point of CLUSTER_EXTENSION_POINTS) contributions.registerExtensionPoint(point);
     contributions.registerSurface({ id: 'node-summary', target: { kind: 'builtin', render: NodeSummary } });
-    contributions.registerExtension({ id: 'node-summary', kind: 'tab', tabId: 'summary', label: 'Resource summary', surfaceId: 'node-summary', point: NODE_TABS_POINT });
-    contributions.registerRoute(consoleRoute({ id: 'cluster-overview-route', path: '/clusters/current', target: { kind: 'builtin', render: ClusterOverview } }));
-    contributions.registerNavigation(primaryNavigation({ id: 'cluster-overview-navigation', label: 'Cluster Overview', routeId: 'cluster-overview-route', order: 100 }));
-    contributions.registerRoute(consoleRoute({ id: 'node-detail', path: '/clusters/:cluster/nodes/:node', childPoint: NODE_CHILD_ROUTES_POINT, target: { kind: 'builtin', render: NodeLayout, routeLayout: true } }));
-    contributions.registerRoute({ id: 'node-events', parentRouteId: 'node-detail', point: NODE_CHILD_ROUTES_POINT, path: 'events', target: { kind: 'builtin', render: NodeEvents } });
-    contributions.registerNavigation(primaryNavigation({ id: 'node-navigation', label: 'Node', routeId: 'node-detail', childPoint: NODE_NAVIGATION_POINT, order: 150 }));
-    contributions.registerNavigation({ id: 'node-events-navigation', label: 'Events', parentId: 'node-navigation', routeId: 'node-events', point: NODE_NAVIGATION_POINT });
+    contributions.registerExtension(clusterExtensions['node-summary']);
+    contributions.registerRoute({ ...clusterRoutes['cluster-overview-route'], target: { kind: 'builtin', render: ClusterOverview } });
+    contributions.registerNavigation(clusterNavigation['cluster-overview-navigation']);
+    contributions.registerRoute({ ...clusterRoutes['node-detail'], target: { kind: 'builtin', render: NodeLayout, routeLayout: true } });
+    contributions.registerRoute({ ...clusterRoutes['node-events'], target: { kind: 'builtin', render: NodeEvents } });
+    contributions.registerNavigation(clusterNavigation['node-navigation']);
+    contributions.registerNavigation(clusterNavigation['node-events-navigation']);
     contributions.registerSurface({ id: 'cluster-overview-card', target: { kind: 'builtin', render: ClusterOverview } });
-    contributions.registerExtension(homeCard({ id: 'cluster-overview-card', surfaceId: 'cluster-overview-card', label: 'Cluster Card', order: 100 }));
+    contributions.registerExtension(clusterExtensions['cluster-overview-card']);
   },
 };

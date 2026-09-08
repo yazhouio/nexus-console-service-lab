@@ -54,16 +54,7 @@ V1 Kind 固定为 `route | navigation | action | tab | surface`。各 Kind 定�
 
 Contribution Registry 是贡献与 UI 定义的声明真源，声明通过所属插件的接纳事务提交。Adapter、查询和诊断所需目录只能从已接纳声明派生，不维护另一套注册事务或独立可变声明。当前 `runtime.surfaces.get/list` 已采用只读派生索引；Surface Instance、Scope 和 Attempt 等动态执行事实仍各自按寿命维护，不与声明合并。
 
-| 公开契约 | 归属与形式 |
-| --- | --- |
-| Root Route Child Route 接纳点 | console-core 拥有，一等 Route 模型 |
-| Primary Navigation 接纳点 | console-core 拥有；Navigation 支持多个 Container |
-| console-core/home.cards@1 | Core 页面具体 Point，Surface 局部内容 |
-| console-core/settings.sections@1 | Core 页面具体 Point，受限 Section 内容 |
-| console-core/plugin-details.actions@1 | Core 页面具体 Action Point |
-| list.actions@1 | 通用参数化 Profile，由各页面 Owner 实例化 |
-| detail.actions@1 | 通用参数化 Profile，由各页面 Owner 实例化 |
-| detail.tabs@1 | 通用参数化 Profile，由各页面 Owner 实例化 |
+公开 Point、Profile 与 Ref 的结构化清单由源码生成，见 [插件契约参考](./generated/plugin-contract/index.md)。
 
 `list/detail` 不绑定 Kubernetes。console-core 只拥有自己的 Point；例如 Cluster 页面 Owner 可将 `list.actions@1` 实例化为自己的节点操作 Point。所有扩展必须明确命名并受治理，不开放任意 Header、Layout 注入或核心页面替换。
 

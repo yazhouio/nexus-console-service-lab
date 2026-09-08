@@ -7,3 +7,5 @@ doc_build/
 .DS_Store
 
 dist-validation/
+
+/apps/docs/docs/generated/plugin-contract/

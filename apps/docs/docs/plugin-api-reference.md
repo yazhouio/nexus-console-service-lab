@@ -266,3 +266,8 @@ Runtime 层公开 `createRouteModel`、`createActionRuntime`、`createContributi
 Browser Host 的 `BrowserHost` 接收 `BrowserDistribution`：发行版提供插件、根、契约、policy bundle、权限、安装存储和恢复操作。Host 不导入任何 Console 业务实现。`@nexus/browser-host/testing` 仅供 Distribution 验收 harness 使用，Feature 不可依赖。
 
 Platform 的七个 Capability、动作和权限见 [Capability Catalog](./capability-catalog.md)。具体 Point/Ref/Action/Tab 声明示例见 [Author Guide](./plugin-author-guide.md)。
+
+
+## 自动生成的插件契约参考
+
+[Kind/Profile/Ref、Point 和按版本的插件 Extension API](./generated/plugin-contract/index.md) 直接消费共享声明。该参考不代表当前安装或运行时可用状态。

@@ -34,6 +34,7 @@ export default defineConfig({
           text: 'P0 · Contract',
           items: [
             { text: 'Plugin API Reference', link: '/plugin-api-reference' },
+            { text: '生成的插件契约参考', link: '/generated/plugin-contract/' },
             { text: 'Manifest / Contract Spec', link: '/manifest-contract-spec' },
             { text: '跨插件 UI 组合契约', link: '/cross-plugin-ui-composition-contract' },
             { text: 'UI 组合实现与作者 API', link: '/cross-plugin-ui-composition-implementation' },

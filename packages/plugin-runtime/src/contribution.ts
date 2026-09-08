@@ -322,40 +322,16 @@ export function createContributionRegistry(contracts: PointContracts = {}): Cont
 
         const routeIds = new Set(routes.keys());
         for (const route of stagedRoutes) {
-          if (
-            !isNonEmptyString(route.id) ||
-            !isNonEmptyString(route.path) ||
-            routeIds.has(route.id) ||
-            (route.parentRouteId !== undefined && !isNonEmptyString(route.parentRouteId)) ||
-            (route.acceptsChildren !== undefined && typeof route.acceptsChildren !== 'boolean')
-          ) {
-            invalidContribution(
-              ownerPluginId,
-              `Route ${route.id} from ${ownerPluginId} is invalid or duplicated.`,
-            );
-          }
-          if (route.point) assertPointRef(route.point);
-          if (route.childPoint) assertPointRef(route.childPoint);
+          assertRouteMetadata(ownerPluginId, route);
+          if (routeIds.has(route.id)) invalidContribution(ownerPluginId, `Route ${route.id} from ${ownerPluginId} is invalid or duplicated.`);
           validateRenderTarget(ownerPluginId, route.target);
           routeIds.add(route.id);
         }
 
         const navigationIds = new Set(navigation.keys());
         for (const item of stagedNavigation) {
-          if (
-            !isNonEmptyString(item.id) ||
-            !isNonEmptyString(item.label) ||
-            navigationIds.has(item.id) ||
-            (item.acceptsChildren !== undefined && typeof item.acceptsChildren !== 'boolean') ||
-            (item.order !== undefined && !Number.isFinite(item.order))
-          ) {
-            invalidContribution(
-              ownerPluginId,
-              `Navigation ${item.id} from ${ownerPluginId} is invalid or duplicated.`,
-            );
-          }
-          if (item.point) assertPointRef(item.point);
-          if (item.childPoint) assertPointRef(item.childPoint);
+          assertNavigationMetadata(ownerPluginId, item);
+          if (navigationIds.has(item.id)) invalidContribution(ownerPluginId, `Navigation ${item.id} from ${ownerPluginId} is invalid or duplicated.`);
           navigationIds.add(item.id);
         }
 
@@ -447,4 +423,37 @@ export function createContributionRegistry(contracts: PointContracts = {}): Cont
       };
     },
   };
+}
+
+/** Shared shape checks for registration and repository documentation; no relation admission. */
+export function assertRouteMetadata(ownerPluginId: string, route: Omit<RouteContribution, 'target'>): void {
+  if (
+    !isNonEmptyString(route.id) ||
+    !isNonEmptyString(route.path) ||
+    (route.parentRouteId !== undefined && !isNonEmptyString(route.parentRouteId)) ||
+    (route.acceptsChildren !== undefined && typeof route.acceptsChildren !== 'boolean')
+  ) {
+    invalidContribution(
+      ownerPluginId,
+      `Route ${route.id} from ${ownerPluginId} is invalid or duplicated.`,
+    );
+  }
+  if (route.point) assertPointRef(route.point);
+  if (route.childPoint) assertPointRef(route.childPoint);
+}
+
+export function assertNavigationMetadata(ownerPluginId: string, item: NavigationContribution): void {
+  if (
+    !isNonEmptyString(item.id) ||
+    !isNonEmptyString(item.label) ||
+    (item.acceptsChildren !== undefined && typeof item.acceptsChildren !== 'boolean') ||
+    (item.order !== undefined && !Number.isFinite(item.order))
+  ) {
+    invalidContribution(
+      ownerPluginId,
+      `Navigation ${item.id} from ${ownerPluginId} is invalid or duplicated.`,
+    );
+  }
+  if (item.point) assertPointRef(item.point);
+  if (item.childPoint) assertPointRef(item.childPoint);
 }
