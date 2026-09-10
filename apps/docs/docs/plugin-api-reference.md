@@ -244,7 +244,7 @@ const snapshot = inspect(runtime, {
 });
 ```
 
-每个 Route/Navigation snapshot 的可选 `host` 提供 state、parent/fullPath、封闭 diagnostic codes 和瞬时导航 diagnostic。没有 Host source 时不生成该轴；它独立于 Plugin ACTIVE/FAILED。`RouteContext` 不写入 inspection，以免把当前 URL 参数或 search 当成诊断数据公开。安装和发布到旧 Host 前，可用 `assertContributionContractCompatible(manifest, 1)` 明确拒绝新字段；当前支持版本为 2，详见 [路由 rollout](./host-routing-implementation)。
+每个 Route/Navigation snapshot 的可选 `host` 提供 state、parent/fullPath、封闭 diagnostic codes 和瞬时导航 diagnostic。没有 Host source 时不生成该轴；它独立于 Plugin ACTIVE/FAILED。`RouteContext` 不写入 inspection，以免把当前 URL 参数或 search 当成诊断数据公开。安装和发布到旧 Host 前，可用 `assertContributionContractCompatible(manifest, 1)` 明确拒绝新字段；当前支持版本为 2，详见 [路由 rollout](maintainers/host-routing-implementation.md)。
 
 ## 9. UI Composition SDK
 
@@ -252,7 +252,7 @@ const snapshot = inspect(runtime, {
 
 Inspector 的 `inspectUi: () => ui.core.inspect()` source 提供 relation、Scope tree、Attempt 与 occurrence 元数据，不包含 Context / Overlay 业务数据。失败执行的呈现资源被清理后，失败事实仍保留在有效 Scope 中供重试；已清理的 Surface Instance 不作为历史记录保留。
 
-完整用法与实际限制见 [UI 组合实现与作者 API](./cross-plugin-ui-composition-implementation.md)。
+完整用法与实际限制见 [UI 组合指南](./ui-composition-guide.md)。
 
 
 ## Console Core 公开组合入口

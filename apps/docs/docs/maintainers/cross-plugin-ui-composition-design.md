@@ -1,6 +1,6 @@
 # 跨插件 UI 组合协议设计
 
-状态：设计已收敛；整体审阅后的六条补充已纳入实施基线，进入实现与浏览器验收。2026-09-04 已确认 Q1–Q25、Q27–Q34；Q26 已撤回，首个生产版本直接采用新的 owner-scoped 声明，不为原型 `slot: string` 设计 legacy mapping 或 rollback 兼容。完整契约、作者 API 草案及验收矩阵见[整体契约审阅稿](./cross-plugin-ui-composition-contract.md)，本文保留决策依据与演进记录。Q7 仅纳入 A → B Context，Q8 经整体审阅调整为首期验收最小 A → B → C 递归链路，Q18 的同 Major 冻结是首期规则；本文不表示代码已提供该能力。术语以 CONTEXT.md（仓库 `CONTEXT.md`） 为准，所有权与扩展点模型见 ADR-0007（仓库 `docs/adr/0007-extension-point-slot-surface-ownership.md`）、ADR-0008（仓库 `docs/adr/0008-plugin-owned-typed-extension-points.md`）。
+状态：设计已收敛；整体审阅后的六条补充已纳入实施基线，进入实现与浏览器验收。2026-09-04 已确认 Q1–Q25、Q27–Q34；Q26 已撤回，首个生产版本直接采用新的 owner-scoped 声明，不为原型 `slot: string` 设计 legacy mapping 或 rollback 兼容。完整契约、作者 API 草案及验收矩阵见[整体契约审阅稿](../cross-plugin-ui-composition-contract.md)，本文保留决策依据与演进记录。Q7 仅纳入 A → B Context，Q8 经整体审阅调整为首期验收最小 A → B → C 递归链路，Q18 的同 Major 冻结是首期规则；本文不表示代码已提供该能力。术语以 CONTEXT.md（仓库 `CONTEXT.md`） 为准，所有权与扩展点模型见 ADR-0007（仓库 `docs/adr/0007-extension-point-slot-surface-ownership.md`）、ADR-0008（仓库 `docs/adr/0008-plugin-owned-typed-extension-points.md`）。
 
 ## 已确认的设计边界
 
@@ -86,7 +86,7 @@
 
 ## 决策树与收尾
 
-Q1–Q25、Q27–Q34 已确认，Q26 已撤回；本轮未产生新的协议语义分支。各分支均已整理到[整体契约审阅稿](./cross-plugin-ui-composition-contract.md)：
+Q1–Q25、Q27–Q34 已确认，Q26 已撤回；本轮未产生新的协议语义分支。各分支均已整理到[整体契约审阅稿](../cross-plugin-ui-composition-contract.md)：
 
 | 分支 | 决策依据 | 整体稿落点 |
 | --- | --- | --- |
@@ -109,7 +109,7 @@ Q1–Q25、Q27–Q34 已确认，Q26 已撤回；本轮未产生新的协议语�
 
 ## 首个生产契约草案
 
-声明字段、作者入口、Context 转换、observe 维度、失败与恢复、Overlay 动作及验收矩阵统一维护在[整体契约审阅稿](./cross-plugin-ui-composition-contract.md)，避免问答记录与完整契约各自演进出不同签名。定义不携带 occurrence、Scope、Session 或 DOM；这些属于 Host 管理的运行事实。
+声明字段、作者入口、Context 转换、observe 维度、失败与恢复、Overlay 动作及验收矩阵统一维护在[整体契约审阅稿](../cross-plugin-ui-composition-contract.md)，避免问答记录与完整契约各自演进出不同签名。定义不携带 occurrence、Scope、Session 或 DOM；这些属于 Host 管理的运行事实。
 
 ## 可行性前置调查
 
@@ -137,4 +137,4 @@ Builtin 目前在 activate 中注册 render target，Restricted 在 manifest 静
 
 ## 实施进度
 
-六条补充已落地为实施基线并开始实现。上文原型审计保留为决策背景；当前源码、验收结果和 adapter 限制以 [UI 组合实现](./cross-plugin-ui-composition-implementation.md) 为准，不再代表待实现清单。
+六条补充已落地为实施基线并开始实现。上文原型审计保留为决策背景；当前源码、验收结果和 adapter 限制以 [UI 组合实现](cross-plugin-ui-composition-implementation.md) 为准，不再代表待实现清单。

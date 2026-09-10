@@ -1,6 +1,6 @@
 # 跨插件 UI 组合：实现与作者 API
 
-实现对应 [协议契约](./cross-plugin-ui-composition-contract.md) 与 Q1–Q34 的已确认决策。A 管理 placement，B 声明 contribution，Host 管理执行。首期验证独立 Restricted A → B → C 及 Builtin contribution；不承诺递归的长期兼容性、稳定深度、性能或多层布局行为。
+实现对应 [协议契约](../cross-plugin-ui-composition-contract.md) 与 Q1–Q34 的已确认决策。A 管理 placement，B 声明 contribution，Host 管理执行。首期验证独立 Restricted A → B → C 及 Builtin contribution；不承诺递归的长期兼容性、稳定深度、性能或多层布局行为。
 
 ## 作者接入
 

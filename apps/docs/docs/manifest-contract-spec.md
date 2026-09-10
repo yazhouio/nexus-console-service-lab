@@ -95,7 +95,7 @@ interface RestrictedRouteContribution {
 }
 ```
 
-`parentRouteId` 引用父 Route，child 的 `path` 为非空相对路径；省略时使用顶层绝对路径。`point` 是可达声明必需的版本化接纳引用；`childPoint` 必须指向父 Owner 发布的 Point。`acceptsChildren` 保留为可读的旧字段，不能替代 Point 或授权。Restricted Surface 只作为叶 target，Host realm 的 Builtin Layout 承担 Outlet 组合。Host 路径、授权、环与冲突的 quarantine 不改变 Plugin bootstrap state。完整 grammar、隔离和 rollout 见 [Host 路由实施](./host-routing-implementation)。
+`parentRouteId` 引用父 Route，child 的 `path` 为非空相对路径；省略时使用顶层绝对路径。`point` 是可达声明必需的版本化接纳引用；`childPoint` 必须指向父 Owner 发布的 Point。`acceptsChildren` 保留为可读的旧字段，不能替代 Point 或授权。Restricted Surface 只作为叶 target，Host realm 的 Builtin Layout 承担 Outlet 组合。Host 路径、授权、环与冲突的 quarantine 不改变 Plugin bootstrap state。完整 grammar、隔离和 rollout 见 [Host 路由实施](maintainers/host-routing-implementation.md)。
 
 ### Navigation
 
@@ -139,7 +139,7 @@ interface RestrictedUiExtensionContribution {
 - 未挂载的 Slot 不会触发 Surface 执行；Ready 后不能新增静态定义；
 - 新契约不接受原型的 `slot: string` 字段。
 
-精确白名单与校验落点见 [UI 组合实现](./cross-plugin-ui-composition-implementation.md)。
+精确白名单与校验落点见 [UI 组合指南](./ui-composition-guide.md)。
 
 ## 5. Bridge Contract
 

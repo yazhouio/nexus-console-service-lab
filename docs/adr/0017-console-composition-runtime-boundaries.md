@@ -4,7 +4,7 @@ status: accepted
 
 # 分离 Console 组装、Host 适配、Runtime 机制与 Core 业务
 
-完整设计、迁移范围和验收要求见 [Console Core 插件化设计](../../apps/docs/docs/console-core-architecture.md)。
+完整设计、迁移范围和验收要求见 [Console Core 插件化设计](../../apps/docs/docs/maintainers/console-core-architecture.md)。
 
 Console Distribution 负责选择并固定插件版本、声明 Core Closure、提供静态 policy bundle 与 grants；Host 只负责启动、browser/history adapter 和不依赖插件系统的 break-glass UI；Plugin Runtime 负责插件解析与生命周期、Route Model、Contribution Policy、Extension Kind 和 UI 执行机制；Required System Plugin `console-core` 负责 Global Layout、Navigation、Home、Settings 与 Console 业务 Point Profile。四层必须落实为单向物理依赖，Builtin 与 Restricted Plugin 共享公开的声明、组合、治理和生命周期语义，但保留本地与隔离执行 Adapter；这取代 ADR-0001 中 Host 内置 Overview、Host 拥有 Route Model 以及 V1 不向 Restricted Plugin 提供主动 Console 导航的决定。
 

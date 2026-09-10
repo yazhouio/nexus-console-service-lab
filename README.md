@@ -15,11 +15,15 @@ V1 frontend plugin runtime workspace described by the normative documents in `sp
 
 ## Documentation
 
-The documentation is organized by delivery priority in
-[apps/docs/docs/README.md](apps/docs/docs/README.md). P0 covers authoring, public APIs, contracts,
-architecture, and the current capability catalog; P1 covers compatibility,
-security, troubleshooting, and examples; P2 covers internal implementation
-design.
+Start with the [Deployment mock walkthrough](apps/docs/docs/deployment-example.md),
+then follow the [plugin author guide](apps/docs/docs/plugin-author-guide.md) or
+[host integration guide](apps/docs/docs/host-integration.md).
+Public documentation describes current usage and contracts. Design decisions and
+implementation history have a separate [maintainer entrance](apps/docs/docs/maintainers/index.md).
+
+Open `http://localhost:3000/deployments` for the complete mock resource example:
+list → detail → HPA/VPA cards and actions → monitoring/network tabs.
+Mock changes last for the current page session and reset on reload.
 
 ## Commands
 
@@ -56,7 +60,7 @@ configuration reload, and Runtime Inspector facts. It also explicitly verifies t
 same-origin Wujie plugins can access `window.parent`: this is
 **cooperative-isolation**, not a hostile-code security boundary.
 
-The implementation also follows [Console Core architecture](apps/docs/docs/console-core-architecture.md), including managed Router-tree rendering, versioned Point admission, Action-only execution and lazy Tabs. `pnpm check:boundaries` enforces package and author import boundaries and runs as part of type checking.
+The implementation also follows [Console Core architecture](apps/docs/docs/maintainers/console-core-architecture.md), including managed Router-tree rendering, versioned Point admission, Action-only execution and lazy Tabs. `pnpm check:boundaries` enforces package and author import boundaries and runs as part of type checking.
 
 The original runtime covers tickets 01–12 in
 [the V1 ticket set](.scratch/frontend-plugin-runtime-v1/issues/).

@@ -73,7 +73,7 @@ V1 不实现 SemVer Solver、Multiple Provider Negotiation、运行时 Artifact 
 
 新增的 `parentRouteId` / `acceptsChildren` 属于 contribution contract 2，字段可选，旧声明保持可读。旧 Host 的 closed schema 会拒绝新字段，发布前须执行 `pnpm check:plugin-contract <manifest.json> <target-contract-version>`；安装入口可显式配置 `contributionContractVersion: 1 | 2 | 3`。这不是自动 feature negotiation，也不改变 Bridge/Host API 的精确版本语义。
 
-若要回退到旧 validator，应先在兼容 Host 清除所有已保存的新 schema 版本，再重新安装旧声明；仅切换 active version 仍会保留不可读的新版本。兼容测试覆盖该拒绝及恢复路径。生产构建默认启用 routing，目标环境验证流程见 [Host 路由实施与启用](./host-routing-implementation)。
+若要回退到旧 validator，应先在兼容 Host 清除所有已保存的新 schema 版本，再重新安装旧声明；仅切换 active version 仍会保留不可读的新版本。兼容测试覆盖该拒绝及恢复路径。生产构建默认启用 routing，目标环境验证流程见 [Host 路由实施与启用](maintainers/host-routing-implementation.md)。
 
 
 Console Core 实现使用 contribution contract 3：新增版本化 Route/Navigation Point、Profile/Ref 绑定、Action/Tab、角色与来源元数据。新声明发布到 1/2 目标时，兼容检查明确拒绝；当前安装验证默认使用 3。该编号不改变 `kubesphere.console@1` Host API 或独立的 Bridge protocolVersion。

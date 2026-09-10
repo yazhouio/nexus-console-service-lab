@@ -4,7 +4,7 @@ status: accepted
 
 # 通用交互 Profile 通过 Ref Contract 绑定领域引用
 
-完整目录、执行语义和验收要求见 [Console Core 插件化设计](../../apps/docs/docs/console-core-architecture.md)。
+完整目录、执行语义和验收要求见 [Console Core 插件化设计](../../apps/docs/docs/maintainers/console-core-architecture.md)。
 
 沿用 `Kind → Profile → Point → Slot`：Runtime 的 V1 Kind 固定为 route、navigation、action、tab、surface，各自实现执行语义与生命周期。`list.actions@1`、`detail.actions@1`、`detail.tabs@1` 表达通用交互语义；Profile 显式声明 Ref Contract 参数位，Point 绑定已注册的领域引用契约，例如 ResourceRef@1 或 PluginRef@1。这使交互契约可以跨领域复用，同时保留可校验的引用结构，避免每个业务领域新增 Kind 或让 Point 任意改写 Context Schema。
 

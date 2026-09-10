@@ -1,5 +1,7 @@
 # Example Plugins
 
+第一次使用建议先运行 [Deployment 完整案例](./deployment-example.md)，了解列表、详情、卡片、操作和 Tab 如何组合。
+
 ## 示例组成
 
 | 路径 | 作用 |

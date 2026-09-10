@@ -94,7 +94,7 @@ interface ClusterCapability {
 
 `open` 返回自有已声明 Surface 的 Overlay handle；`complete` 完成当前 Overlay 执行，`cancel` 取消本 owner Scope 的 handle。`observe` 是 subscription：传 `{ handle }` 观察单项，传 `null` 枚举当前 owner Scope 的全部记录。每个动作都要求声明 capability 并获得 `ui.overlay` grant。
 
-业务 outcome 与呈现 execution 分开；open 不等待业务结果，终态只可从 pending 进入 completed / cancelled 一次。资源属于 Host 绑定的 owner Scope，替代 Attempt 可恢复观察。完整输入输出及生命周期见 [UI 组合实现](./cross-plugin-ui-composition-implementation.md)。
+业务 outcome 与呈现 execution 分开；open 不等待业务结果，终态只可从 pending 进入 completed / cancelled 一次。资源属于 Host 绑定的 owner Scope，替代 Attempt 可恢复观察。完整输入输出及生命周期见 [UI 组合指南](./ui-composition-guide.md)。
 
 
 ## 6. Platform Capability（Builtin / Restricted 共用）

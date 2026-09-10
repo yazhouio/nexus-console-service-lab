@@ -1,5 +1,7 @@
 # Plugin Author Guide
 
+第一次使用建议先运行 [Deployment 完整案例](./deployment-example.md)，了解列表、详情、卡片、操作和 Tab 如何组合。
+
 ## 1. 先确定插件类型
 
 V1 只有两条正式执行路径：
@@ -152,7 +154,7 @@ V1 不提供：
 
 A 静态声明 Extension Point，在自己的 Surface 中渲染 `<Slot id="details" contextKey={nodeId} context={{ nodeId }} />`。B 声明指向 A 的 point@major 的 Contribution 和自身 Surface，用 `useSurfaceContext()` 读取最新合法快照。Host 负责授权、选择、执行和清理；A 只管理 placement。
 
-Restricted 入口用 `connectUiHost()` 创建唯一控制连接，再用 `UiProvider` 包装 UI。Builtin 使用 Host 注入的同一 `UiClient`。Overlay 使用 `nexus.ui-overlay@1` Capability 并声明 `ui.overlay` 权限。完整可运行代码、Schema 白名单和 v1 限制见 [UI 组合实现与作者 API](./cross-plugin-ui-composition-implementation.md)。
+Restricted 入口用 `connectUiHost()` 创建唯一控制连接，再用 `UiProvider` 包装 UI。Builtin 使用 Host 注入的同一 `UiClient`。Overlay 使用 `nexus.ui-overlay@1` Capability 并声明 `ui.overlay` 权限。完整可运行代码、Schema 白名单和 v1 限制见 [UI 组合指南](./ui-composition-guide.md)。
 
 
 ## Console Core 作者接口（contract version 3）

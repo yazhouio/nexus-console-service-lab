@@ -1,8 +1,8 @@
 # 首期跨插件 UI 组合契约
 
-后续变更：2026-09-07 [Console Core 插件化设计](./console-core-architecture.md) 明确 Runtime 执行职责，并引入参数化 Profile/Ref Contract、Action/Tab 和 Execution Session。本文保留已实现的首期 Surface 契约；新增模型是后续目标，尚不表示当前 SDK 已支持。
+本文描述跨插件内容组合的契约。当前作者 API 支持参数化 Profile / RefContract、Surface、Action 和 Tab；使用方式见 [UI 组合指南](./ui-composition-guide.md)，完整业务示例见 [Deployment 案例](./deployment-example.md)。
 
-状态：已实现，进入验收记录归档。2026-09-04 按整体审阅后的六条补充收敛设计。本文合并 Q1–Q25、Q27–Q34；[设计记录](./cross-plugin-ui-composition-design.md)保存决策，仓库 `CONTEXT.md` 定义术语。协议语义以本文为准，公开 SDK、具体实现选择和验证结果见 [UI 组合实现与作者 API](./cross-plugin-ui-composition-implementation.md)。
+以下保留内容 Surface 的详细契约。设计背景和历史验收记录位于[维护者文档](./maintainers/index.md)，不作为接入前置阅读。
 
 ## 1. 场景、角色与交付范围
 
@@ -229,7 +229,7 @@ Owner Scope 结束时，未完成项取消，所有该 Scope 的 handle 永久�
 
 ## 9. 首期验收矩阵
 
-下表是首期验收要求，实际执行结果见 [实施记录](./cross-plugin-ui-composition-implementation.md#可运行验收)。协议契约检查与真实浏览器检查共同覆盖；不能仅以模拟 adapter 通过来宣称 Restricted 嵌套已可用。
+下表是首期验收要求，实际执行结果见 [实施记录](maintainers/cross-plugin-ui-composition-implementation.md#可运行验收)。协议契约检查与真实浏览器检查共同覆盖；不能仅以模拟 adapter 通过来宣称 Restricted 嵌套已可用。
 
 | 验收场景 | 必须证明的结果 |
 | --- | --- |

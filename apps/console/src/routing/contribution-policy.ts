@@ -4,7 +4,10 @@ import { NODE_CHILD_ROUTES_POINT, NODE_NAVIGATION_POINT, NODE_ACTIONS_POINT, NOD
 export const contributionGovernance: ContributionPolicyBundle = {
   revision: 'console-contributions-v2',
   grants: [
-    ...(['cluster','kubeeye','extension-demo'] as const).flatMap(contributorId => [
+    ...(['deployment-hpa', 'deployment-vpa'] as const).map(contributorId => ({ contributorId, ownerPluginId: 'deployment', kind: 'surface' as const, targetId: 'deployment.cards', contractMajor: 1 })),
+    ...(['deployment-monitoring', 'deployment-network'] as const).map(contributorId => ({ contributorId, ownerPluginId: 'deployment', kind: 'tab' as const, targetId: 'deployment.tabs', contractMajor: 1 })),
+    { contributorId: 'deployment-vpa', ownerPluginId: 'deployment', kind: 'action', targetId: 'deployment.actions', contractMajor: 1 },
+    ...(['cluster','kubeeye','extension-demo','deployment'] as const).flatMap(contributorId => [
       { contributorId, ownerPluginId: CORE_ROUTES_POINT.ownerPluginId, kind: 'route' as const, targetId: CORE_ROUTES_POINT.id, contractMajor: 1 },
       { contributorId, ownerPluginId: PRIMARY_NAVIGATION_POINT.ownerPluginId, kind: 'navigation' as const, targetId: PRIMARY_NAVIGATION_POINT.id, contractMajor: 1 },
       { contributorId, ownerPluginId: HOME_CARDS_POINT.ownerPluginId, kind: 'surface' as const, targetId: HOME_CARDS_POINT.id, contractMajor: 1 },
