@@ -72,6 +72,7 @@ export function useRouteContext() {
 }
 
 interface RouteLinkProps {
+  readonly className?: string;
   readonly routeId: string;
   readonly params: Readonly<Record<string, string>>;
   readonly children: ReactNode;
@@ -101,7 +102,8 @@ export function useCapabilitySubscription<T>(capability: `${string}@${number}`, 
 }
 
 /** Page-owned Action placement; admission and execution stay behind the bound client. */
-export function ActionMenu({ point, context }: { point: import('./ui/definitions').ExtensionPointRef; context: import('./contribution').JsonValue }) {
+interface ControlClassNames { root?: string; button?: string; status?: string; result?: string }
+export function ActionMenu({ point, context, classNames }: { classNames?: ControlClassNames; point: import('./ui/definitions').ExtensionPointRef; context: import('./contribution').JsonValue }) {
   const client = useUiClient(), key = JSON.stringify({ point, context });
   const [choices, setChoices] = useState<Awaited<ReturnType<UiClient['actions']['query']>>>([]);
   const [pending, setPending] = useState<Awaited<ReturnType<UiClient['actions']['start']>>>();
@@ -125,22 +127,22 @@ export function ActionMenu({ point, context }: { point: import('./ui/definitions
     } catch { if (active.current) setStatus('Action failed'); }
     finally { if (active.current) setPending(undefined); }
   };
-  return <div aria-label="Actions">
-    {choices.filter(choice => !choice.reason && choice.visible).map(choice => <button key={`${choice.ownerPluginId}/${choice.contribution.id}`} disabled={!!pending || status === 'Starting action…' || choice.disabled} onClick={() => { void run({ ownerPluginId: choice.ownerPluginId, id: choice.contribution.id }); }}>{choice.contribution.label}</button>)}
-    {pending && <button onClick={() => { void pending.cancel().catch(() => undefined); }}>Cancel action</button>}
-    <span role="status">{status}</span>{result !== undefined && <pre aria-label="Action result">{JSON.stringify(result)}</pre>}
+  return <div className={classNames?.root} aria-label="Actions">
+    {choices.filter(choice => !choice.reason && choice.visible).map(choice => <button className={classNames?.button} key={`${choice.ownerPluginId}/${choice.contribution.id}`} disabled={!!pending || status === 'Starting action…' || choice.disabled} onClick={() => { void run({ ownerPluginId: choice.ownerPluginId, id: choice.contribution.id }); }}>{choice.contribution.label}</button>)}
+    {pending && <button className={classNames?.button} onClick={() => { void pending.cancel().catch(() => undefined); }}>Cancel action</button>}
+    <span className={classNames?.status} role="status">{status}</span>{result !== undefined && <pre className={classNames?.result} aria-label="Action result">{JSON.stringify(result)}</pre>}
   </div>;
 }
 
 /** Manual activation: arrow keys move focus; Enter/Space select a fresh Surface execution. */
-export function Tabs({ label, ...input }: Omit<SlotInput, 'selected'> & { label: string }) {
+export function Tabs({ label, classNames, ...input }: Omit<SlotInput, 'selected'> & { label: string; classNames?: ControlClassNames }) {
   const [selected, setSelected] = useState<import('./ui/definitions').ContributionRef>();
   const prefix = useRef(`tabs-${crypto.randomUUID()}`).current;
   const panel = `${prefix}-panel`;
   return <Slot {...input} selected={selected ? [selected] : []} feedback={(state, retry, error) => <>
-    <div role="tablist" aria-label={label}>{state?.contributions.map((tab, index) => {
+    <div className={classNames?.root} role="tablist" aria-label={label}>{state?.contributions.map((tab, index) => {
       const chosen = selected?.ownerPluginId === tab.ref.ownerPluginId && selected?.id === tab.ref.id;
-      return <button role="tab" key={`${tab.ref.ownerPluginId}/${tab.ref.id}`} id={`${prefix}-${index}`} aria-controls={panel} aria-selected={chosen} disabled={tab.availability !== 'available'} tabIndex={chosen || !selected && index === 0 ? 0 : -1} onClick={() => setSelected(tab.ref)} onKeyDown={event => {
+      return <button className={classNames?.button} role="tab" key={`${tab.ref.ownerPluginId}/${tab.ref.id}`} id={`${prefix}-${index}`} aria-controls={panel} aria-selected={chosen} disabled={tab.availability !== 'available'} tabIndex={chosen || !selected && index === 0 ? 0 : -1} onClick={() => setSelected(tab.ref)} onKeyDown={event => {
         if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
         event.preventDefault();
         const buttons = [...event.currentTarget.parentElement!.querySelectorAll<HTMLButtonElement>('[role=tab]:not(:disabled)')];
@@ -150,6 +152,6 @@ export function Tabs({ label, ...input }: Omit<SlotInput, 'selected'> & { label:
       }}>{tab.label ?? tab.tabId}</button>;
     })}</div>
     {error && <p role="alert">{error}</p>}
-    {state?.contributions.filter(tab => tab.selected && tab.execution?.phase === 'failed').map(tab => <button key={tab.ref.id} onClick={() => { if (tab.execution?.retryTarget) void retry(tab.execution.retryTarget); }}>Retry {tab.label}</button>)}
+    {state?.contributions.filter(tab => tab.selected && tab.execution?.phase === 'failed').map(tab => <button className={classNames?.button} key={tab.ref.id} onClick={() => { if (tab.execution?.retryTarget) void retry(tab.execution.retryTarget); }}>Retry {tab.label}</button>)}
   </>} panel={{ id: panel, label }} />;
 }

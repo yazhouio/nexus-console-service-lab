@@ -1,4 +1,5 @@
-import '@nexus/console-core/styles.css';
+import '@nexus/design-tokens/theme.css';
+import '@nexus/design-tokens/baseline.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 

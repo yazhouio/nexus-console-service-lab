@@ -1,0 +1,11 @@
+.card {
+  color: var(--nexus-color-text-primary);
+  background: var(--nexus-color-surface);
+  border: 1px solid var(--nexus-color-border-default);
+  border-radius: var(--nexus-radius-md);
+  padding: var(--nexus-space-4);
+  font-family: var(--nexus-font-family-body);
+  font-size: var(--nexus-font-size-body);
+  line-height: var(--nexus-line-height-body);
+}
+.button { color: var(--nexus-color-action-primary); background: var(--nexus-color-surface); border: 1px solid var(--nexus-color-border-default); padding: var(--nexus-space-2); }

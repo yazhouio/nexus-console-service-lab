@@ -4,7 +4,7 @@ import { frozenCopy } from '../immutable';
 import { uiKey, type ContributionRef, type CompiledExtensionPointDefinition, type HostContributionPolicy, type SurfaceContributionDefinition, type TabContributionDefinition } from './definitions';
 import { assertUiJson, matchesContext, canonicalJson } from './schema';
 
-export class UiError extends Error { constructor(readonly code: string) { super(code); this.name = 'UiError'; } }
+export class UiError extends Error { constructor(readonly code: string, readonly stage?: UiExecution['stage']) { super(code); this.name = 'UiError'; } }
 export interface UiSizing { readonly mode: 'content-sized' | 'bounded'; readonly minWidth?: number; readonly maxWidth?: number; readonly minHeight?: number; readonly maxHeight?: number }
 export interface SlotInput { readonly id: string; readonly contextKey: string; readonly context: JsonValue; readonly hidden?: boolean; readonly selected?: readonly ContributionRef[]; readonly sizing?: UiSizing }
 export interface ContextSnapshot { readonly contextKey: string; readonly revision: number; readonly value: JsonValue }
@@ -125,7 +125,7 @@ export function createUiRuntime(options: UiRuntimeOptions) {
       } catch (error) {
         if (a.valid) {
           try { options.onError?.(error, a.id); } catch { /* Diagnostics cannot keep a failed execution alive. */ }
-          failAttempt(a.id, error instanceof UiError ? error.code : 'SURFACE_FAILED');
+          failAttempt(a.id, error instanceof UiError ? error.code : 'SURFACE_FAILED', error instanceof UiError ? error.stage : undefined);
         }
       }
     });

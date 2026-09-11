@@ -1,0 +1,2381 @@
+{
+  "recordedAt": "2026-09-10T02:51:48.722Z",
+  "baselineCommit": "5e8e27f55d4b267342b1d500456838b153a25839",
+  "node": "v24.14.1",
+  "chromium": "151.0.7922.34",
+  "wujie": "2.1.0",
+  "scope": "Experimental browser asset loader over unchanged production UI core, real Wujie and three real Rsbuild CSS Modules builds (two source revisions, one no-hash output replacement). No production Browser UI host, React presentation, bridge handshake, Tailwind or StyleX integration certification. Single-factor variants unless explicitly identified as equivalent replacements/additions.",
+  "sourceSha256": {
+    "packages/plugin-runtime/src/ui/runtime.ts": "53258b838dde35c6614439a7437f593b743cd0048d02a0ecddf0af433265d3d3",
+    "packages/plugin-runtime/src/contribution.ts": "3d9da0e1e7db677b5cce5334dba694a604ec512592a667c250f7dea5fc15cf0c",
+    "packages/plugin-runtime/src/browser/ui-host.ts": "aecbabb00a6a3fcfe68ee4bed7d90749f05005079f482fe4e42986f9c5bafce0",
+    "packages/plugin-runtime/src/browser/wujie-driver.ts": "f23129b3d5d06b043c95184dec0fca62585e5b2642ae431a3a6778a1f01fbd58",
+    "packages/plugin-runtime/src/browser/wujie-plugin-adapter.ts": "65ea2009490b5146106d5d2e11f3bbbd53db423c1d01de89f12cd1e9a03d6d93",
+    "packages/plugin-runtime/node_modules/wujie/lib/index.js": "51e085a210682fc9921f05e99a7dffccf913fef87edaac8bae209a7b745fe1a7",
+    "docs/validation/plugin-styling-ablation.mjs": "1edae80e46f3fdf0f1f45daa8711faeafc6a3e87818a553ccf595302172cec6f",
+    "docs/validation/plugin-styling-ablation.browser.js": "a7ae1f7ee88c050a23efc3d280fae5ad132d6e22ec47916423b379313542ec98"
+  },
+  "builds": {
+    "v1": {
+      "css": [
+        "/build/v1/static/css/index.93fdc06d0f.css"
+      ],
+      "js": [
+        "/build/v1/static/js/index.6fb8756fca.js"
+      ],
+      "manifestSha256": "05ae0dfb545cafe02ca49c5342ad6e96ede3f716c1e5c9ce07ac6daf3c552cce"
+    },
+    "v2": {
+      "css": [
+        "/build/v2/static/css/index.8489438222.css"
+      ],
+      "js": [
+        "/build/v2/static/js/index.806c7f04ec.js"
+      ],
+      "manifestSha256": "407d1a99c4052f0dc44a49d15d9427814b1f13840c64344c1e8b379afd6df1e8"
+    },
+    "v2stable": {
+      "css": [
+        "/build/v2stable/static/css/index.css"
+      ],
+      "js": [
+        "/build/v2stable/static/js/index.js"
+      ],
+      "manifestSha256": "3a52a55ceb93a775017eeb3d45a6b5436dad78ece42b5a145babd57981581852"
+    }
+  },
+  "results": [
+    {
+      "variant": "baseline",
+      "passed": 12,
+      "failed": 0,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "direct-generated-list",
+      "passed": 12,
+      "failed": 0,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "versioned-url-no-hash",
+      "passed": 12,
+      "failed": 0,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-y9RkN_",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "live-token-copy",
+      "passed": 12,
+      "failed": 0,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": true
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "no-platform-tokens",
+      "passed": 11,
+      "failed": 1,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": false,
+          "error": "Initial semantics differ; observed=[\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\"]"
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(0, 0, 0)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "plugin-token-defaults",
+      "passed": 11,
+      "failed": 1,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": false,
+          "error": "Initial semantics differ; observed=[\"rgb(20, 40, 60)\",\"rgb(200, 0, 0)\",\"rgb(20, 40, 60)\"]"
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(200, 0, 0)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "global-selectors",
+      "passed": 11,
+      "failed": 1,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": false,
+          "error": "Another owner was restyled; observed={\"host\":\"rgb(255, 0, 0)\",\"own\":\"rgb(255, 0, 0)\",\"nested\":\"rgb(255, 0, 0)\",\"restricted\":\"rgb(20, 40, 60)\"}"
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "document-only",
+      "passed": 11,
+      "failed": 1,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": false,
+          "error": "Same URL must mount once in each existing CSS root; observed={\"count\":[1,0,0],\"padding\":[\"17px\",\"0px\",\"0px\"]}"
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "url-only-dedupe",
+      "passed": 11,
+      "failed": 1,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": false,
+          "error": "Same URL must mount once in each existing CSS root; observed={\"count\":[1,0,0],\"padding\":[\"17px\",\"0px\",\"0px\"]}"
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "no-dedupe",
+      "passed": 10,
+      "failed": 2,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": false,
+          "error": "Concurrent presentations duplicated stylesheet; observed=2"
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": false,
+          "error": "Shared Slot emitted duplicate stylesheets; observed=2"
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "no-reference-lifetime",
+      "passed": 9,
+      "failed": 3,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": false,
+          "error": "First release removed surviving presentation CSS; observed=\"0px\""
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": false,
+          "error": "Expected ready execution; observed={\"phase\":\"failed\",\"attemptId\":\"0560e6a9-e30e-43cd-893e-6553df6bae85:attempt:4\",\"error\":\"CSS_CANCELLED\",\"stage\":\"artifact\",\"retryTarget\":\"0560e6a9-e30e-43cd-893e-6553df6bae85:attempt:4\"}"
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": false,
+          "error": "Child teardown removed owner/overlay CSS; observed=undefined"
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "no-final-release",
+      "passed": 3,
+      "failed": 9,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": false,
+          "error": "Last release retained stylesheet; observed=1"
+        },
+        {
+          "name": "actual-style-root",
+          "passed": false,
+          "error": "Existing roots retained CSS after disposal; observed=undefined"
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": false,
+          "error": "Partial load leaked references; observed=2"
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": false,
+          "error": "Cancelled/finished load retained resource; observed=1"
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": false,
+          "error": "CSS survived completed DOM cleanup; observed=undefined"
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": false,
+          "error": "Built asset remained after release; observed=undefined"
+        },
+        {
+          "name": "bounded-failure",
+          "passed": false,
+          "error": "Timed-out CSS remained mounted; observed=undefined"
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": false,
+          "error": "Owner end leaked overlay or stylesheet; observed=undefined"
+        },
+        {
+          "name": "single-css-owner",
+          "passed": false,
+          "error": "Host static import retained CSS after Runtime release; observed={\"remaining\":1,\"padding\":\"17px\"}"
+        }
+      ]
+    },
+    {
+      "variant": "no-ready-gate",
+      "passed": 11,
+      "failed": 1,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": false,
+          "error": "Business DOM appeared before required CSS; observed={\"phase\":\"starting\",\"attemptId\":\"0daee4d0-db5b-44de-a81a-18d06bab5ee7:attempt:2\"}"
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "no-failure-rollback",
+      "passed": 9,
+      "failed": 3,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": false,
+          "error": "Partial load leaked references; observed=2"
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": false,
+          "error": "Cancelled/finished load retained resource; observed=1"
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": false,
+          "error": "Timed-out CSS remained mounted; observed=undefined"
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "retain-failed-cache",
+      "passed": 11,
+      "failed": 1,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": false,
+          "error": "Expected ready execution; observed={\"phase\":\"failed\",\"attemptId\":\"7310a86f-c1f7-4998-9ec2-fd39649d34d4:attempt:3\",\"error\":\"CSS_LOAD_FAILED\",\"stage\":\"artifact\",\"retryTarget\":\"7310a86f-c1f7-4998-9ec2-fd39649d34d4:attempt:3\"}"
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "release-on-abort",
+      "passed": 11,
+      "failed": 1,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": false,
+          "error": "CSS released before asynchronous DOM cleanup; observed={\"connected\":true,\"padding\":\"0px\"}"
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "handwritten-stale-assets",
+      "passed": 11,
+      "failed": 1,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": false,
+          "error": "Rebuilt JS was paired with stale/manual CSS assets; observed={\"className\":\"cardV2-qtuA_U\",\"color\":\"rgb(0, 0, 0)\",\"padding\":\"0px\"}"
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "no-deadline",
+      "passed": 11,
+      "failed": 1,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": false,
+          "error": "CSS without a deadline remained starting"
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": true,
+          "observed": {
+            "remaining": 0,
+            "padding": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "host-static-import",
+      "passed": 11,
+      "failed": 1,
+      "checks": [
+        {
+          "name": "theme-inheritance",
+          "passed": true,
+          "observed": {
+            "light": [
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)",
+              "rgb(20, 40, 60)"
+            ],
+            "dark": [
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)",
+              "rgb(180, 200, 220)"
+            ],
+            "explicitBridge": false
+          }
+        },
+        {
+          "name": "selector-ownership",
+          "passed": true,
+          "observed": {
+            "host": "rgb(1, 2, 3)",
+            "own": "rgb(255, 0, 0)",
+            "nested": "rgb(3, 2, 1)",
+            "restricted": "rgb(20, 40, 60)"
+          }
+        },
+        {
+          "name": "shared-lifetime",
+          "passed": true,
+          "observed": {
+            "peakLinks": 1,
+            "survivingPadding": "17px",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "actual-style-root",
+          "passed": true,
+          "observed": {
+            "linksPerRoot": [
+              1,
+              1,
+              1
+            ],
+            "padding": [
+              "17px",
+              "17px",
+              "17px"
+            ]
+          }
+        },
+        {
+          "name": "ready-gate",
+          "passed": true,
+          "observed": {
+            "beforeCss": "no-business-dom",
+            "afterCss": "ready"
+          }
+        },
+        {
+          "name": "failure-rollback-retry",
+          "passed": true,
+          "observed": {
+            "failure": {
+              "code": "CSS_LOAD_FAILED",
+              "stage": "artifact"
+            },
+            "retry": "ready",
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "cancel-shared-load",
+          "passed": true,
+          "observed": {
+            "cancelledDom": 0,
+            "survivor": "ready",
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "dom-cleanup-order",
+          "passed": true,
+          "observed": {
+            "connected": true,
+            "padding": "17px"
+          }
+        },
+        {
+          "name": "build-asset-identity",
+          "passed": true,
+          "observed": {
+            "className": "cardV2-qtuA_U",
+            "color": "rgb(91, 37, 13)",
+            "padding": "14px"
+          }
+        },
+        {
+          "name": "bounded-failure",
+          "passed": true,
+          "observed": {
+            "error": "CSS_LOAD_TIMEOUT",
+            "stage": "artifact"
+          }
+        },
+        {
+          "name": "slot-overlay-lifetime",
+          "passed": true,
+          "observed": {
+            "hiddenAttemptRetained": true,
+            "overlaySurvivedChild": true,
+            "finalLinks": 0
+          }
+        },
+        {
+          "name": "single-css-owner",
+          "passed": false,
+          "error": "Host static import retained CSS after Runtime release; observed={\"remaining\":1,\"padding\":\"17px\"}"
+        }
+      ]
+    }
+  ],
+  "characterization": {
+    "wujieRetry": {
+      "first": {
+        "loadErrors": 1,
+        "padding": "0px"
+      },
+      "retry": {
+        "loadErrors": 0,
+        "padding": "17px"
+      },
+      "recovered": true
+    }
+  }
+}

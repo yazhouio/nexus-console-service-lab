@@ -39,11 +39,12 @@ export function BrowserHost({ distribution }: { readonly distribution: BrowserDi
         },
         onAudit: appendAudit,
       });
-      const ui = browser.createUiHost({ onAudit: appendAudit, runtime, restrictedAdapter: adapter, policy, builtinPermissions: distribution.capabilityGrants, renderBuiltin: renderBuiltinUi });
+      const presentationErrors: { attemptId: string; message: string }[] = [];
+      const ui = browser.createUiHost({ onError(cause, attemptId) { presentationErrors.push({ attemptId, message: String(cause) }); if (presentationErrors.length > 100) presentationErrors.shift(); }, onAudit: appendAudit, runtime, restrictedAdapter: adapter, policy, builtinPermissions: distribution.capabilityGrants, builtinCss: distribution.builtinCss, renderBuiltin: renderBuiltinUi });
       overlay.bind(ui.overlayCapability);
       cleanup = () => { void ui.dispose(); for (const instance of adapter.listInstances()) void adapter.unmount(instance.identity.surfaceInstanceId).catch(() => undefined); };
       const model = createRouteModel({ routes: runtime.contributions.listRoutes(), navigation: runtime.contributions.listNavigation(), points: runtime.contributions.listExtensionPoints(), rootRoutePoint: runtime.rootRoutePoint, navigationRootPoints: runtime.navigationRootPoints, policy });
-      const diagnostics = () => inspect(runtime, { listInstances: () => adapter.listInstances(), inspectUi: () => ui.core.inspect(), inspectActions: () => ui.actions.inspect(), listHostContributions: () => model.listHostContributions(window.location.pathname + window.location.search) });
+      const diagnostics = () => ({ ...inspect(runtime, { listInstances: () => adapter.listInstances(), inspectUi: () => ui.core.inspect(), inspectActions: () => ui.actions.inspect(), listHostContributions: () => model.listHostContributions(window.location.pathname + window.location.search) }), presentationErrors: [...presentationErrors] });
       platform.bind({ runtime, model, store, catalog: distribution.catalog,
         location: () => window.location.pathname + window.location.search,
         navigate(href) { window.history.pushState(null, '', href); window.dispatchEvent(new PopStateEvent('popstate')); },
@@ -68,8 +69,8 @@ function BrowserPresentation({ services, root, onFailure }: { services: HostServ
   useEffect(() => { services.platform.notify('routes.query@1'); }, [services, location.pathname, location.search]);
   return <RouteLinkProvider renderLink={(props, client) => {
     let href: string;
-    try { href = services.model.pathFor(props.routeId, props.params); } catch { return <span aria-disabled="true">{props.children}</span>; }
-    return <a href={href} aria-current={props.current ? 'page' : undefined} onClick={event => { event.preventDefault(); void client.invoke('routes.navigate@1', 'navigate', { routeId: props.routeId, params: props.params }).catch(() => undefined); }}>{props.children}</a>;
+    try { href = services.model.pathFor(props.routeId, props.params); } catch { return <span className={props.className} aria-disabled="true">{props.children}</span>; }
+    return <a className={props.className} href={href} aria-current={props.current ? 'page' : undefined} onClick={event => { event.preventDefault(); void client.invoke('routes.navigate@1', 'navigate', { routeId: props.routeId, params: props.params }).catch(() => undefined); }}>{props.children}</a>;
   }}>
     {root.contribution.target.kind === 'builtin' ? <ManagedBuiltin ui={services.ui} ownerPluginId={root.ownerPluginId} surfaceId={root.contribution.id}
       target={root.contribution.target} mountPointId="root-presentation" onFailure={onFailure} outlet={<RoutedContent model={services.model} />} /> : <SurfaceMount pluginId={root.ownerPluginId}

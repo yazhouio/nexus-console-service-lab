@@ -15,7 +15,8 @@
     "@nexus/browser-host": "workspace:*",
     "@nexus/console-core": "workspace:*",
     "@nexus/console-core-api": "workspace:*",
-    "@nexus/cluster-api": "workspace:*"
+    "@nexus/cluster-api": "workspace:*",
+    "@nexus/design-tokens": "workspace:*"
   },
   "devDependencies": {
     "@rsbuild/core": "catalog:",

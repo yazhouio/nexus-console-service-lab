@@ -1,3 +1,4 @@
+import { createArtifactAssets } from './artifact-assets';
 import { frozenCopy } from '../immutable';
 import { createActionRuntime } from '../action-runtime';
 import { createBrowserActionDriver } from './action-driver';
@@ -16,13 +17,17 @@ export interface UiHostOptions {
   onAudit?: (entry: import('./plugin-bridge').BridgeAuditEntry) => void;
   onError?: (cause: unknown, attemptId: string) => void;
   runtime: PluginRuntime; restrictedAdapter: WujiePluginAdapter; policy: HostContributionPolicy;
+  builtinCss?: Readonly<Record<string, readonly string[]>>;
   builtinPermissions?: Readonly<Record<string, readonly string[]>>;
   renderBuiltin(render: unknown, container: HTMLElement, client: UiClient, onFailure: (error: unknown) => void): UiMounted | Promise<UiMounted>;
 }
 export function createUiHost(options: UiHostOptions) {
-  options = { ...options, builtinPermissions: frozenCopy(options.builtinPermissions ?? {}) };
+  options = { ...options, builtinCss: frozenCopy(options.builtinCss ?? {}), builtinPermissions: frozenCopy(options.builtinPermissions ?? {}) };
   // Wujie virtualizes HTML.parentNode; anchor ownership follows the physical Host DOM.
   const physicalParent = Object.getOwnPropertyDescriptor(window.Node.prototype, 'parentNode')!.get!;
+  const hostDocument = window.document;
+  const connected = Object.getOwnPropertyDescriptor(window.Node.prototype, 'isConnected')!.get!;
+  const assets = createArtifactAssets();
   const bindings = new Map<string, string>();
   const localCleanups = new Set<Promise<void>>();
   const roots = new Map<string, () => ParentNode | undefined>();
@@ -59,6 +64,26 @@ export function createUiHost(options: UiHostOptions) {
       if (node === root) return true;
     }
     return false;
+  }
+  function actualStyleRoot(container: HTMLElement, attemptId: string): { root: Document | ShadowRoot; lineage: Node[] } {
+    core.identity(attemptId);
+    if (!connected.call(container)) throw new UiError('ANCHOR_NOT_IN_ROOT');
+    const lineage: Node[] = [];
+    for (let node: Node | null = container; node; node = physicalParent.call(node)) {
+      lineage.push(node);
+      const owner = rootOwners.get(node);
+      if (owner) core.identity(owner);
+      if (node === hostDocument) return { root: hostDocument, lineage };
+      if (node instanceof window.ShadowRoot) {
+        // Only an existing, active Restricted presentation can own this physical root.
+        for (const [id, read] of roots) if (read() === node) {
+          core.identity(id);
+          return { root: node, lineage };
+        }
+        throw new UiError('PRESENTATION_ROOT_MISSING');
+      }
+    }
+    throw new UiError('PRESENTATION_ROOT_MISSING');
   }
   function resolveAnchor(attemptId: string, token: string): HTMLElement {
     const root = getRoot(attemptId); if (!root) throw new UiError('PRESENTATION_ROOT_MISSING');
@@ -125,19 +150,43 @@ export function createUiHost(options: UiHostOptions) {
       visibility(anchor, hidden) { (anchor as HTMLElement).hidden = hidden; },
       async mount(input) {
         const container = input.placement as HTMLElement;
-        const ready = controlReady(input.attemptId, input.signal);
         const disposeBindings = () => { roots.delete(input.attemptId); anchors.delete(input.attemptId); };
         input.signal.addEventListener('abort', disposeBindings, { once: true });
         if (input.target.kind === 'builtin') {
           roots.set(input.attemptId, () => container); rootOwners.set(container, input.attemptId);
-          const local = localClient(input.attemptId);
-          let mounted: UiMounted | undefined;
+          let css: { release(): void } | undefined;
           try {
+            const location = actualStyleRoot(container, input.attemptId);
+            css = await assets.acquire(options.builtinCss?.[input.ownerPluginId] ?? [], location.root, input.signal);
+            const current = actualStyleRoot(container, input.attemptId);
+            if (input.signal.aborted || current.root !== location.root || current.lineage.length !== location.lineage.length || current.lineage.some((node, index) => node !== location.lineage[index])) throw new UiError('STALE_EXECUTION');
+          } catch (cause) {
+            css?.release();
+            const descriptor = candidate(input.ownerPluginId);
+            const error = new UiError('CSS_ARTIFACT_FAILED', 'artifact');
+            error.message = `CSS artifact failed: owner=${input.ownerPluginId} version=${descriptor?.version ?? 'unknown'} attemptId=${input.attemptId}: ${String(cause)}`;
+            throw error;
+          }
+          // CSS waiting has its own timeout; only rendering starts the UI-ready clock.
+          const ready = controlReady(input.attemptId, input.signal);
+          let local: ReturnType<typeof localClient> | undefined;
+          let mounted: UiMounted | undefined;
+          const cleanup = async () => {
+            disposeBindings(); local?.dispose();
+            try {
+              const results = await Promise.allSettled([Promise.resolve().then(() => mounted?.dispose()), local?.settled()]);
+              const failure = results.find(result => result.status === 'rejected');
+              if (failure?.status === 'rejected') throw failure.reason;
+            } finally { css?.release(); }
+          };
+          try {
+            local = localClient(input.attemptId);
             mounted = await options.renderBuiltin(input.target.render, container, local.client, () => core.failAttempt(input.attemptId));
             await ready;
-          } catch (error) { local.dispose(); await mounted?.dispose(); throw error; }
-          return { async dispose() { disposeBindings(); local.dispose(); await Promise.all([mounted?.dispose(), local.settled()]); } };
+          } catch (error) { await cleanup(); throw error; }
+          return { dispose: cleanup };
         }
+        const ready = controlReady(input.attemptId, input.signal);
         roots.set(input.attemptId, () => container.querySelector('wujie-app')?.shadowRoot ?? undefined);
         const meta = metadata.get(container);
         const mounting = options.restrictedAdapter.mount({ pluginId: input.ownerPluginId, surfaceId: input.surfaceId, container,
@@ -169,7 +218,7 @@ export function createUiHost(options: UiHostOptions) {
       overlay(handle, presentation, close) {
         const previous = document.activeElement as HTMLElement | null;
         const dialog = document.createElement('dialog'); dialog.dataset.nexusOverlay = handle; dialog.setAttribute('aria-label', presentation === 'drawer' ? 'Plugin drawer' : 'Plugin dialog');
-        Object.assign(dialog.style, { padding: '20px', maxWidth: '90vw', width: '640px', maxHeight: '90vh', overflow: 'auto', border: '1px solid #ccc', borderRadius: '8px' });
+        Object.assign(dialog.style, { padding: '20px', maxWidth: '90vw', width: '640px', maxHeight: '90vh', overflow: 'auto', border: '1px solid var(--nexus-color-border-default)', borderRadius: 'var(--nexus-radius-md)', color: 'var(--nexus-color-text-primary)', background: 'var(--nexus-color-surface)', fontFamily: 'var(--nexus-font-family-body)' });
         if (presentation === 'drawer') Object.assign(dialog.style, { marginRight: '0', marginTop: '0', height: '100vh', maxHeight: '100vh' });
         const closeButton = document.createElement('button'); closeButton.textContent = 'Close'; closeButton.onclick = close;
         const feedback = document.createElement('div'), container = document.createElement('div');
@@ -213,7 +262,12 @@ export function createUiHost(options: UiHostOptions) {
         },
       };
     },
-    async dispose() { await actions.dispose(); await core.dispose(); while (localCleanups.size) await Promise.allSettled([...localCleanups]); },
+    async dispose() {
+      assets.close();
+      try { await actions.dispose(); } finally {
+        try { await core.dispose(); while (localCleanups.size) await Promise.allSettled([...localCleanups]); } finally { assets.dispose(); }
+      }
+    },
   };
 }
 export type UiHost = ReturnType<typeof createUiHost>;

@@ -26,6 +26,8 @@ export default defineConfig({
           { text: '内部实现', link: '/maintainers/internal-implementation-design' },
           { text: 'Host 路由设计', link: '/maintainers/host-routing-design' },
           { text: 'Host 路由实施', link: '/maintainers/host-routing-implementation' },
+          { text: '插件样式设计', link: '/maintainers/plugin-styling-design' },
+          { text: '插件样式实施', link: '/maintainers/plugin-styling-implementation' },
           { text: 'UI 组合设计', link: '/maintainers/cross-plugin-ui-composition-design' },
           { text: 'UI 组合实施', link: '/maintainers/cross-plugin-ui-composition-implementation' },
         ] },

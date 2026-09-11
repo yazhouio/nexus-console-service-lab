@@ -11,8 +11,10 @@ interface Presentation {
   readonly render: unknown;
   readonly client: UiClient;
   readonly fail: (error: unknown) => void;
+  presented?: boolean;
+  removed?: () => void;
   committed(): void;
-  dispose(): void;
+  dispose(): void | Promise<void>;
 }
 const containers = new WeakMap<HTMLElement, (presentation: Presentation) => void>();
 
@@ -31,7 +33,10 @@ export function renderInTree(render: unknown, container: HTMLElement, client: Ui
 }
 
 function Committed({ presentation, children }: { presentation: Presentation; children: ReactNode }) {
-  useLayoutEffect(() => { presentation.committed(); }, [presentation]);
+  useLayoutEffect(() => {
+    presentation.presented = true; presentation.committed();
+    return () => { presentation.presented = false; presentation.removed?.(); };
+  }, [presentation]);
   return children;
 }
 
@@ -43,6 +48,7 @@ export function ManagedBuiltin({ ui, ownerPluginId, surfaceId, target, mountPoin
   const container = useRef<HTMLDivElement>(null);
   const [presentation, setPresentation] = useState<Presentation>();
   const [execution, setExecution] = useState<{ scopeId: string; phase: string }>();
+  const retry = useRef<() => void>(() => undefined);
   const failure = useRef(onFailure); failure.current = onFailure;
   useLayoutEffect(() => {
     const element = container.current;
@@ -53,11 +59,16 @@ export function ManagedBuiltin({ ui, ownerPluginId, surfaceId, target, mountPoin
       current = value;
       value.dispose = () => {
         value.committed();
-        if (active) setPresentation(previous => previous === value ? undefined : previous);
+        if (!active) return;
+        return new Promise<void>(resolve => {
+          if (value.presented) value.removed = resolve; else resolve();
+          setPresentation(previous => previous === value ? undefined : previous);
+        });
       };
       setPresentation(value);
     });
     const root = ui.mountRoot(ownerPluginId, surfaceId, target, element, mountPointId);
+    retry.current = () => { root.retry(); };
     const update = () => {
       setExecution({ scopeId: root.scopeId, phase: root.execution.phase });
       if (root.execution.phase === 'failed') failure.current?.();
@@ -68,7 +79,7 @@ export function ManagedBuiltin({ ui, ownerPluginId, surfaceId, target, mountPoin
   }, [ui, ownerPluginId, surfaceId, target, mountPointId]);
   const View = presentation?.render as ComponentType<{ routeContext?: RouteContext }> | undefined;
   return <div ref={container} data-managed-presentation={mountPointId} data-execution-scope={execution?.scopeId} data-execution-phase={execution?.phase}>
-    {execution?.phase === 'failed' && <p role="alert">Unable to display this view.</p>}
+    {execution?.phase === 'failed' && <p role="alert">Unable to display this view. <button onClick={() => retry.current()}>Retry view</button></p>}
     {presentation && View && <Committed key={presentation.id} presentation={presentation}>
       <SurfaceBoundary fail={presentation.fail}><UiProvider client={presentation.client}><RoutePresentationProvider context={routeContext} outlet={outlet === undefined ? nested : outlet}><View routeContext={routeContext} /></RoutePresentationProvider></UiProvider></SurfaceBoundary>
     </Committed>}

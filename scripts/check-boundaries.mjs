@@ -5,6 +5,7 @@ import { createScanner, SyntaxKind } from 'typescript/unstable/ast';
 
 const root = resolve(import.meta.dirname, '..');
 function role(file) {
+  if (file.startsWith('packages/design-tokens/')) return 'tokens';
   if (file.startsWith('packages/plugin-runtime/')) return 'runtime';
   if (file.startsWith('packages/browser-host/')) return 'host';
   if (file.startsWith('packages/console-core/')) return 'core';
@@ -14,7 +15,7 @@ function role(file) {
   return undefined;
 }
 const packageRoots = {
-  '@nexus/plugin-runtime': 'packages/plugin-runtime', '@nexus/browser-host': 'packages/browser-host',
+  '@nexus/design-tokens': 'packages/design-tokens', '@nexus/plugin-runtime': 'packages/plugin-runtime', '@nexus/browser-host': 'packages/browser-host',
   '@nexus/console-core': 'packages/console-core', '@nexus/console-core-api': 'packages/console-core-api', '@nexus/cluster-api': 'packages/cluster-api',
 };
 export function checkImport(file, specifier, typeOnly = false) {
@@ -36,8 +37,8 @@ export function checkImport(file, specifier, typeOnly = false) {
   if (specifier.startsWith('@nexus/plugin-runtime/') && !['@nexus/plugin-runtime/react', '@nexus/plugin-runtime/client', ...(sourceRole === 'host' ? ['@nexus/plugin-runtime/browser'] : [])].includes(specifier)) return 'Runtime private/browser entry is unavailable to this layer';
   if (sourceRole === 'runtime' && targetRole && targetRole !== 'runtime') return 'Runtime cannot depend on Host or business packages';
   if (sourceRole === 'host' && targetRole && !['runtime', 'host'].includes(targetRole)) return 'Host cannot depend on business implementations or APIs';
-  if (sourceRole === 'core' && targetRole && !['core', 'runtime'].includes(targetRole) && packageName !== '@nexus/console-core-api') return 'Core can depend only on its API and public Runtime contracts';
-  if (sourceRole === 'feature' && targetRole && !['runtime', 'api'].includes(targetRole)) return 'Feature cannot depend on Core implementations or Host';
+  if (sourceRole === 'core' && targetRole && !['core', 'runtime', 'tokens'].includes(targetRole) && packageName !== '@nexus/console-core-api') return 'Core can depend only on its API and public Runtime contracts';
+  if (sourceRole === 'feature' && targetRole && !['runtime', 'api', 'tokens'].includes(targetRole)) return 'Feature cannot depend on Core implementations or Host';
   if (sourceRole === 'api' && (!typeOnly || targetRole && !['runtime', 'api'].includes(targetRole))) return 'API packages import external contracts as types only';
   if (specifier.startsWith('@nexus/') && !targetRole) return 'Unknown workspace dependency must declare its architecture boundary';
 }

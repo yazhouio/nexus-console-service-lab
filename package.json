@@ -25,10 +25,20 @@
     "routing:smoke": "node scripts/routing-smoke.mjs",
     "build:routing-release": "node scripts/check-node-version.mjs && NEXUS_REQUIRE_ROUTING_EVIDENCE=true pnpm --filter @nexus/console build",
     "check:boundaries": "node scripts/check-boundaries.mjs",
-    "generate:plugin-contract": "node scripts/generate-plugin-contract.mjs"
+    "generate:plugin-contract": "node scripts/generate-plugin-contract.mjs",
+    "test:styling-compilers": "pnpm --filter @nexus/plugin-runtime build && node scripts/validate-styling-compilers.mjs",
+    "test:styling": "pnpm build:routing-validation && pnpm test:e2e:preview e2e/plugin-styling.spec.ts && pnpm test:styling-compilers"
   },
   "devDependencies": {
+    "@babel/core": "7.28.5",
     "@playwright/test": "catalog:",
+    "@stylexjs/babel-plugin": "0.19.0",
+    "@stylexjs/stylex": "0.19.0",
+    "@tailwindcss/node": "4.3.3",
+    "lightningcss": "1.33.0",
+    "postcss": "8.5.26",
+    "postcss-selector-parser": "7.1.0",
+    "tailwindcss": "4.3.3",
     "typescript": "catalog:"
   }
 }

@@ -1,0 +1,25 @@
+/* Integrated HTML owns this CSS; the Host owns the inherited platform values. */
+.kubeeye-panel {
+  box-sizing: border-box;
+  padding: var(--nexus-space-6);
+  border: 1px solid var(--nexus-color-border-default);
+  border-radius: var(--nexus-radius-lg);
+  font-family: var(--nexus-font-family-body);
+  font-size: var(--nexus-font-size-body);
+  line-height: var(--nexus-line-height-body);
+  color: var(--nexus-color-text-primary);
+  background: var(--nexus-color-surface);
+}
+.kubeeye-button {
+  box-sizing: border-box;
+  margin: var(--nexus-space-1);
+  padding: var(--nexus-space-2) var(--nexus-space-3);
+  border: 1px solid var(--nexus-color-border-default);
+  border-radius: var(--nexus-radius-md);
+  background: var(--nexus-color-surface);
+  color: var(--nexus-color-action-primary);
+  font: inherit;
+  cursor: pointer;
+}
+.kubeeye-button:disabled { opacity: .55; cursor: not-allowed; }
+.kubeeye-button:focus-visible { outline: 2px solid var(--nexus-color-focus); }

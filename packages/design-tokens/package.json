@@ -1,0 +1,6 @@
+{
+  "name": "@nexus/design-tokens",
+  "version": "1.0.0",
+  "private": true,
+  "exports": { "./theme.css": "./theme.css", "./baseline.css": "./baseline.css" }
+}

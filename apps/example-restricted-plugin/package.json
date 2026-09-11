@@ -5,7 +5,8 @@
   "scripts": {
     "build": "rspack build --mode production",
     "dev": "rspack serve --mode development",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "dev:preview": "NEXUS_STANDALONE_PREVIEW=true rspack serve --mode development"
   },
   "dependencies": {
     "react": "catalog:",
@@ -20,6 +21,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "react-refresh": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@nexus/design-tokens": "workspace:*"
   }
 }

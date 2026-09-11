@@ -7,6 +7,8 @@ export interface RecoveryConfiguration {
   rollback?(id: string): void;
 }
 export interface BrowserDistribution extends Omit<BootstrapPluginRuntimeOptions, 'installed'> {
+  /** Build-generated absolute CSS URLs, associated with the selected Builtin definitions. */
+  readonly builtinCss?: Readonly<Record<string, readonly string[]>>;
   readonly applicationLabel: string;
   readonly policyBundle: ContributionPolicyBundle;
   readonly capabilityGrants: Readonly<Record<string, readonly string[]>>;

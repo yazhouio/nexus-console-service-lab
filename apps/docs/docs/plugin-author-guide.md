@@ -220,3 +220,14 @@ Tab 贡献声明 `{ kind: 'tab', tabId, label, surfaceId, point }`，其中 Surf
 
 
 V1 约束适用范围：`group/order` 适用于各 Kind。`cardinality` 对 Surface/Tab 表示当前 Placement 选中的贡献数量，对 Action 表示一次调用的执行数量（固定为 1，范围不含 1 时贡献不可调用）；Route/Navigation 不接收该维度。`sizing/presentations` 仅适用于 Surface/Tab；Point Surface 支持 `inline`，Tab 支持 `tab`。Overlay 的 modal/drawer 是独立协议，不属于 Point 的呈现方式。尚无执行语义的维度或方式在声明接纳时明确拒绝，不作为无效限制静默保存。
+
+
+## 插件样式
+
+插件 CSS 使用平台 `--nexus-*` Token，例如 `color: var(--nexus-color-text-primary)`、`background: var(--nexus-color-surface)` 和 `padding: var(--nexus-space-4)`。这些变量只读；业务变量、class、动画、字体和 layer 使用自己的命名空间。给自身元素挂私有 class，避免 `.pluginRoot button` 等规则影响 Anchor 下的其他插件。不要依赖 Core 或其他插件的私有 class。
+
+Builtin 由 Distribution 关联构建生成的完整 CSS URL 数组；首次 UI 执行会等待 CSS，就绪后才渲染，最后一个消费者卸载后回收。不要在插件 JS 中使用会向 Host 全局注入 CSS 的普通副作用 import；本仓库的 `?artifact` 编译路径保留 CSS Modules 默认 class 映射，并提供具名 `css` 数组供 Distribution 组装。异步 UI 的 CSS 也须进入这份静态闭包，纯 Action 不触发 UI CSS 加载。
+
+Restricted 由自己的 HTML 引入内部 CSS，自行声明字体、背景及 reset，并继承 Host Token。集成产物不携带同名平台默认变量，也不另设主题 Bridge。独立预览可以加载 `@nexus/design-tokens/theme.css`；示例的 `dev:preview` 与集成开发端口分开。
+
+`RouteLink` 可传 `className`；`ActionMenu`、`Tabs` 可传 `classNames` 为它们自身的 root/button/status/result 指定私有类名。这些是本地 React 呈现参数，不改变 Point 或 Surface 契约。构建及验收细节见[插件样式实施记录](./maintainers/plugin-styling-implementation.md)。

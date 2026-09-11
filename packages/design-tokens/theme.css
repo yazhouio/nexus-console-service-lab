@@ -1,0 +1,34 @@
+/* Nexus visual contract v1. This CSS is the only source of token values. */
+:root {
+  --nexus-color-text-primary: #242e42;
+  --nexus-color-text-muted: #79879c;
+  --nexus-color-canvas: #f5f7fa;
+  --nexus-color-surface: #fff;
+  --nexus-color-border-default: #e3e8ef;
+  --nexus-color-action-primary: #3385ff;
+  --nexus-color-action-hover: #2468d8;
+  --nexus-color-danger: #c44242;
+  --nexus-color-success: #55bc8a;
+  --nexus-color-focus: #2468d8;
+  --nexus-space-1: 4px;
+  --nexus-space-2: 8px;
+  --nexus-space-3: 12px;
+  --nexus-space-4: 16px;
+  --nexus-space-5: 20px;
+  --nexus-space-6: 24px;
+  --nexus-space-8: 32px;
+  --nexus-font-family-body: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --nexus-font-family-code: "SFMono-Regular", Consolas, monospace;
+  --nexus-font-size-small: 12px;
+  --nexus-font-size-body: 14px;
+  --nexus-font-size-heading: 28px;
+  --nexus-font-weight-regular: 400;
+  --nexus-font-weight-medium: 500;
+  --nexus-font-weight-semibold: 600;
+  --nexus-line-height-body: 1.55;
+  --nexus-line-height-heading: 1.25;
+  --nexus-radius-sm: 3px;
+  --nexus-radius-md: 6px;
+  --nexus-radius-lg: 12px;
+  --nexus-shadow-card: 0 2px 8px rgb(36 46 66 / 4%);
+}
