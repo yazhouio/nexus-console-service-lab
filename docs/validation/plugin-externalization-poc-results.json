@@ -1,0 +1,488 @@
+{
+  "startedAt": "2026-09-11T08:05:11.078Z",
+  "node": "v24.14.1",
+  "scratch": "/var/folders/gf/ydg54pp50kxc3d_fnk2nqrv40000gn/T/nexus-mf-gates-RxzwoA",
+  "gates": {
+    "hostInstances": "PASS",
+    "strictVersionRejection": "PASS",
+    "cssSingleOwner": "PASS"
+  },
+  "cases": [
+    {
+      "name": "shared-identities-and-managed-css",
+      "passed": true,
+      "load": {
+        "ok": true,
+        "css": [
+          "http://127.0.0.1:58615/good/static/plugin-css/poc.922e2eedfce5dfe783ba.css",
+          "http://127.0.0.1:58615/good/static/plugin-css/poc.10c49d14b4ef374a30e0.css"
+        ],
+        "identity": {
+          "react": true,
+          "jsx": true,
+          "uiProvider": true,
+          "uiClient": true,
+          "routeContext": true,
+          "routeLink": true
+        }
+      },
+      "lazy": {
+        "ok": true,
+        "reactDom": true
+      },
+      "style": {
+        "color": "rgb(12, 34, 56)",
+        "padding": "7px"
+      },
+      "logs": []
+    },
+    {
+      "name": "badreact",
+      "passed": true,
+      "result": {
+        "ok": false,
+        "error": "Error: [ Federation Runtime ]: Version 19.2.8 from poc_host of shared singleton module react does not satisfy the requirement of undefined which needs ^18.0.0)"
+      },
+      "logs": []
+    },
+    {
+      "name": "badsdk",
+      "passed": true,
+      "result": {
+        "ok": false,
+        "error": "Error: [ Federation Runtime ]: Version 0.1.0 from poc_host of shared singleton module @nexus/plugin-runtime/react does not satisfy the requirement of undefined which needs ^9.0.0)"
+      },
+      "logs": []
+    },
+    {
+      "name": "missing-shared-sdk",
+      "passed": true,
+      "result": {
+        "ok": false,
+        "error": "Error: The getter for the shared module is not a function. This may be caused by setting \"shared.import: false\" without the host providing the corresponding lib. #RUNTIME-012\nargs: {\"shareKey\":\"@nexus/plugin-runtime/react\"}\nView the docs to see how to solve: https://module-federation.io/guide/troubleshooting/runtime#runtime-012"
+      },
+      "logs": []
+    },
+    {
+      "name": "non-strict-negative-control",
+      "passed": true,
+      "result": {
+        "ok": true,
+        "css": [
+          "http://127.0.0.1:58615/loose/static/plugin-css/poc.922e2eedfce5dfe783ba.css",
+          "http://127.0.0.1:58615/loose/static/plugin-css/poc.10c49d14b4ef374a30e0.css"
+        ],
+        "identity": {
+          "react": true,
+          "jsx": true,
+          "uiProvider": true,
+          "uiClient": true,
+          "routeContext": true,
+          "routeLink": true
+        }
+      },
+      "logs": [
+        {
+          "type": "warning",
+          "text": "[ Federation Runtime ] Version 19.2.8 from poc_host of shared singleton module react does not satisfy the requirement of undefined which needs ^18.0.0)"
+        }
+      ]
+    },
+    {
+      "name": "duplicate-sdk-negative-control",
+      "passed": true,
+      "result": {
+        "ok": true,
+        "css": [
+          "http://127.0.0.1:58615/duplicatesdk/static/plugin-css/poc.922e2eedfce5dfe783ba.css",
+          "http://127.0.0.1:58615/duplicatesdk/static/plugin-css/poc.10c49d14b4ef374a30e0.css"
+        ],
+        "identity": {
+          "react": true,
+          "jsx": true,
+          "uiProvider": false,
+          "uiClient": false,
+          "routeContext": false,
+          "routeLink": false
+        }
+      },
+      "errors": [
+        "Error: A Host-bound UiProvider is required."
+      ],
+      "logs": [
+        {
+          "type": "error",
+          "text": "Error: A Host-bound UiProvider is required.\n    at Object.a (http://127.0.0.1:58615/duplicatesdk/static/js/async/456.8eeba4186d.js:1:1671)\n    at p (http://127.0.0.1:58615/duplicatesdk/static/js/async/456.8eeba4186d.js:1:813)\n    at l6 (http://127.0.0.1:58616/static/js/lib-react.e710d2eaa2.js:2:50985)\n    at oT (http://127.0.0.1:58616/static/js/lib-react.e710d2eaa2.js:2:71372)\n    at oW (http://127.0.0.1:58616/static/js/lib-react.e710d2eaa2.js:2:82397)\n    at uk (http://127.0.0.1:58616/static/js/lib-react.e710d2eaa2.js:2:116030)\n    at http://127.0.0.1:58616/static/js/lib-react.e710d2eaa2.js:2:115875\n    at ub (http://127.0.0.1:58616/static/js/lib-react.e710d2eaa2.js:2:115883)\n    at uu (http://127.0.0.1:58616/static/js/lib-react.e710d2eaa2.js:2:112039)\n    at uG (http://127.0.0.1:58616/static/js/lib-react.e710d2eaa2.js:2:134382)"
+        }
+      ]
+    },
+    {
+      "name": "lazy-shared-conflict-timing",
+      "passed": true,
+      "entry": {
+        "ok": true,
+        "css": [
+          "http://127.0.0.1:58615/lazybad/static/plugin-css/poc.922e2eedfce5dfe783ba.css",
+          "http://127.0.0.1:58615/lazybad/static/plugin-css/poc.10c49d14b4ef374a30e0.css"
+        ],
+        "identity": {
+          "react": true,
+          "jsx": true,
+          "uiProvider": true,
+          "uiClient": true,
+          "routeContext": true,
+          "routeLink": true
+        }
+      },
+      "result": {
+        "ok": false,
+        "error": "Error: [ Federation Runtime ]: Version 19.2.8 from poc_host of shared singleton module react-dom does not satisfy the requirement of undefined which needs ^18.0.0)"
+      },
+      "logs": []
+    }
+  ],
+  "snapshots": {
+    "packages/plugin-runtime/src/ui-react.tsx": "ee960facb5c58734db729ebb056753acccca3f6712caee8a902b53dff178b282",
+    "packages/plugin-runtime/src/browser/ui-host.ts": "fee644993bf2d68291a73bb98d46f66b6f35167878d59809a582a71a1d82adb5",
+    "packages/plugin-runtime/src/browser/artifact-assets.ts": "a2e3e0f237e4f581e10710083f08225259853b496be38cbc4374f516e0ebb408",
+    "packages/plugin-runtime/src/bootstrap.ts": "ea7089fc1f63956e074427094b735b534b6f653c3d7574d031375426d82ad0eb",
+    "packages/plugin-runtime/package.json": "f25064f711bd424036a386dddc8dcfb0d550db76a4cb97ea27cf99f633a5f093",
+    "package.json": "21d042f0388085c3d298d8b6ebe5b5cc7884f8de0669b13ad8ca6686674256b6",
+    "pnpm-lock.yaml": "403c1e2ecdbceaaeab8e3c95c7b3d1d35893da8ecd43aebc1e8c32f07414c5d5",
+    "scripts/artifact-css-loader.cjs": "2fba4fd2bf7b14b8bd268a7301e0a4c6aa9410398cfc7dcc4b04a84db3c32c34",
+    "scripts/check-plugin-css.mjs": "555e83423256b7aa48269f081106832b999311ff0cd2d658b7f1512c25b7ae15",
+    "scripts/reject-unmanaged-css.cjs": "7c7b7769a60340c694786f670ec0c93c0e822e790e7dd620b67c77e8ecf65a7e",
+    "apps/console/artifact-css-closure.ts": "9660c239fcaaab14311e41597b632d3f50012f1a60fdcb2798576069bd3dfdc2"
+  },
+  "versions": {
+    "host": {
+      "@rsbuild/core": "2.2.2",
+      "@rspack/core": "2.2.2",
+      "@module-federation/runtime": "2.9.0",
+      "@module-federation/runtime-core": "2.9.0",
+      "@module-federation/runtime-tools": "2.9.0",
+      "react": "19.2.8",
+      "react-dom": "19.2.8",
+      "@nexus/plugin-runtime": "0.1.0"
+    },
+    "remote": {
+      "@rsbuild/core": "2.2.2",
+      "@rspack/core": "2.2.2",
+      "@module-federation/runtime": "2.9.0",
+      "@module-federation/runtime-core": "2.9.0",
+      "@module-federation/runtime-tools": "2.9.0",
+      "react": "19.2.8",
+      "react-dom": "19.2.8",
+      "@nexus/plugin-runtime": "0.1.0"
+    }
+  },
+  "network": [
+    {
+      "server": "host",
+      "path": "/nested/console/path",
+      "at": 1789113913877,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/lib-react.e710d2eaa2.js",
+      "at": 1789113913891,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/104.0e5777e146.js",
+      "at": 1789113913891,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/index.279f27fc4b.js",
+      "at": 1789113913893,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/good/remoteEntry.js",
+      "at": 1789113913939,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/good/static/js/async/456.b237299223.js",
+      "at": 1789113913944,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/good/static/js/async/780.53b720b5a7.js",
+      "at": 1789113913949,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/good/static/plugin-css/poc.922e2eedfce5dfe783ba.css",
+      "at": 1789113913963,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/good/static/plugin-css/poc.10c49d14b4ef374a30e0.css",
+      "at": 1789113913963,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/nested/console/path",
+      "at": 1789113914940,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/lib-react.e710d2eaa2.js",
+      "at": 1789113914944,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/104.0e5777e146.js",
+      "at": 1789113914944,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/index.279f27fc4b.js",
+      "at": 1789113914944,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/badreact/remoteEntry.js",
+      "at": 1789113914963,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/badreact/static/js/async/456.fb38c6a8f9.js",
+      "at": 1789113914967,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/nested/console/path",
+      "at": 1789113915038,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/lib-react.e710d2eaa2.js",
+      "at": 1789113915043,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/104.0e5777e146.js",
+      "at": 1789113915043,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/index.279f27fc4b.js",
+      "at": 1789113915043,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/badsdk/remoteEntry.js",
+      "at": 1789113915059,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/badsdk/static/js/async/456.25067abc2e.js",
+      "at": 1789113915063,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/nested/console/path",
+      "at": 1789113915132,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/lib-react.e710d2eaa2.js",
+      "at": 1789113915135,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/104.0e5777e146.js",
+      "at": 1789113915135,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/index.279f27fc4b.js",
+      "at": 1789113915135,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/good/remoteEntry.js",
+      "at": 1789113915153,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/good/static/js/async/456.b237299223.js",
+      "at": 1789113915157,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/nested/console/path",
+      "at": 1789113915229,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/lib-react.e710d2eaa2.js",
+      "at": 1789113915233,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/104.0e5777e146.js",
+      "at": 1789113915233,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/index.279f27fc4b.js",
+      "at": 1789113915233,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/loose/remoteEntry.js",
+      "at": 1789113915250,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/loose/static/js/async/456.091ebb26f0.js",
+      "at": 1789113915253,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/nested/console/path",
+      "at": 1789113915287,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/lib-react.e710d2eaa2.js",
+      "at": 1789113915291,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/104.0e5777e146.js",
+      "at": 1789113915291,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/index.279f27fc4b.js",
+      "at": 1789113915291,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/duplicatesdk/remoteEntry.js",
+      "at": 1789113915309,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/duplicatesdk/static/js/async/456.8eeba4186d.js",
+      "at": 1789113915313,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/duplicatesdk/static/plugin-css/poc.922e2eedfce5dfe783ba.css",
+      "at": 1789113915320,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/duplicatesdk/static/plugin-css/poc.10c49d14b4ef374a30e0.css",
+      "at": 1789113915321,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/nested/console/path",
+      "at": 1789113915362,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/lib-react.e710d2eaa2.js",
+      "at": 1789113915366,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/104.0e5777e146.js",
+      "at": 1789113915366,
+      "status": 200
+    },
+    {
+      "server": "host",
+      "path": "/static/js/index.279f27fc4b.js",
+      "at": 1789113915366,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/lazybad/remoteEntry.js",
+      "at": 1789113915383,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/lazybad/static/js/async/456.36c2959d12.js",
+      "at": 1789113915387,
+      "status": 200
+    },
+    {
+      "server": "remote",
+      "path": "/lazybad/static/js/async/780.73ad86c77b.js",
+      "at": 1789113915389,
+      "status": 200
+    }
+  ],
+  "origins": {
+    "host": "http://127.0.0.1:58616",
+    "remote": "http://127.0.0.1:58615"
+  },
+  "browser": "151.0.7922.34",
+  "bundleAudit": {
+    "good": {
+      "privateSdk": [],
+      "privateReact": []
+    },
+    "duplicatesdk": {
+      "privateSdk": [
+        "./node_modules/@nexus/plugin-runtime/dist/ui-react.js"
+      ],
+      "privateReact": []
+    }
+  },
+  "passed": true,
+  "finishedAt": "2026-09-11T08:05:15.423Z"
+}
