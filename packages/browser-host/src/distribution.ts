@@ -6,7 +6,21 @@ export interface RecoveryConfiguration {
   disable?(id: string): void;
   rollback?(id: string): void;
 }
+export interface BuiltinPreparationFailure {
+  readonly id: string;
+  readonly version: string;
+  readonly entry: string;
+  readonly stage: 'load' | 'timeout' | 'exports' | 'identity';
+  readonly reason: string;
+}
+export interface PreparedBuiltins {
+  readonly builtins: BootstrapPluginRuntimeOptions['builtins'];
+  readonly builtinCss: Readonly<Record<string, readonly string[]>>;
+  readonly failures: readonly BuiltinPreparationFailure[];
+}
 export interface BrowserDistribution extends Omit<BootstrapPluginRuntimeOptions, 'installed'> {
+  /** Must settle in finite time; failures describe selected but unloaded Builtins. */
+  readonly prepareBuiltins?: () => Promise<PreparedBuiltins>;
   /** Build-generated absolute CSS URLs, associated with the selected Builtin definitions. */
   readonly builtinCss?: Readonly<Record<string, readonly string[]>>;
   readonly applicationLabel: string;

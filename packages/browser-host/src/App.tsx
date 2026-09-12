@@ -8,9 +8,10 @@ import { ManagedBuiltin } from './ManagedBuiltin';
 import { BreakGlass } from './BreakGlass';
 import { SurfaceMount } from './SurfaceMount';
 import { RoutedContent } from './routing/RoutePage';
+import { mergePreparedBuiltins } from './prepare-builtins';
 import type { BrowserDistribution } from './distribution';
 
-type Startup = { state: 'BOOTSTRAPPING' } | { state: 'FAILED'; failure: BootstrapFailure } | { state: 'READY'; services: HostServices };
+type Startup = { state: 'BOOTSTRAPPING' } | { state: 'FAILED'; failure: BootstrapFailure; preparation: unknown } | { state: 'READY'; services: HostServices };
 
 export function BrowserHost({ distribution }: { readonly distribution: BrowserDistribution }) {
   const [startup, setStartup] = useState<Startup>({ state: 'BOOTSTRAPPING' });
@@ -21,11 +22,17 @@ export function BrowserHost({ distribution }: { readonly distribution: BrowserDi
     setStartup({ state: 'BOOTSTRAPPING' }); setPresentationFailure(undefined);
     const platform = createPlatformPlugin(), overlay = createUiOverlayPlugin();
     const bridgeContracts = [...platformBridgeContracts, uiOverlayBridgeContract, ...distribution.bridgeContracts ?? []];
-    const builtins = [platform.plugin, overlay.plugin, ...distribution.builtins];
+    let preparation: unknown = Object.freeze({ failures: Object.freeze([]), conflicts: Object.freeze([]) });
     void Promise.resolve().then(async () => {
+      const prepared = await distribution.prepareBuiltins?.();
+      if (disposed) return;
+      preparation = Object.freeze({ failures: Object.freeze((prepared?.failures ?? []).map(failure => Object.freeze({ ...failure }))), conflicts: Object.freeze([]) });
+      const merged = mergePreparedBuiltins([platform.plugin, overlay.plugin, ...distribution.builtins], distribution.builtinCss, prepared);
       const policy = createContributionPolicy(distribution.policyBundle);
       const store = distribution.createStore(bridgeContracts);
-      const runtime = await bootstrapPluginRuntime({ ...distribution, builtins, bridgeContracts, installed: [...store.list(), ...distribution.additionalInstallations ?? []] });
+      const { installed, conflicts } = merged.filterInstallations([...store.list(), ...distribution.additionalInstallations ?? []]);
+      preparation = Object.freeze({ failures: merged.failures, conflicts });
+      const runtime = await bootstrapPluginRuntime({ ...distribution, builtins: merged.builtins, bridgeContracts, installed });
       if (disposed) return;
       const browser = await import('@nexus/plugin-runtime/browser');
       if (disposed) return;
@@ -40,22 +47,22 @@ export function BrowserHost({ distribution }: { readonly distribution: BrowserDi
         onAudit: appendAudit,
       });
       const presentationErrors: { attemptId: string; message: string }[] = [];
-      const ui = browser.createUiHost({ onError(cause, attemptId) { presentationErrors.push({ attemptId, message: String(cause) }); if (presentationErrors.length > 100) presentationErrors.shift(); }, onAudit: appendAudit, runtime, restrictedAdapter: adapter, policy, builtinPermissions: distribution.capabilityGrants, builtinCss: distribution.builtinCss, renderBuiltin: renderBuiltinUi });
+      const ui = browser.createUiHost({ onError(cause, attemptId) { presentationErrors.push({ attemptId, message: String(cause) }); if (presentationErrors.length > 100) presentationErrors.shift(); }, onAudit: appendAudit, runtime, restrictedAdapter: adapter, policy, builtinPermissions: distribution.capabilityGrants, builtinCss: merged.builtinCss, renderBuiltin: renderBuiltinUi });
       overlay.bind(ui.overlayCapability);
       cleanup = () => { void ui.dispose(); for (const instance of adapter.listInstances()) void adapter.unmount(instance.identity.surfaceInstanceId).catch(() => undefined); };
       const model = createRouteModel({ routes: runtime.contributions.listRoutes(), navigation: runtime.contributions.listNavigation(), points: runtime.contributions.listExtensionPoints(), rootRoutePoint: runtime.rootRoutePoint, navigationRootPoints: runtime.navigationRootPoints, policy });
-      const diagnostics = () => ({ ...inspect(runtime, { listInstances: () => adapter.listInstances(), inspectUi: () => ui.core.inspect(), inspectActions: () => ui.actions.inspect(), listHostContributions: () => model.listHostContributions(window.location.pathname + window.location.search) }), presentationErrors: [...presentationErrors] });
+      const diagnostics = () => ({ ...inspect(runtime, { listInstances: () => adapter.listInstances(), inspectUi: () => ui.core.inspect(), inspectActions: () => ui.actions.inspect(), listHostContributions: () => model.listHostContributions(window.location.pathname + window.location.search) }), preparation, presentationErrors: [...presentationErrors] });
       platform.bind({ runtime, model, store, catalog: distribution.catalog,
         location: () => window.location.pathname + window.location.search,
         navigate(href) { window.history.pushState(null, '', href); window.dispatchEvent(new PopStateEvent('popstate')); },
         audit: () => audit, recordAudit: appendAudit, diagnostics,
       });
       setStartup({ state: 'READY', services: { runtime, store, adapter, ui, model, audit, platform, diagnostics } });
-    }).catch(error => { cleanup?.(); if (!disposed) setStartup({ state: 'FAILED', failure: { ready: false, error } }); });
+    }).catch(error => { cleanup?.(); if (!disposed) setStartup({ state: 'FAILED', failure: { ready: false, error }, preparation }); });
     return () => { disposed = true; cleanup?.(); };
   }, [distribution]);
   if (startup.state === 'BOOTSTRAPPING') return <p role="status">Starting plugin runtime…</p>;
-  if (startup.state === 'FAILED') return <BreakGlass ready={false} diagnostics={inspect(startup.failure)} recovery={distribution.recovery} applicationLabel={distribution.applicationLabel} />;
+  if (startup.state === 'FAILED') return <BreakGlass ready={false} diagnostics={{ ...inspect(startup.failure), preparation: startup.preparation }} recovery={distribution.recovery} applicationLabel={distribution.applicationLabel} />;
   const { services } = startup;
   let root;
   try { root = resolveRootPresentation(services.runtime); }

@@ -1,8 +1,13 @@
+import { createRequire } from 'node:module';
 import { ArtifactCssClosure } from './artifact-css-closure';
 import { resolve } from 'node:path';
 import { routingBuildSettings } from '../../scripts/routing-gate';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+
+const require = createRequire(import.meta.url);
+const sdkVersion = require('@nexus/plugin-runtime/package.json').version;
+const pins = JSON.parse(process.env.NEXUS_BUILTIN_PINS ?? '[]');
 
 const routing = routingBuildSettings(process.env);
 
@@ -12,23 +17,29 @@ export default defineConfig({
     chain.module.rule(CHAIN_ID.RULE.CSS).resourceQuery({ not: [/artifact/] });
     const artifacts = [
       ['ui-local', './src/ui-local.module.css', false],
-      ['core', '../../packages/console-core/src', true],
+      ['core', '../../packages/console-core', true],
       ['cluster', './src/plugins/cluster.css', false],
       ['extension-demo', './src/plugins/extension-demo.css', false],
       ['deployment-ui', './src/plugins/deployment-ui.css', false],
     ] as const;
     for (const [namespace, path, allowFixed] of artifacts) {
       chain.module.rule(`artifact-${namespace}`).test(/\.css$/).resourceQuery(/artifact/).include.add(resolve(import.meta.dirname, path)).end()
-        .type('javascript/auto').use('artifact-css').loader(resolve(import.meta.dirname, '../../scripts/artifact-css-loader.cjs')).options({ namespace, allowFixed });
+        .type('javascript/auto').use('artifact-css').loader(require.resolve('@nexus/plugin-build/artifact-css-loader')).options({ namespace, allowFixed });
     }
     chain.module.rule('no-unmanaged-plugin-css').test(/\.css$/).resourceQuery({ not: [/artifact/] })
       .exclude.add(resolve(import.meta.dirname, '../../packages/design-tokens')).end()
-      .use('reject-unmanaged').loader(resolve(import.meta.dirname, '../../scripts/reject-unmanaged-css.cjs'));
+      .use('reject-unmanaged').loader(require.resolve('@nexus/plugin-build/reject-unmanaged-css'));
   } },
   output: { assetPrefix: '/', distPath: { root: routing.output } },
   plugins: [pluginReact()],
   source: {
-    define: { 'process.env.PUBLIC_HOST_ROUTING': JSON.stringify(String(routing.enabled)), 'process.env.PUBLIC_TEST_FIXTURES': JSON.stringify(String(routing.fixtures)) },
+    define: {
+      NEXUS_REMOTE_DEMO: JSON.stringify(pins.some((pin: { id: string }) => pin.id === 'extension-demo')),
+      NEXUS_BUILTIN_PINS: JSON.stringify(pins),
+      NEXUS_SHARED_VERSIONS: JSON.stringify({ react: require('react/package.json').version, sdk: sdkVersion }),
+      'process.env.PUBLIC_HOST_ROUTING': JSON.stringify(String(routing.enabled)),
+      'process.env.PUBLIC_TEST_FIXTURES': JSON.stringify(String(routing.fixtures)),
+    },
     entry: {
       index: './src/main.tsx',
     },
