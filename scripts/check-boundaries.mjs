@@ -10,11 +10,13 @@ function role(file) {
   if (file.startsWith('packages/browser-host/')) return 'host';
   if (file.startsWith('packages/console-core/')) return 'core';
   if (/^packages\/[^/]+-api\//.test(file)) return 'api';
-  if (file.startsWith('apps/console/src/plugins/') || /^apps\/(?:example-restricted-plugin|ui-composition-fixtures)\//.test(file)) return 'feature';
+  if (file.startsWith('apps/console/src/plugins/') || /^apps\/(?:example-builtin-plugin|example-restricted-plugin|ui-composition-fixtures)\//.test(file)) return 'feature';
   if (file.startsWith('apps/console/')) return 'distribution';
   return undefined;
 }
 const packageRoots = {
+  '@nexus/example-restricted-plugin': 'apps/example-restricted-plugin',
+  '@nexus/example-builtin-plugin': 'apps/example-builtin-plugin',
   '@nexus/design-tokens': 'packages/design-tokens', '@nexus/plugin-runtime': 'packages/plugin-runtime', '@nexus/browser-host': 'packages/browser-host',
   '@nexus/console-core': 'packages/console-core', '@nexus/console-core-api': 'packages/console-core-api', '@nexus/cluster-api': 'packages/cluster-api',
 };
@@ -38,6 +40,10 @@ export function checkImport(file, specifier, typeOnly = false) {
   if (sourceRole === 'runtime' && targetRole && targetRole !== 'runtime') return 'Runtime cannot depend on Host or business packages';
   if (sourceRole === 'host' && targetRole && !['runtime', 'host'].includes(targetRole)) return 'Host cannot depend on business implementations or APIs';
   if (sourceRole === 'core' && targetRole && !['core', 'runtime', 'tokens'].includes(targetRole) && packageName !== '@nexus/console-core-api') return 'Core can depend only on its API and public Runtime contracts';
+  // Compatibility re-exports for repository contract tooling; business plugins cannot import each other.
+  if (file === 'apps/console/src/plugins/extension-demo.tsx' && specifier === '@nexus/example-builtin-plugin/plugin' ||
+      file === 'apps/console/src/plugins/extension-demo-data.ts' && specifier === '@nexus/example-builtin-plugin/data' ||
+      file === 'apps/console/src/plugins/kubeeye-manifest.ts' && ['@nexus/example-restricted-plugin/manifest.json', '@nexus/example-restricted-plugin/manifest-v2.json'].includes(specifier)) return;
   if (sourceRole === 'feature' && targetRole && !['runtime', 'api', 'tokens'].includes(targetRole)) return 'Feature cannot depend on Core implementations or Host';
   if (sourceRole === 'api' && (!typeOnly || targetRole && !['runtime', 'api'].includes(targetRole))) return 'API packages import external contracts as types only';
   if (specifier.startsWith('@nexus/') && !targetRole) return 'Unknown workspace dependency must declare its architecture boundary';

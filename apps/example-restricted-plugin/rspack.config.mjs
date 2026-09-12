@@ -1,6 +1,12 @@
+import v1 from './manifest.json' with { type: 'json' };
+import v2 from './manifest-v2.json' with { type: 'json' };
 import { rspack } from '@rspack/core';
 import { defineConfig } from '@rspack/cli';
 import { ReactRefreshRspackPlugin } from '@rspack/plugin-react-refresh';
+
+const version = process.env.NEXUS_PLUGIN_VERSION ?? v1.version;
+const manifest = [v1, v2].find(value => value.version === version);
+if (!manifest) throw Error(`Unpublished KubeEye version: ${version}`);
 
 export default defineConfig((_env, argv) => {
   const isDevelopment = argv.mode !== 'production';
@@ -12,7 +18,7 @@ export default defineConfig((_env, argv) => {
     entry: standalonePreview ? ['@nexus/design-tokens/theme.css', './src/main.tsx'] : './src/main.tsx',
     output: {
       clean: true,
-      publicPath: standalonePreview ? '/' : '/plugins/kubeeye/1.0.0/',
+      publicPath: standalonePreview ? '/' : manifest.entry,
     },
     resolve: {
       extensions: ['.tsx', '.ts', '.jsx', '.js'],
@@ -42,6 +48,7 @@ export default defineConfig((_env, argv) => {
       ],
     },
     plugins: [
+      new rspack.CopyRspackPlugin({ patterns: [{ from: version === v1.version ? 'manifest.json' : 'manifest-v2.json', to: 'manifest.json' }] }),
       new rspack.HtmlRspackPlugin({
         template: './index.html',
       }),
