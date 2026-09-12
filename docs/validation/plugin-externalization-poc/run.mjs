@@ -45,9 +45,9 @@ try {
   await cp(join(fixture, 'host'), host, { recursive: true });
   await cp(join(fixture, 'remote'), remote, { recursive: true });
   await mkdir(join(remote, 'tools'), { recursive: true });
-  for (const file of ['scripts/artifact-css-loader.cjs', 'scripts/check-plugin-css.mjs', 'scripts/reject-unmanaged-css.cjs', 'apps/console/artifact-css-closure.ts']) {
+  for (const file of ['packages/plugin-build/artifact-css-loader.cjs', 'packages/plugin-build/check-plugin-css.mjs', 'packages/plugin-build/reject-unmanaged-css.cjs', 'packages/plugin-build/artifact-css-closure.mjs']) {
     const bytes = await capture(file);
-    await writeFile(join(remote, 'tools', file.split('/').at(-1)), bytes);
+    await writeFile(join(remote, 'tools', file.split('/').at(-1).replace('artifact-css-closure.mjs', 'artifact-css-closure.ts')), bytes);
   }
   const common = { '@rsbuild/core': '2.2.2', '@rspack/core': '2.2.2', '@rsbuild/plugin-react': '2.1.0', react: '19.2.8', 'react-dom': '19.2.8', '@nexus/plugin-runtime': `file:${tgz}` };
   const overrides = { '@rspack/core': '2.2.2' };
@@ -194,6 +194,6 @@ try {
   await Promise.all(servers.map(server => new Promise(resolve => server.close(resolve))));
   report.finishedAt = new Date().toISOString();
   await writeFile(join(evidence, 'results.json'), JSON.stringify(report, null, 2));
-  await writeFile(join(repo, 'docs/validation/plugin-externalization-poc-results.json'), JSON.stringify(report, null, 2));
+  await writeFile(process.env.NEXUS_POC_REPORT ?? join(repo, 'docs/validation/plugin-externalization-poc-results.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify({ passed: report.passed, gates: report.gates, cases: report.cases.length, evidence, scratch }));
 }

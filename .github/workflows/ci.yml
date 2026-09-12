@@ -23,6 +23,7 @@ jobs:
       - run: pnpm test:e2e
       - run: pnpm build:routing-validation
       - run: pnpm test:e2e:preview
+      - run: pnpm test:externalization
       - uses: actions/upload-artifact@v4
         if: always()
         with:

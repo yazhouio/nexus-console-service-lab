@@ -8,6 +8,8 @@
 - [内部实现设计](./internal-implementation-design.md)
 - [Host 路由设计](./host-routing-design.md)
 - [Host 路由实施记录](./host-routing-implementation.md)
+- [Plugin Externalization 最小设计](./plugin-externalization-design.md)
+- [Plugin Externalization 实现与发布](./plugin-externalization.md)
 - [插件样式设计](./plugin-styling-design.md)
 - [插件样式实施记录](./plugin-styling-implementation.md)
 - [跨插件 UI 设计](./cross-plugin-ui-composition-design.md)

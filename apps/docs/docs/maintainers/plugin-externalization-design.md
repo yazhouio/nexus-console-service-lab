@@ -1,6 +1,6 @@
 # Plugin Externalization 最小设计
 
-状态：设计提案，2026-09-11。最终核对基线为 `6c52a9b`，包含已落地的插件样式实现；本轮只新增设计与调研文档，没有修改实现或运行跨仓库 PoC。技术资料核验见 [Loader 调研记录](../../../../docs/validation/plugin-externalization-loader-research.md)。
+状态：设计提案，2026-09-11。最终核对基线为 `6c52a9b`，包含已落地的插件样式实现；本轮只新增设计与调研文档，没有修改实现或运行跨仓库 PoC。技术资料核验见 Loader 调研记录（`docs/validation/plugin-externalization-loader-research.md`）。
 
 **推荐：可信 Builtin 使用 Federation Runtime 从 HTTP/CDN 加载，Remote 使用当前 Rspack 的 Federation 构建能力；Host 通过 pure runtime 登记自己已经使用的共享模块。加载结果仍是现有 `PluginDefinition` 与 `builtinCss`。Restricted 保持现有 Manifest + Wujie。**
 
@@ -8,21 +8,23 @@
 
 本阶段承诺独立仓库构建、独立发布制品、浏览器启动时动态取回已选择的 Builtin，以及外部项目通过 npm 包使用 Host。插件版本仍由 Distribution 固定，一次 Runtime 的 Plugin Set 不变。发布新制品与将其纳入 Console 发行版是两个动作；首次方案允许 pins 继续位于现有 Distribution 代码中，切换选择仍需更新 Distribution 并 reload，不默认增加远程发行配置服务或保证切版无需重建 Distribution。
 
+> 实施进展（2026-09-12）：已按本设计接入异步 Builtin 准备、Federation 发行示例、公共包发布和独立 Restricted Manifest。使用方式见 [Externalization 实现指南](./plugin-externalization.md)，验证入口为 `pnpm test:externalization`。本文的基线描述保留为设计时依据。
+
 ## 1. 已有实现决定的约束
 
 | 事实 | 源码证据 | 对设计的影响 |
 | --- | --- | --- |
-| `PluginDefinition` 只有 descriptor 与 `activate(context)` | [plugin.ts](/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/plugin.ts:6) | 不新增 `load/init/mount/unload` Plugin ABI，也不把 Federation 方法映射成插件生命周期。 |
-| Bootstrap 输入是已取得的 Builtin definitions；resolver 一次运行，注册事务提交 | [bootstrap.ts](/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/bootstrap.ts:69)、[启动实现](/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/bootstrap.ts:419) | 远程定义在 bootstrap 前取得，继续复用 Core Closure、能力依赖和 Admission。 |
-| BrowserHost 已只依赖 Runtime，Distribution 注入具体插件和恢复能力 | [Host exports](/Users/yazhou/code/nexus-service/packages/browser-host/src/index.ts:1)、[BrowserDistribution](/Users/yazhou/code/nexus-service/packages/browser-host/src/distribution.ts:9) | Host 公共化优先完成现有包发布，无需新增 Console Host Facade。 |
-| Builtin 都由 Console 静态 import | [distribution.ts](/Users/yazhou/code/nexus-service/apps/console/src/distribution.ts:6) | 新接入点是异步取得定义，不是重新实现注册机制。 |
-| Host 和插件共同使用 SDK React Context | [ui-react.tsx](/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/ui-react.tsx:3)、[ManagedBuiltin](/Users/yazhou/code/nexus-service/packages/browser-host/src/ManagedBuiltin.tsx:84) | 必须共享 `@nexus/plugin-runtime/react` 的模块身份；仅共享 React 不够。 |
-| 根呈现/Route Layout 在 Host Router 树内，独立 Slot 由 Host 创建 React Root | [ManagedBuiltin](/Users/yazhou/code/nexus-service/packages/browser-host/src/ManagedBuiltin.tsx:43)、[render-builtin-ui](/Users/yazhou/code/nexus-service/packages/browser-host/src/render-builtin-ui.tsx:10) | Remote 导出定义及组件引用，由原有 Host renderer 执行；不能远程自行 mount 整个应用代替此语义。 |
-| CSS URL 数组、就绪门禁、按真实样式根去重和引用回收已经实现 | [builtinCss](/Users/yazhou/code/nexus-service/packages/browser-host/src/distribution.ts:10)、[ui-host](/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/browser/ui-host.ts:155)、[artifact-assets](/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/browser/artifact-assets.ts:46) | 只改变这些 URL 的构建来源，不增加 AssetManager。 |
-| Restricted 是独立 HTML 应用，但 adapter 强制入口同源 | [Manifest](/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/manifest.ts:23)、[Wujie origin 检查](/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/browser/wujie-plugin-adapter.ts:280) | 最小 CDN 接入是同源 URL 代理/CDN 路由；允许域名或 CORS 配置本身不能解除此限制。 |
-| Store 变更要求 reload，UI Runtime 在创建时取声明快照 | [installation-store](/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/installation-store.ts:24)、[ui/runtime](/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/ui/runtime.ts:33) | 动态取模块不代表运行中热安装、替换或卸载 JS。 |
+| `PluginDefinition` 只有 descriptor 与 `activate(context)` | plugin.ts（`packages/plugin-runtime/src/plugin.ts:6`） | 不新增 `load/init/mount/unload` Plugin ABI，也不把 Federation 方法映射成插件生命周期。 |
+| Bootstrap 输入是已取得的 Builtin definitions；resolver 一次运行，注册事务提交 | bootstrap.ts（`packages/plugin-runtime/src/bootstrap.ts:69`）、启动实现（`packages/plugin-runtime/src/bootstrap.ts:419`） | 远程定义在 bootstrap 前取得，继续复用 Core Closure、能力依赖和 Admission。 |
+| BrowserHost 已只依赖 Runtime，Distribution 注入具体插件和恢复能力 | Host exports（`packages/browser-host/src/index.ts:1`）、BrowserDistribution（`packages/browser-host/src/distribution.ts:9`） | Host 公共化优先完成现有包发布，无需新增 Console Host Facade。 |
+| Builtin 都由 Console 静态 import | distribution.ts（`apps/console/src/distribution.ts:6`） | 新接入点是异步取得定义，不是重新实现注册机制。 |
+| Host 和插件共同使用 SDK React Context | ui-react.tsx（`packages/plugin-runtime/src/ui-react.tsx:3`）、ManagedBuiltin（`packages/browser-host/src/ManagedBuiltin.tsx:84`） | 必须共享 `@nexus/plugin-runtime/react` 的模块身份；仅共享 React 不够。 |
+| 根呈现/Route Layout 在 Host Router 树内，独立 Slot 由 Host 创建 React Root | ManagedBuiltin（`packages/browser-host/src/ManagedBuiltin.tsx:43`）、render-builtin-ui（`packages/browser-host/src/render-builtin-ui.tsx:10`） | Remote 导出定义及组件引用，由原有 Host renderer 执行；不能远程自行 mount 整个应用代替此语义。 |
+| CSS URL 数组、就绪门禁、按真实样式根去重和引用回收已经实现 | builtinCss（`packages/browser-host/src/distribution.ts:10`）、ui-host（`packages/plugin-runtime/src/browser/ui-host.ts:155`）、artifact-assets（`packages/plugin-runtime/src/browser/artifact-assets.ts:46`） | 只改变这些 URL 的构建来源，不增加 AssetManager。 |
+| Restricted 是独立 HTML 应用，但 adapter 强制入口同源 | Manifest（`packages/plugin-runtime/src/manifest.ts:23`）、Wujie origin 检查（`packages/plugin-runtime/src/browser/wujie-plugin-adapter.ts:280`） | 最小 CDN 接入是同源 URL 代理/CDN 路由；允许域名或 CORS 配置本身不能解除此限制。 |
+| Store 变更要求 reload，UI Runtime 在创建时取声明快照 | installation-store（`packages/plugin-runtime/src/installation-store.ts:24`）、ui/runtime（`packages/plugin-runtime/src/ui/runtime.ts:33`） | 动态取模块不代表运行中热安装、替换或卸载 JS。 |
 
-设计优先服从当前实现及 [ADR 0017](/Users/yazhou/code/nexus-service/docs/adr/0017-console-composition-runtime-boundaries.md)。早期《技术调研》中的通用 Loader 图不是本阶段必须恢复的设计；V1 明确推迟的远程 Direct 需求现在出现，只需实现这条实际路径。Builtin 在本阶段表示可信代码采用现有 Direct 执行路径；它可以来自本地或远程。沿用 `kind: 'builtin'`，不新增 `external` kind，也不把来源自动等同于权限。
+设计优先服从当前实现及 ADR 0017（`docs/adr/0017-console-composition-runtime-boundaries.md`）。早期《技术调研》中的通用 Loader 图不是本阶段必须恢复的设计；V1 明确推迟的远程 Direct 需求现在出现，只需实现这条实际路径。Builtin 在本阶段表示可信代码采用现有 Direct 执行路径；它可以来自本地或远程。沿用 `kind: 'builtin'`，不新增 `external` kind，也不把来源自动等同于权限。
 
 ## 2. 加载方案比较
 
@@ -83,7 +85,7 @@ BrowserHost 进入现有 BOOTSTRAPPING
   → 既有 UI Attempt 按需取得 CSS 并渲染
 ```
 
-接入位置是 [App.tsx 的启动 effect](/Users/yazhou/code/nexus-service/packages/browser-host/src/App.tsx:18)，位于 bootstrap 调用之前。`applicationLabel`、`recovery`、本地 break-glass 和 Host 自身依赖保持同步可用。不要先在 App 外等待整个远程 Distribution 再挂载 Host，否则网络失败时还需重建一套外层恢复 UI。
+接入位置是 App.tsx 的启动 effect（`packages/browser-host/src/App.tsx:18`），位于 bootstrap 调用之前。`applicationLabel`、`recovery`、本地 break-glass 和 Host 自身依赖保持同步可用。不要先在 App 外等待整个远程 Distribution 再挂载 Host，否则网络失败时还需重建一套外层恢复 UI。
 
 Remote module 求值只能提供定义与构建资产数据，不自动 activate、不启动顶层网络业务或写入 Host DOM。下载可并行，提交顺序仍由现有 resolver 决定。选择的全部远程 definitions 在 bootstrap 前收集完毕；页面代码可由插件自身惰性 import，但本阶段不做访问页面时才接纳新插件。
 
@@ -101,11 +103,11 @@ Remote module 求值只能提供定义与构建资产数据，不自动 activate
 | 已装载后 activate 失败 | 原 activation 事务回滚与 Core/non-Core 规则。 |
 | UI 执行时 CSS、异步页面 chunk 或 render 失败 | 进入对应的原有呈现失败机制；普通执行失败不反转 Runtime Ready，Core 根呈现失败进入 break-glass。 |
 
-未装载插件没有成为 Runtime Candidate，不能在 `runtime.plugins` 中伪称为 `FAILED/SKIPPED`。Host 用一份只读启动失败记录显示“已选择、未装载”，与 Runtime inspection 一起导出；bootstrap 随后失败时也保留这份记录。[inspection](/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/inspection.ts:104) 的错误投影有固定结构，仅把加载异常塞进 `BootstrapFailure.error` 会丢失这些细节。
+未装载插件没有成为 Runtime Candidate，不能在 `runtime.plugins` 中伪称为 `FAILED/SKIPPED`。Host 用一份只读启动失败记录显示“已选择、未装载”，与 Runtime inspection 一起导出；bootstrap 随后失败时也保留这份记录。inspection（`packages/plugin-runtime/src/inspection.ts:104`） 的错误投影有固定结构，仅把加载异常塞进 `BootstrapFailure.error` 会丢失这些细节。
 
 这里没有重复 Runtime 状态：启动失败记录只描述进入 Runtime 前发生的网络/发行失败，之后不随 Scope、Attempt 或权限变化。它也意味着 resolver 只验证成功装载的集合，不能声称验证了失败模块原本可能造成的重复 provider 等完整发行冲突。最小方案接受这一限制，完整发行闭包由发布时的组合验证证明；未声明的业务依赖不能靠 Loader 推导。
 
-**失败 Builtin 的 ID 仍由 Distribution 保留。** 当前 [同名 Restricted 防覆盖逻辑](/Users/yazhou/code/nexus-service/packages/plugin-runtime/src/resolver.ts:484) 只看实际 Builtin candidates。若过滤掉未装载 Builtin，就可能让同名 Restricted 进入集合。因此 Host 必须按本地定义、成功远程定义和失败选择项的预期 ID，排除同名 Restricted 输入并记冲突诊断；无须复制 descriptor 或创建占位插件。已知的重复 Builtin 选择直接视为 Distribution 配置错误。该 ID 集合从本次选择结果派生，不持久化成另一份安装状态。
+**失败 Builtin 的 ID 仍由 Distribution 保留。** 当前 同名 Restricted 防覆盖逻辑（`packages/plugin-runtime/src/resolver.ts:484`） 只看实际 Builtin candidates。若过滤掉未装载 Builtin，就可能让同名 Restricted 进入集合。因此 Host 必须按本地定义、成功远程定义和失败选择项的预期 ID，排除同名 Restricted 输入并记冲突诊断；无须复制 descriptor 或创建占位插件。已知的重复 Builtin 选择直接视为 Distribution 配置错误。该 ID 集合从本次选择结果派生，不持久化成另一份安装状态。
 
 ## 5. 共享范围与兼容边界
 
@@ -123,7 +125,7 @@ Remote module 求值只能提供定义与构建资产数据，不自动 activate
 
 Host pure runtime 的 `lib` 必须返回 Host 自己实际使用的导入值；不能指向另一份从 CDN 新加载的 React。发布 Host 时也须 externalize 对应 React/SDK 入口，避免公共包内部私有打包一份，再在应用层登记另一份。版本字符串由实际安装包/构建信息生成，Remote 的兼容范围来自自身依赖声明，不能另维护一张相互漂移的手工版本表。
 
-Remote 对必要共享依赖采用 `import: false`、`singleton: true` 和显式 `requiredVersion`，并在选定的 Rspack/Federation 组合中启用及验证 `strictVersion`。只配置 singleton，版本不满足可能仅警告；禁止通过降级到自带 React/SDK 来“修复”不兼容。Host 已选定并加载共享实现，不让 Remote 发布更高版本改变 Host 的 React。构建 shared 的行为见 [官方 shared 配置](https://module-federation.io/configure/shared)，strictVersion 的确切支持与拒绝路径以 [调研中的源码证据](../../../../docs/validation/plugin-externalization-loader-research.md) 和 PoC 为准。
+Remote 对必要共享依赖采用 `import: false`、`singleton: true` 和显式 `requiredVersion`，并在选定的 Rspack/Federation 组合中启用及验证 `strictVersion`。只配置 singleton，版本不满足可能仅警告；禁止通过降级到自带 React/SDK 来“修复”不兼容。Host 已选定并加载共享实现，不让 Remote 发布更高版本改变 Host 的 React。构建 shared 的行为见 [官方 shared 配置](https://module-federation.io/configure/shared)，strictVersion 的确切支持与拒绝路径以 调研中的源码证据（`docs/validation/plugin-externalization-loader-research.md`） 和 PoC 为准。
 
 采用 `loaded-first` 复用 Host 已登记的实现，不为收集可供选择的版本而提前访问其他 Remote；本方案仍会显式加载当前 Distribution 选定的全部远程 definitions。共享策略与严格版本校验解决不同问题。[shareStrategy](https://module-federation.io/configure/shareStrategy.html)
 
@@ -137,7 +139,7 @@ PoC 初始固定仓库实际基线 React/DOM 19.2.8 与 SDK 0.1.0；之后是否
 
 ## 6. CSS 和制品 URL 沿用现有机制
 
-现有 [artifact-css-loader](/Users/yazhou/code/nexus-service/scripts/artifact-css-loader.cjs:13) 已展开 CSS imports、生成 CSS Modules 映射、发射字体/图片，并返回基于 `__webpack_public_path__` 的绝对 CSS URL 数组。[ArtifactCssClosure](/Users/yazhou/code/nexus-service/apps/console/artifact-css-closure.ts:7) 已接受一个闭包入口路径，只是当前传入 Console 的 `distribution.ts`。
+现有 artifact-css-loader（`scripts/artifact-css-loader.cjs:13`） 已展开 CSS imports、生成 CSS Modules 映射、发射字体/图片，并返回基于 `__webpack_public_path__` 的绝对 CSS URL 数组。ArtifactCssClosure（`apps/console/artifact-css-closure.ts:7`） 已接受一个闭包入口路径，只是当前传入 Console 的 `distribution.ts`。
 
 独立构建需要的调整很小：Remote 的发行入口承担本插件完整 CSS 闭包；将同一个构建检查的入口参数指向它。Host 不扫描插件仓库源码。所有异步组件 CSS 仍提前进入这份完整闭包，JS class map 与 CSS 来自同次编译。无 CSS 时生成空数组，不能因为漏收集而默认为空。
 
@@ -151,7 +153,7 @@ JS 模块缓存寿命可持续整页；Scope/Attempt 的 DOM、订阅、Action �
 
 ## 7. 将现有包变成外部项目可用的发布物
 
-当前包都有 `private: true`。只有 plugin-runtime 已有 `dist` JS/类型输出；browser-host、console-core、两个 API 包仍导出 `src`。workspace/catalog、根 tsconfig 与源码 paths 让当前构建成功掩盖了发布缺口。[包配置](/Users/yazhou/code/nexus-service/packages/browser-host/package.json:1)、[源码 paths](/Users/yazhou/code/nexus-service/tsconfig.base.json:15)
+当前包都有 `private: true`。只有 plugin-runtime 已有 `dist` JS/类型输出；browser-host、console-core、两个 API 包仍导出 `src`。workspace/catalog、根 tsconfig 与源码 paths 让当前构建成功掩盖了发布缺口。包配置（`packages/browser-host/package.json:1`）、源码 paths（`tsconfig.base.json:15`）
 
 | 现有模块 | 必要发布工作 |
 | --- | --- |
@@ -168,13 +170,13 @@ JS 模块缓存寿命可持续整页；Scope/Attempt 的 DOM、订阅、Action �
 
 本地 `console-core` CSS 在外部 Host 构建中继续经过相同 artifact 工具，Remote CSS 在插件仓库构建中完成。Host 主包不导入 Console 的主题、策略、恢复 Store、catalog 或具体 Core；外部应用继续通过现有 Distribution 提供这些选择。
 
-Contract 文档生成器仍是仓库工具：[sources.ts](/Users/yazhou/code/nexus-service/scripts/plugin-contract/sources.ts:1) 直接导入选定源码，[generate.ts](/Users/yazhou/code/nexus-service/scripts/plugin-contract/generate.ts:1) 使用内部 compiler，输出 Markdown。它不成为远程加载前置条件。本阶段发布真实所需的 API 包和 Restricted Manifest；需要外部文档聚合时再消费这些同源数据，不引入另一个 Contract Registry 或重写 Compiler。
+Contract 文档生成器仍是仓库工具：sources.ts（`scripts/plugin-contract/sources.ts:1`） 直接导入选定源码，generate.ts（`scripts/plugin-contract/generate.ts:1`） 使用内部 compiler，输出 Markdown。它不成为远程加载前置条件。本阶段发布真实所需的 API 包和 Restricted Manifest；需要外部文档聚合时再消费这些同源数据，不引入另一个 Contract Registry 或重写 Compiler。
 
 ## 8. Restricted 独立发布
 
 现有 Restricted 已自行构建 HTML/JS/CSS，并在自己的 realm 使用 React 与 SDK client。它继续 Wujie + Bridge，不加入 Builtin Federation share scope，也不试图跨 realm 共享 React 对象。
 
-将 [kubeeye-manifest.ts](/Users/yazhou/code/nexus-service/apps/console/src/plugins/kubeeye-manifest.ts:1) 中插件所有的现有 Manifest 声明移到插件仓库，由插件构建发布 `manifest.json`；发布目录/entry 与 bundler publicPath 由同一发布输入产生。Host 消费这份 Manifest 并继续单独提供 `enabled/grantedPermissions`。Host 的 Bridge contract 和 grants 不由插件发布物自动授予。
+将 kubeeye-manifest.ts（`apps/console/src/plugins/kubeeye-manifest.ts:1`） 中插件所有的现有 Manifest 声明移到插件仓库，由插件构建发布 `manifest.json`；发布目录/entry 与 bundler publicPath 由同一发布输入产生。Host 消费这份 Manifest 并继续单独提供 `enabled/grantedPermissions`。Host 的 Bridge contract 和 grants 不由插件发布物自动授予。
 
 第一阶段可由 Distribution 的发行组装读取固定版本 Manifest 并交给已有 catalog/InstallationStore，沿用 `validateRestrictedInstallRecord`；无需先新增运行时 Manifest Fetcher。需要启动时取 Manifest 的产品需求以后也应只是组装入口，不重建 Admission 模型。
 
@@ -186,7 +188,7 @@ Contract 文档生成器仍是仓库工具：[sources.ts](/Users/yazhou/code/nex
 
 PoC 必须使用真正独立的目录/仓库：平台发布包、外部 Host 应用、外部插件项目。外部项目只安装 tarball 或 registry 固定版本，不使用 workspace links、根 paths、源码 symlink 或本仓 `scripts` 路径。使用生产构建与静态 HTTP 服务；HMR 成功不算通过。
 
-首个 Builtin 选 extension-demo，并覆盖 Route/Slot/Action 与 SDK hooks；必要的测试变体只用于验证上下文和资源寿命。Restricted 使用现有 KubeEye。Deployment 主插件和四个扩展保持当前组装作为回归样本：[deployment-mock](/Users/yazhou/code/nexus-service/apps/console/src/plugins/deployment-mock.ts:14) 的 `records/listeners` 是它们共享的业务状态，不能拆成五份再用平台 shared 暗中补救。以后独立发布它们时，数据共享应经现有 Capability 或真实 backend 明确表达。
+首个 Builtin 选 extension-demo，并覆盖 Route/Slot/Action 与 SDK hooks；必要的测试变体只用于验证上下文和资源寿命。Restricted 使用现有 KubeEye。Deployment 主插件和四个扩展保持当前组装作为回归样本：deployment-mock（`apps/console/src/plugins/deployment-mock.ts:14`） 的 `records/listeners` 是它们共享的业务状态，不能拆成五份再用平台 shared 暗中补救。以后独立发布它们时，数据共享应经现有 Capability 或真实 backend 明确表达。
 
 | 风险 | 必须看到的结果 |
 | --- | --- |
