@@ -1,23 +1,33 @@
 {
   "name": "@nexus/console-core",
   "version": "1.0.0",
-  "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./styles.css": "./src/styles.css"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json && cp src/styles.css dist/styles.css"
   },
   "dependencies": {
-    "@nexus/plugin-runtime": "workspace:*",
-    "react": "catalog:",
     "@nexus/console-core-api": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",
     "@types/react": "catalog:",
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "react": "catalog:",
+    "@nexus/plugin-runtime": "workspace:*"
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "@nexus/plugin-runtime": "^0.1.0"
   }
 }

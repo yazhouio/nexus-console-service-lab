@@ -1,0 +1,30 @@
+{
+  "name": "@nexus/plugin-build",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "*.cjs",
+    "*.mjs",
+    "*.mts"
+  ],
+  "exports": {
+    "./artifact-css-loader": "./artifact-css-loader.cjs",
+    "./reject-unmanaged-css": "./reject-unmanaged-css.cjs",
+    "./check-css": {
+      "types": "./check-plugin-css.d.mts",
+      "import": "./check-plugin-css.mjs"
+    },
+    "./closure": {
+      "types": "./artifact-css-closure.d.mts",
+      "import": "./artifact-css-closure.mjs"
+    }
+  },
+  "dependencies": {
+    "lightningcss": "1.33.0",
+    "postcss": "8.5.26",
+    "postcss-selector-parser": "7.1.0"
+  },
+  "peerDependencies": {
+    "@rsbuild/core": "2.2.2"
+  }
+}

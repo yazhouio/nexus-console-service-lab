@@ -1,0 +1,29 @@
+{
+  "name": "@nexus/example-builtin-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./plugin": "./src/extension-demo.tsx",
+    "./data": "./src/extension-demo-data.ts"
+  },
+  "scripts": {
+    "build": "rsbuild build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nexus/plugin-runtime": "workspace:*",
+    "@nexus/console-core-api": "workspace:*",
+    "@nexus/cluster-api": "workspace:*",
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "catalog:",
+    "@rsbuild/plugin-react": "catalog:",
+    "@module-federation/runtime-tools": "2.9.0",
+    "@nexus/plugin-build": "workspace:*",
+    "typescript": "catalog:",
+    "@types/react": "catalog:",
+    "@types/node": "catalog:"
+  }
+}

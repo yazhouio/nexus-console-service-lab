@@ -1,10 +1,24 @@
 {
   "name": "@nexus/console-core-api",
   "version": "1.0.0",
-  "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
-  "scripts": { "typecheck": "tsc --noEmit" },
-  "dependencies": { "@nexus/plugin-runtime": "workspace:*" },
-  "devDependencies": { "typescript": "catalog:" }
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "@nexus/plugin-runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  },
+  "files": [
+    "dist"
+  ]
 }

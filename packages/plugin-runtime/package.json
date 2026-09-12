@@ -1,7 +1,6 @@
 {
   "name": "@nexus/plugin-runtime",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "exports": {
     ".": {
@@ -19,7 +18,8 @@
     "./react": {
       "types": "./dist/ui-react.d.ts",
       "import": "./dist/ui-react.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"

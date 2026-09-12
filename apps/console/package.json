@@ -6,7 +6,8 @@
     "build": "rsbuild build",
     "dev": "rsbuild dev",
     "preview": "rsbuild preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@nexus/plugin-runtime": "workspace:*",
@@ -16,7 +17,10 @@
     "@nexus/console-core": "workspace:*",
     "@nexus/console-core-api": "workspace:*",
     "@nexus/cluster-api": "workspace:*",
-    "@nexus/design-tokens": "workspace:*"
+    "@nexus/design-tokens": "workspace:*",
+    "@module-federation/enhanced": "2.9.0",
+    "@nexus/example-builtin-plugin": "workspace:*",
+    "@nexus/example-restricted-plugin": "workspace:*"
   },
   "devDependencies": {
     "@rsbuild/core": "catalog:",
@@ -25,6 +29,7 @@
     "@types/react-dom": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "@nexus/plugin-build": "workspace:*"
   }
 }

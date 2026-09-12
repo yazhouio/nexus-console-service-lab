@@ -1,25 +1,39 @@
 {
   "name": "@nexus/browser-host",
   "version": "1.0.0",
-  "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./testing": "./src/testing.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js"
+    }
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@nexus/plugin-runtime": "workspace:*",
-    "react": "catalog:",
-    "react-dom": "catalog:",
     "react-router": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",
     "@types/react": "catalog:",
     "@types/node": "catalog:",
-    "@types/react-dom": "catalog:"
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "@nexus/plugin-runtime": "workspace:*"
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@nexus/plugin-runtime": "^0.1.0"
   }
 }
