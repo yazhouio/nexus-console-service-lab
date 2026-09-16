@@ -30,9 +30,7 @@ export interface BridgeUnaryActionContract<
   ): Result | Promise<Result>;
 }
 
-export interface OpenedBridgeSubscription<
-  Snapshot extends JsonValue = JsonValue,
-> {
+export interface OpenedBridgeSubscription<Snapshot extends JsonValue = JsonValue> {
   readonly snapshot: Snapshot;
   dispose(): void | Promise<void>;
 }
@@ -52,14 +50,10 @@ export interface BridgeSubscriptionActionContract<
     payload: Request,
     context: BridgeInvocationContext,
     emit: (event: Event) => void,
-  ):
-    | OpenedBridgeSubscription<Snapshot>
-    | Promise<OpenedBridgeSubscription<Snapshot>>;
+  ): OpenedBridgeSubscription<Snapshot> | Promise<OpenedBridgeSubscription<Snapshot>>;
 }
 
-export type BridgeActionContract =
-  | BridgeUnaryActionContract
-  | BridgeSubscriptionActionContract;
+export type BridgeActionContract = BridgeUnaryActionContract | BridgeSubscriptionActionContract;
 
 export interface BridgeCapabilityContract {
   readonly id: CapabilityId;

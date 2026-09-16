@@ -1,6 +1,9 @@
 {
   "name": "@nexus/console-core",
   "version": "1.0.0",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -17,17 +20,14 @@
     "@nexus/console-core-api": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "@types/react": "catalog:",
+    "@nexus/plugin-runtime": "workspace:*",
     "@types/node": "catalog:",
+    "@types/react": "catalog:",
     "react": "catalog:",
-    "@nexus/plugin-runtime": "workspace:*"
+    "typescript": "catalog:"
   },
-  "files": [
-    "dist"
-  ],
   "peerDependencies": {
-    "react": "^19.0.0",
-    "@nexus/plugin-runtime": "^0.1.0"
+    "@nexus/plugin-runtime": "^0.1.0",
+    "react": "^19.0.0"
   }
 }

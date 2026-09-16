@@ -2,11 +2,6 @@
   "name": "nexus-plugin-runtime-workspace",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@12.3.1+sha512.3c14c15408d1489d350f8ed7f93361d26cc707054f6849a4eea3bb7407ff4fe4564b413a1c421a773a176ab1168a8df1c7d548f2cd0dc7d344f58c4e680a5b18",
-  "engines": {
-    "node": ">=24.14.1 <25",
-    "pnpm": ">=12.0.0"
-  },
   "scripts": {
     "dev:docs": "pnpm --filter @nexus/docs dev",
     "build": "pnpm -r --if-present build",
@@ -29,7 +24,11 @@
     "test:styling-compilers": "pnpm --filter @nexus/plugin-runtime build && node scripts/validate-styling-compilers.mjs",
     "test:styling": "pnpm build:routing-validation && pnpm test:e2e:preview e2e/plugin-styling.spec.ts && pnpm test:styling-compilers",
     "test:externalization": "node scripts/validate-externalization.mjs",
-    "build:public": "pnpm --filter @nexus/browser-host... --filter @nexus/console-core... --filter @nexus/cluster-api build"
+    "build:public": "pnpm --filter @nexus/browser-host... --filter @nexus/console-core... --filter @nexus/cluster-api build",
+    "lint": "oxlint --max-warnings=34",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt --write",
+    "format:check": "oxfmt --check"
   },
   "devDependencies": {
     "@babel/core": "7.28.5",
@@ -37,10 +36,19 @@
     "@stylexjs/babel-plugin": "0.19.0",
     "@stylexjs/stylex": "0.19.0",
     "@tailwindcss/node": "4.3.3",
+    "lefthook": "2.1.14",
     "lightningcss": "1.33.0",
+    "oxfmt": "0.68.0",
+    "oxlint": "1.83.0",
+    "oxlint-tsgolint": "7.0.2001",
     "postcss": "8.5.26",
     "postcss-selector-parser": "7.1.0",
     "tailwindcss": "4.3.3",
     "typescript": "catalog:"
-  }
+  },
+  "engines": {
+    "node": ">=24.14.1 <25",
+    "pnpm": ">=12.0.0"
+  },
+  "packageManager": "pnpm@12.3.1+sha512.3c14c15408d1489d350f8ed7f93361d26cc707054f6849a4eea3bb7407ff4fe4564b413a1c421a773a176ab1168a8df1c7d548f2cd0dc7d344f58c4e680a5b18"
 }

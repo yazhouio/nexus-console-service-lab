@@ -2,34 +2,20 @@ import type { ActionHandler } from './action-runtime';
 import { uiKey, type ExtensionPointRef } from './ui/definitions';
 import type { PointContracts } from './ui/point-compiler';
 import { frozenCopy, readonlyMap, readonlySet } from './immutable';
-import {
-  createCapabilityRegistry,
-  type CapabilityRegistry,
-} from './capability';
+import { createCapabilityRegistry, type CapabilityRegistry } from './capability';
 import type { BridgeCapabilityContract } from './bridge-contract';
 import type {
   ContributionReferenceCatalog,
   NavigationContribution,
   RestrictedRouteContribution,
-  RestrictedUiExtensionContribution,
   RouteContribution,
   UiExtensionContribution,
 } from './contribution';
 import type { HostApiId, PluginId } from './identifiers';
-import {
-  createContributionRegistry,
-  type ContributionRegistry,
-} from './contribution';
+import { createContributionRegistry, type ContributionRegistry } from './contribution';
 import { isPermissionId } from './manifest';
-import type {
-  InstalledPluginRecord,
-  RestrictedPluginManifest,
-} from './manifest';
-import type {
-  PluginCandidate,
-  PluginDefinition,
-  Resolution,
-} from './plugin';
+import type { InstalledPluginRecord } from './manifest';
+import type { PluginCandidate, PluginDefinition, Resolution } from './plugin';
 import { resolvePluginSet } from './resolver';
 import {
   PluginRuntimeBootstrapError,
@@ -38,10 +24,7 @@ import {
   type PluginRuntimeState,
   type PluginValidationIssue,
 } from './runtime-state';
-import {
-  projectSurfaceDefinitions,
-  type SurfaceDefinitionRegistry,
-} from './surface-definition';
+import { projectSurfaceDefinitions, type SurfaceDefinitionRegistry } from './surface-definition';
 
 export interface RootPresentation {
   readonly ownerPluginId: PluginId;
@@ -108,9 +91,7 @@ function createBridgeContractCatalog(
 ): ReadonlyMap<string, BridgeCapabilityContract> {
   const catalog = new Map<string, BridgeCapabilityContract>();
 
-  for (const contract of [...contracts].sort((left, right) =>
-    left.id.localeCompare(right.id),
-  )) {
+  for (const contract of [...contracts].sort((left, right) => left.id.localeCompare(right.id))) {
     if (catalog.has(contract.id)) {
       throw new PluginRuntimeBootstrapError({
         code: 'INVALID_BRIDGE_CONTRACT',
@@ -123,7 +104,7 @@ function createBridgeContractCatalog(
     for (const [actionName, action] of Object.entries(contract.actions)) {
       if (
         actionName.length === 0 ||
-        action.requiredPermissions.some(permission => !isPermissionId(permission))
+        action.requiredPermissions.some((permission) => !isPermissionId(permission))
       ) {
         throw new PluginRuntimeBootstrapError({
           code: 'INVALID_BRIDGE_CONTRACT',
@@ -168,7 +149,7 @@ export function validateRestrictedAgainstHost(
     }
 
     const missingBridgeContract = manifest.requires.find(
-      capability => !bridgeContracts.has(capability),
+      (capability) => !bridgeContracts.has(capability),
     );
     if (missingBridgeContract !== undefined) {
       issues.push(
@@ -184,14 +165,14 @@ export function validateRestrictedAgainstHost(
     }
 
     const knownPermissions = new Set(
-      manifest.requires.flatMap(capability =>
+      manifest.requires.flatMap((capability) =>
         Object.values(bridgeContracts.get(capability)?.actions ?? {}).flatMap(
-          action => action.requiredPermissions,
+          (action) => action.requiredPermissions,
         ),
       ),
     );
     const unknownPermission = manifest.permissions.find(
-      permission => !knownPermissions.has(permission),
+      (permission) => !knownPermissions.has(permission),
     );
     if (unknownPermission !== undefined) {
       issues.push(
@@ -216,16 +197,11 @@ export function validateRestrictedAgainstHost(
 function normalizeRestrictedContributions(
   record: InstalledPluginRecord,
 ): NormalizedRestrictedDeclarations {
-  const normalizeTarget = (
-    contribution:
-      RestrictedRouteContribution,
-  ) =>
+  const normalizeTarget = (contribution: RestrictedRouteContribution) =>
     Object.freeze({
       kind: 'sandbox-surface' as const,
       surfaceId: contribution.surfaceId,
-      ...(contribution.layout === undefined
-        ? {}
-        : { layout: contribution.layout }),
+      ...(contribution.layout === undefined ? {} : { layout: contribution.layout }),
       ...(contribution.initialParameters === undefined
         ? {}
         : { initialParameters: contribution.initialParameters }),
@@ -234,7 +210,7 @@ function normalizeRestrictedContributions(
   return {
     record,
     routes: Object.freeze(
-      (record.manifest.contributions.routes ?? []).map(route =>
+      (record.manifest.contributions.routes ?? []).map((route) =>
         Object.freeze({
           id: route.id,
           path: route.path,
@@ -243,14 +219,14 @@ function normalizeRestrictedContributions(
           ...(route.expectedProfile ? { expectedProfile: route.expectedProfile } : {}),
           ...(route.expectedRefContract ? { expectedRefContract: route.expectedRefContract } : {}),
           ...(route.parentRouteId === undefined ? {} : { parentRouteId: route.parentRouteId }),
-          ...(route.acceptsChildren === undefined ? {} : { acceptsChildren: route.acceptsChildren }),
+          ...(route.acceptsChildren === undefined
+            ? {}
+            : { acceptsChildren: route.acceptsChildren }),
           target: normalizeTarget(route),
         }),
       ),
     ),
-    navigation: Object.freeze(
-      [...(record.manifest.contributions.navigation ?? [])],
-    ),
+    navigation: Object.freeze([...(record.manifest.contributions.navigation ?? [])]),
     extensions: Object.freeze([...(record.manifest.contributions.extensions ?? [])]),
   };
 }
@@ -263,14 +239,9 @@ function validateRestrictedContributionSet(
   readonly references: ContributionReferenceCatalog;
 } {
   const issues = new Map<PluginId, PluginValidationIssue>();
-  const restrictedIds = new Set(
-    declarations.map(declaration => declaration.record.manifest.id),
-  );
+  const restrictedIds = new Set(declarations.map((declaration) => declaration.record.manifest.id));
 
-  const markCollision = (
-    pluginId: PluginId,
-    description: string,
-  ): void => {
+  const markCollision = (pluginId: PluginId, description: string): void => {
     if (!issues.has(pluginId)) {
       issues.set(
         pluginId,
@@ -309,7 +280,6 @@ function validateRestrictedContributionSet(
     for (const item of declaration.navigation) {
       addOwner(navigationOwners, item.id, pluginId);
     }
-
   }
 
   for (const [id, owners] of routeOwners) {
@@ -335,36 +305,27 @@ function validateRestrictedContributionSet(
   while (changed) {
     changed = false;
     const activeDeclarations = declarations.filter(
-      declaration => !issues.has(declaration.record.manifest.id),
+      (declaration) => !issues.has(declaration.record.manifest.id),
     );
     const routeIds = new Set([
-      ...contributionRegistry
-        .listRoutes()
-        .map(route => route.contribution.id),
-      ...activeDeclarations.flatMap(declaration =>
-        declaration.routes.map(route => route.id),
-      ),
+      ...contributionRegistry.listRoutes().map((route) => route.contribution.id),
+      ...activeDeclarations.flatMap((declaration) => declaration.routes.map((route) => route.id)),
     ]);
     const navigationIds = new Set([
-      ...contributionRegistry
-        .listNavigation()
-        .map(item => item.contribution.id),
-      ...activeDeclarations.flatMap(declaration =>
-        declaration.navigation.map(item => item.id),
-      ),
+      ...contributionRegistry.listNavigation().map((item) => item.contribution.id),
+      ...activeDeclarations.flatMap((declaration) => declaration.navigation.map((item) => item.id)),
     ]);
 
     for (const declaration of activeDeclarations) {
       const pluginId = declaration.record.manifest.id;
       const invalidNavigation = declaration.navigation.find(
-        item =>
+        (item) =>
           (item.routeId !== undefined && !routeIds.has(item.routeId)) ||
           (item.parentId !== undefined && !navigationIds.has(item.parentId)),
       );
       if (invalidNavigation !== undefined) {
         const missingReference =
-          invalidNavigation.routeId !== undefined &&
-          !routeIds.has(invalidNavigation.routeId)
+          invalidNavigation.routeId !== undefined && !routeIds.has(invalidNavigation.routeId)
             ? invalidNavigation.routeId
             : invalidNavigation.parentId;
         markCollision(
@@ -377,29 +338,22 @@ function validateRestrictedContributionSet(
   }
 
   const finalDeclarations = declarations.filter(
-    declaration => !issues.has(declaration.record.manifest.id),
+    (declaration) => !issues.has(declaration.record.manifest.id),
   );
   return {
     issues,
     references: {
       routeIds: new Set(
-        finalDeclarations.flatMap(declaration =>
-          declaration.routes.map(route => route.id),
-        ),
+        finalDeclarations.flatMap((declaration) => declaration.routes.map((route) => route.id)),
       ),
       navigationIds: new Set(
-        finalDeclarations.flatMap(declaration =>
-          declaration.navigation.map(item => item.id),
-        ),
+        finalDeclarations.flatMap((declaration) => declaration.navigation.map((item) => item.id)),
       ),
     },
   };
 }
 
-function bootstrapFailure(
-  pluginId: PluginId,
-  error: unknown,
-): PluginRuntimeBootstrapError {
+function bootstrapFailure(pluginId: PluginId, error: unknown): PluginRuntimeBootstrapError {
   if (error instanceof PluginRuntimeContractError) {
     return new PluginRuntimeBootstrapError({
       ...error.issue,
@@ -421,37 +375,31 @@ export async function bootstrapPluginRuntime(
 ): Promise<PluginRuntime> {
   // Capture inputs before the first await. Ready catalogs cannot follow caller edits.
   options = frozenCopy(options);
-  const bridgeContracts = createBridgeContractCatalog(
-    options.bridgeContracts ?? [],
-  );
+  const bridgeContracts = createBridgeContractCatalog(options.bridgeContracts ?? []);
   const hostValidation = validateRestrictedAgainstHost(
     options.installed ?? [],
     new Set(options.supportedHostApis ?? []),
     bridgeContracts,
   );
-  const builtinIds = new Set(options.builtins.map(definition => definition.id));
+  const builtinIds = new Set(options.builtins.map((definition) => definition.id));
   const resolution = resolvePluginSet(
     [
       ...options.builtins.map(asCandidate),
-      ...hostValidation.accepted.map(record => ({
+      ...hostValidation.accepted.map((record) => ({
         kind: 'restricted' as const,
         descriptor: record.manifest,
       })),
     ],
     options.coreRootIds,
   );
-  const definitions = new Map(
-    options.builtins.map(definition => [definition.id, definition]),
-  );
+  const definitions = new Map(options.builtins.map((definition) => [definition.id, definition]));
   const capabilityController = createCapabilityRegistry();
   const contributionController = createContributionRegistry(options);
   const builtinActions = new Map<string, ActionHandler>();
   const pluginStates = new Map<PluginId, PluginRuntimeState>();
-  const validationIssues: PluginValidationIssue[] = [
-    ...hostValidation.issues,
-  ];
+  const validationIssues: PluginValidationIssue[] = [...hostValidation.issues];
   const restrictedRecords = new Map(
-    hostValidation.accepted.map(record => [record.manifest.id, record]),
+    hostValidation.accepted.map((record) => [record.manifest.id, record]),
   );
   const activeRestrictedRecords = new Map<PluginId, InstalledPluginRecord>();
 
@@ -480,8 +428,8 @@ export async function bootstrapPluginRuntime(
   }
 
   const orderedBuiltinIds = [
-    ...resolution.order.filter(pluginId => resolution.coreClosure.has(pluginId)),
-    ...resolution.order.filter(pluginId => !resolution.coreClosure.has(pluginId)),
+    ...resolution.order.filter((pluginId) => resolution.coreClosure.has(pluginId)),
+    ...resolution.order.filter((pluginId) => !resolution.coreClosure.has(pluginId)),
   ];
 
   for (const pluginId of orderedBuiltinIds) {
@@ -491,7 +439,7 @@ export async function bootstrapPluginRuntime(
     }
 
     const inactiveDependency = resolution.dependencies.find(
-      dependency =>
+      (dependency) =>
         dependency.consumer === pluginId &&
         pluginStates.get(dependency.provider)?.state !== 'ACTIVE',
     );
@@ -520,21 +468,19 @@ export async function bootstrapPluginRuntime(
       continue;
     }
 
-    const activation = capabilityController.beginActivation(
-      pluginId,
-      definition,
-    );
-    const contributionActivation =
-      contributionController.beginActivation(pluginId);
+    const activation = capabilityController.beginActivation(pluginId, definition);
+    const contributionActivation = contributionController.beginActivation(pluginId);
 
     const stagedActions = new Map<string, ActionHandler>();
     try {
       await definition.activate({
-        actions: { register(id, handler) {
-          if (typeof handler !== 'function') throw Error('INVALID_ACTION_HANDLER');
-          contributionActivation.context.registerAction({ id });
-          stagedActions.set(uiKey(pluginId, id), handler);
-        } },
+        actions: {
+          register(id, handler) {
+            if (typeof handler !== 'function') throw Error('INVALID_ACTION_HANDLER');
+            contributionActivation.context.registerAction({ id });
+            stagedActions.set(uiKey(pluginId, id), handler);
+          },
+        },
         capabilities: activation.context,
         contributions: contributionActivation.context,
       });
@@ -547,10 +493,7 @@ export async function bootstrapPluginRuntime(
     } catch (error) {
       activation.discard();
       contributionActivation.discard();
-      const stage =
-        error instanceof PluginRuntimeContractError
-          ? error.issue.stage
-          : 'activate';
+      const stage = error instanceof PluginRuntimeContractError ? error.issue.stage : 'activate';
       pluginStates.set(
         pluginId,
         Object.freeze({
@@ -568,7 +511,7 @@ export async function bootstrapPluginRuntime(
 
   const eligibleRestricted: NormalizedRestrictedDeclarations[] = [];
   const orderedRestrictedIds = resolution.order.filter(
-    pluginId => !builtinIds.has(pluginId) && restrictedRecords.has(pluginId),
+    (pluginId) => !builtinIds.has(pluginId) && restrictedRecords.has(pluginId),
   );
 
   for (const pluginId of orderedRestrictedIds) {
@@ -578,7 +521,7 @@ export async function bootstrapPluginRuntime(
     }
 
     const inactiveDependency = resolution.dependencies.find(
-      dependency =>
+      (dependency) =>
         dependency.consumer === pluginId &&
         pluginStates.get(dependency.provider)?.state !== 'ACTIVE',
     );
@@ -638,9 +581,15 @@ export async function bootstrapPluginRuntime(
     for (const item of declaration.navigation) {
       contributionActivation.context.registerNavigation(item);
     }
-    for (const point of manifest.extensionPoints ?? []) contributionActivation.context.registerExtensionPoint(point);
-    for (const action of manifest.actions ?? []) contributionActivation.context.registerAction(action);
-    for (const surface of manifest.surfaces) contributionActivation.context.registerSurface({ id: surface.id, target: { kind: 'sandbox-surface', surfaceId: surface.id } });
+    for (const point of manifest.extensionPoints ?? [])
+      contributionActivation.context.registerExtensionPoint(point);
+    for (const action of manifest.actions ?? [])
+      contributionActivation.context.registerAction(action);
+    for (const surface of manifest.surfaces)
+      contributionActivation.context.registerSurface({
+        id: surface.id,
+        target: { kind: 'sandbox-surface', surfaceId: surface.id },
+      });
     for (const extension of declaration.extensions) {
       contributionActivation.context.registerExtension(extension);
     }
@@ -650,7 +599,7 @@ export async function bootstrapPluginRuntime(
       contributionActivation.apply();
       activeRestrictedRecords.set(manifest.id, declaration.record);
       pluginStates.set(manifest.id, Object.freeze({ state: 'ACTIVE' }));
-    } catch (error) {
+    } catch {
       contributionActivation.discard();
       const issue = manifestIssue({
         code: 'INVALID_CONTRIBUTION',
@@ -676,37 +625,46 @@ export async function bootstrapPluginRuntime(
     rootRoutePoint: frozenCopy(options.rootRoutePoint),
     navigationRootPoints: frozenCopy(options.navigationRootPoints),
     candidates: frozenCopy([
-      ...options.builtins.map(definition => ({ kind: 'builtin' as const, descriptor: {
-        id: definition.id, version: definition.version, requires: definition.requires, provides: definition.provides,
-        ...(definition.roles ? { roles: definition.roles } : {}), ...(definition.provenance ? { provenance: definition.provenance } : {}),
-      } })),
-      ...(options.installed ?? []).filter(record => record.config.enabled).map(record => ({ kind: 'restricted' as const, descriptor: record.manifest })),
+      ...options.builtins.map((definition) => ({
+        kind: 'builtin' as const,
+        descriptor: {
+          id: definition.id,
+          version: definition.version,
+          requires: definition.requires,
+          provides: definition.provides,
+          ...(definition.roles ? { roles: definition.roles } : {}),
+          ...(definition.provenance ? { provenance: definition.provenance } : {}),
+        },
+      })),
+      ...(options.installed ?? [])
+        .filter((record) => record.config.enabled)
+        .map((record) => ({ kind: 'restricted' as const, descriptor: record.manifest })),
     ]),
-    installations: Object.freeze((options.installed ?? []).filter(record => record.config.enabled)),
+    installations: Object.freeze(
+      (options.installed ?? []).filter((record) => record.config.enabled),
+    ),
     resolution: Object.freeze({
-      ...resolution, coreClosure: readonlySet(resolution.coreClosure),
+      ...resolution,
+      coreClosure: readonlySet(resolution.coreClosure),
       dependencies: frozenCopy(resolution.dependencies),
       rejected: frozenCopy(resolution.rejected),
       skipped: readonlyMap(resolution.skipped),
     }),
     capabilities: capabilityController.registry,
     contributions: contributionController.registry,
-    surfaces: projectSurfaceDefinitions(contributionController.registry, owner => activeRestrictedRecords.get(owner)?.manifest.version),
+    surfaces: projectSurfaceDefinitions(
+      contributionController.registry,
+      (owner) => activeRestrictedRecords.get(owner)?.manifest.version,
+    ),
     bridgeContracts,
     restrictedPlugins: readonlyMap(
-      [...activeRestrictedRecords.entries()].sort(([left], [right]) =>
-        left.localeCompare(right),
-      ),
+      [...activeRestrictedRecords.entries()].sort(([left], [right]) => left.localeCompare(right)),
     ),
     validationIssues: Object.freeze(
-      validationIssues.sort((left, right) =>
-        left.pluginId.localeCompare(right.pluginId),
-      ),
+      validationIssues.sort((left, right) => left.pluginId.localeCompare(right.pluginId)),
     ),
     plugins: readonlyMap(
-      [...pluginStates.entries()].sort(([left], [right]) =>
-        left.localeCompare(right),
-      ),
+      [...pluginStates.entries()].sort(([left], [right]) => left.localeCompare(right)),
     ),
   });
 }

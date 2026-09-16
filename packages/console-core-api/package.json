@@ -1,6 +1,9 @@
 {
   "name": "@nexus/console-core-api",
   "version": "1.0.0",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -17,8 +20,5 @@
   },
   "devDependencies": {
     "typescript": "catalog:"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }

@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import {
-  bootstrapPluginRuntime,
-  type PluginDefinition,
-} from '../src';
+import { bootstrapPluginRuntime, type PluginDefinition } from '../src';
 
 describe('bootstrapPluginRuntime', () => {
   it('activates the Core Closure serially in provider order', async () => {
@@ -27,11 +24,9 @@ describe('bootstrapPluginRuntime', () => {
       provides: ['kubesphere.shell@1'],
       activate(context) {
         activationOrder.push('console-core');
-        expect(
-          context.capabilities.require<{ current: string }>(
-            'kubesphere.cluster@2',
-          ),
-        ).toEqual({ current: 'demo' });
+        expect(context.capabilities.require<{ current: string }>('kubesphere.cluster@2')).toEqual({
+          current: 'demo',
+        });
         context.capabilities.register('kubesphere.shell@1', { ready: true });
       },
     };

@@ -17,4 +17,3 @@ createRoot(root).render(
     <BrowserHost distribution={distribution} />
   </StrictMode>,
 );
-

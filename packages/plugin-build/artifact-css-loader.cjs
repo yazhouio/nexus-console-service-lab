@@ -4,7 +4,7 @@ const { readFile } = require('node:fs/promises');
 const { dirname, resolve, extname } = require('node:path');
 const { createHash } = require('node:crypto');
 const { pathToFileURL, fileURLToPath } = require('node:url');
-const digest = value => createHash('sha256').update(value).digest('hex').slice(0, 20);
+const digest = (value) => createHash('sha256').update(value).digest('hex').slice(0, 20);
 
 module.exports = function () {
   const done = this.async();
@@ -13,12 +13,24 @@ module.exports = function () {
     const { checkCss } = await import('./check-plugin-css.mjs');
     const modules = this.resourcePath.endsWith('.module.css');
     const result = await bundleAsync({
-      filename: this.resourcePath, minify: true, analyzeDependencies: true,
-      cssModules: modules ? { pattern: `${options.namespace}-${digest(await readFile(this.resourcePath))}-[hash]-[local]` } : false,
+      filename: this.resourcePath,
+      minify: true,
+      analyzeDependencies: true,
+      cssModules: modules
+        ? {
+            pattern: `${options.namespace}-${digest(await readFile(this.resourcePath))}-[hash]-[local]`,
+          }
+        : false,
       resolver: {
-        read: async file => { this.addDependency(file); const source = await readFile(file, 'utf8'); postcss.parse(source, { from: file }); return source; },
+        read: async (file) => {
+          this.addDependency(file);
+          const source = await readFile(file, 'utf8');
+          postcss.parse(source, { from: file });
+          return source;
+        },
         resolve: (specifier, from) => {
-          if (/^(?:[a-z]+:|\/\/)/i.test(specifier)) throw Error('Remote CSS @import is not an artifact closure');
+          if (/^(?:[a-z]+:|\/\/)/i.test(specifier))
+            throw Error('Remote CSS @import is not an artifact closure');
           return resolve(dirname(from), specifier);
         },
       },
@@ -42,14 +54,17 @@ module.exports = function () {
     checkCss(css, options.namespace, { allowFixed: options.allowFixed });
     const name = `static/plugin-css/${options.namespace}.${digest(css)}.css`;
     this.emitFile(name, css);
-    const classes = Object.fromEntries(Object.entries(result.exports ?? {}).map(([key, value]) => {
-      const composed = value.composes.map(item => {
-        if (item.type === 'dependency') throw Error('Unresolved CSS Modules composition');
-        if (item.type === 'global' && !item.name.startsWith(options.namespace + '-')) throw Error('CSS Modules cannot compose foreign global classes');
-        return item.name;
-      });
-      return [key, [value.name, ...composed].join(' ')];
-    }));
+    const classes = Object.fromEntries(
+      Object.entries(result.exports ?? {}).map(([key, value]) => {
+        const composed = value.composes.map((item) => {
+          if (item.type === 'dependency') throw Error('Unresolved CSS Modules composition');
+          if (item.type === 'global' && !item.name.startsWith(options.namespace + '-'))
+            throw Error('CSS Modules cannot compose foreign global classes');
+          return item.name;
+        });
+        return [key, [value.name, ...composed].join(' ')];
+      }),
+    );
     return `export const css = Object.freeze([new URL(__webpack_public_path__ + ${JSON.stringify(name)}, window.location.origin + '/').href]);\nexport default ${JSON.stringify(classes)};`;
-  })().then(value => done(null, value), done);
+  })().then((value) => done(null, value), done);
 };

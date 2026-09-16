@@ -1,5 +1,17 @@
-import type { BootstrapPluginRuntimeOptions, BridgeCapabilityContract, ContributionPolicyBundle, InstallationStore, InstalledPluginRecord, PlatformCatalogEntry } from '@nexus/plugin-runtime';
-export interface RecoveryChange { readonly id: string; readonly label: string; readonly canRollback: boolean; readonly canDisable?: boolean }
+import type {
+  BootstrapPluginRuntimeOptions,
+  BridgeCapabilityContract,
+  ContributionPolicyBundle,
+  InstallationStore,
+  InstalledPluginRecord,
+  PlatformCatalogEntry,
+} from '@nexus/plugin-runtime';
+export interface RecoveryChange {
+  readonly id: string;
+  readonly label: string;
+  readonly canRollback: boolean;
+  readonly canDisable?: boolean;
+}
 export interface RecoveryConfiguration {
   clearInstallations(): void;
   listChanges?(): readonly RecoveryChange[];

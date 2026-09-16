@@ -1,5 +1,10 @@
 import { createContext, useContext } from 'react';
-import type { InstallationStore, PluginRuntime, RuntimeSnapshot, createPlatformPlugin } from '@nexus/plugin-runtime';
+import type {
+  InstallationStore,
+  PluginRuntime,
+  RuntimeSnapshot,
+  createPlatformPlugin,
+} from '@nexus/plugin-runtime';
 import type { UiHost, BridgeAuditEntry, WujiePluginAdapter } from '@nexus/plugin-runtime/browser';
 import type { RouteModel } from '@nexus/plugin-runtime';
 
@@ -8,7 +13,16 @@ export interface HostServices {
   readonly ui: UiHost;
   readonly store: InstallationStore;
   readonly adapter: WujiePluginAdapter;
-  readonly audit: readonly (BridgeAuditEntry | { type: 'navigation'; pluginId: string; routeId: string; ownerPluginId: string; timestamp: number })[];
+  readonly audit: readonly (
+    | BridgeAuditEntry
+    | {
+        type: 'navigation';
+        pluginId: string;
+        routeId: string;
+        ownerPluginId: string;
+        timestamp: number;
+      }
+  )[];
   readonly model: RouteModel;
   readonly platform: ReturnType<typeof createPlatformPlugin>;
   diagnostics(): RuntimeSnapshot;

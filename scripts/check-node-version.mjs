@@ -11,14 +11,18 @@ export function supportsNode(version, range = requiredNodeRange) {
   if (!match || !bounds) return false;
   const [, major, minor, patch] = match.map(Number);
   const [, minimumMajor, minimumMinor, minimumPatch, maximumMajor] = bounds.map(Number);
-  const atLeastMinimum = major > minimumMajor
-    || major === minimumMajor && (minor > minimumMinor || minor === minimumMinor && patch >= minimumPatch);
+  const atLeastMinimum =
+    major > minimumMajor ||
+    (major === minimumMajor &&
+      (minor > minimumMinor || (minor === minimumMinor && patch >= minimumPatch)));
   return atLeastMinimum && major < maximumMajor;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   if (!supportsNode(process.versions.node)) {
-    console.error(`Node ${requiredNodeRange} is required; actual Node is ${process.versions.node}.`);
+    console.error(
+      `Node ${requiredNodeRange} is required; actual Node is ${process.versions.node}.`,
+    );
     process.exitCode = 1;
   } else console.log(`Node gate passed: ${process.versions.node}`);
 }

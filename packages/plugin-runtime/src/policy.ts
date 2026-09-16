@@ -9,7 +9,23 @@ export function createContributionPolicy(bundle: ContributionPolicyBundle): Host
   if (!bundle.revision) throw Error('POLICY_REVISION_REQUIRED');
   const grants = frozenCopy(bundle.grants);
   for (const grant of grants) {
-    if (!grant.contributorId || !grant.ownerPluginId || !grant.targetId || !['route','navigation','surface','action','tab'].includes(grant.kind) || !Number.isSafeInteger(grant.contractMajor) || grant.contractMajor! < 1) throw Error('INVALID_POINT_GRANT');
+    if (
+      !grant.contributorId ||
+      !grant.ownerPluginId ||
+      !grant.targetId ||
+      !['route', 'navigation', 'surface', 'action', 'tab'].includes(grant.kind) ||
+      !Number.isSafeInteger(grant.contractMajor) ||
+      grant.contractMajor! < 1
+    )
+      throw Error('INVALID_POINT_GRANT');
   }
-  return request => grants.some(grant => grant.contributorId === request.contributorId && grant.ownerPluginId === request.ownerPluginId && grant.kind === request.kind && grant.targetId === request.targetId && grant.contractMajor === request.contractMajor);
+  return (request) =>
+    grants.some(
+      (grant) =>
+        grant.contributorId === request.contributorId &&
+        grant.ownerPluginId === request.ownerPluginId &&
+        grant.kind === request.kind &&
+        grant.targetId === request.targetId &&
+        grant.contractMajor === request.contractMajor,
+    );
 }

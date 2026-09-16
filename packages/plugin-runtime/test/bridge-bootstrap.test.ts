@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  BridgeBootstrapValidationError,
-  validateBridgeBootstrapDescriptor,
-} from '../src';
+import { BridgeBootstrapValidationError, validateBridgeBootstrapDescriptor } from '../src';
 
 describe('validateBridgeBootstrapDescriptor', () => {
   it('accepts only the minimum connection data', () => {
@@ -20,9 +17,9 @@ describe('validateBridgeBootstrapDescriptor', () => {
     });
   });
 
-  it.each(['pluginId', 'permissions', 'capabilities', 'token']) (
+  it.each(['pluginId', 'permissions', 'capabilities', 'token'])(
     'rejects identity or authority field %s',
-    field => {
+    (field) => {
       expect(() =>
         validateBridgeBootstrapDescriptor({
           protocolVersion: 1,

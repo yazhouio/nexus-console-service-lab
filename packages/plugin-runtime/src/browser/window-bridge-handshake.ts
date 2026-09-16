@@ -38,38 +38,26 @@ export interface BridgeHandshakeCoordinator {
 
 interface HostWindow {
   addEventListener(type: 'message', listener: (event: MessageEvent) => void): void;
-  removeEventListener(
-    type: 'message',
-    listener: (event: MessageEvent) => void,
-  ): void;
+  removeEventListener(type: 'message', listener: (event: MessageEvent) => void): void;
 }
 
 interface MessageDestination {
-  postMessage(
-    message: unknown,
-    targetOrigin: string,
-    transfer?: readonly Transferable[],
-  ): void;
+  postMessage(message: unknown, targetOrigin: string, transfer?: readonly Transferable[]): void;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function parseConnectMessage(value: unknown):
-  | (BridgeBootstrapDescriptor & { readonly type: typeof BRIDGE_CONNECT_MESSAGE })
-  | undefined {
+function parseConnectMessage(
+  value: unknown,
+): (BridgeBootstrapDescriptor & { readonly type: typeof BRIDGE_CONNECT_MESSAGE }) | undefined {
   if (!isRecord(value) || value.type !== BRIDGE_CONNECT_MESSAGE) {
     return undefined;
   }
 
-  const allowedFields = new Set([
-    'type',
-    'protocolVersion',
-    'surfaceInstanceId',
-    'nonce',
-  ]);
-  if (Object.keys(value).some(field => !allowedFields.has(field))) {
+  const allowedFields = new Set(['type', 'protocolVersion', 'surfaceInstanceId', 'nonce']);
+  if (Object.keys(value).some((field) => !allowedFields.has(field))) {
     throw new BridgeHandshakeError(
       'BRIDGE_BOOTSTRAP_FAILED',
       'Bridge connect message contains fields outside the bootstrap contract.',
@@ -129,7 +117,8 @@ export function createWindowBridgeHandshakeCoordinator(
 
       const onMessage = (event: MessageEvent): void => {
         if (
-          settled || event.origin !== request.expectedOrigin ||
+          settled ||
+          event.origin !== request.expectedOrigin ||
           !isRecord(event.data) ||
           event.data.type !== BRIDGE_CONNECT_MESSAGE ||
           event.data.surfaceInstanceId !== request.descriptor.surfaceInstanceId
@@ -208,9 +197,7 @@ export function createWindowBridgeHandshakeCoordinator(
           rejectResult(
             new BridgeHandshakeError(
               'BRIDGE_BOOTSTRAP_FAILED',
-              error instanceof Error
-                ? error.message
-                : 'Bridge MessagePort transfer failed.',
+              error instanceof Error ? error.message : 'Bridge MessagePort transfer failed.',
             ),
           );
           return;
@@ -242,10 +229,7 @@ export function createWindowBridgeHandshakeCoordinator(
             return;
           }
           fail(
-            new BridgeHandshakeError(
-              'BRIDGE_BOOTSTRAP_FAILED',
-              'Bridge handshake was cancelled.',
-            ),
+            new BridgeHandshakeError('BRIDGE_BOOTSTRAP_FAILED', 'Bridge handshake was cancelled.'),
           );
         },
       });

@@ -1,4 +1,15 @@
-import { assertPoint, assertPointRef, assertExtensionContribution, uiKey, type ExtensionPointRef, type ContractId, type CompiledExtensionPointDefinition, type ExtensionPointDefinition, type ActionDefinition, type ExtensionContributionDefinition, type SurfaceContributionDefinition, type UiSurfaceDefinition } from './ui/definitions';
+import {
+  assertPointRef,
+  assertExtensionContribution,
+  uiKey,
+  type ExtensionPointRef,
+  type ContractId,
+  type CompiledExtensionPointDefinition,
+  type ExtensionPointDefinition,
+  type ActionDefinition,
+  type ExtensionContributionDefinition,
+  type UiSurfaceDefinition,
+} from './ui/definitions';
 import { createPointCompiler, type PointContracts } from './ui/point-compiler';
 import { frozenCopy } from './immutable';
 import type { PluginId } from './identifiers';
@@ -96,9 +107,10 @@ export interface ContributionRegistry {
   listUiSurfaces(): readonly OwnedContribution<UiSurfaceDefinition>[];
   listRoutes(): readonly OwnedContribution<RouteContribution>[];
   listNavigation(): readonly OwnedContribution<NavigationContribution>[];
-  listExtensions(
-    point?: { readonly ownerPluginId: string; readonly id: string },
-  ): readonly OwnedContribution<UiExtensionContribution>[];
+  listExtensions(point?: {
+    readonly ownerPluginId: string;
+    readonly id: string;
+  }): readonly OwnedContribution<UiExtensionContribution>[];
 }
 
 export interface PluginContributionContext {
@@ -133,15 +145,8 @@ export interface ContributionRegistryController {
 
 export const DEFAULT_CONTRIBUTION_ORDER = 1_000;
 
-export function isJsonValue(
-  value: unknown,
-  ancestors = new Set<unknown>(),
-): value is JsonValue {
-  if (
-    value === null ||
-    typeof value === 'string' ||
-    typeof value === 'boolean'
-  ) {
+export function isJsonValue(value: unknown, ancestors = new Set<unknown>()): value is JsonValue {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') {
     return true;
   }
   if (typeof value === 'number') {
@@ -153,23 +158,15 @@ export function isJsonValue(
 
   const nextAncestors = new Set(ancestors).add(value);
   if (Array.isArray(value)) {
-    return value.every(entry => isJsonValue(entry, nextAncestors));
+    return value.every((entry) => isJsonValue(entry, nextAncestors));
   }
-  if (
-    Object.getPrototypeOf(value) !== Object.prototype &&
-    Object.getPrototypeOf(value) !== null
-  ) {
+  if (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null) {
     return false;
   }
-  return Object.values(value).every(entry =>
-    isJsonValue(entry, nextAncestors),
-  );
+  return Object.values(value).every((entry) => isJsonValue(entry, nextAncestors));
 }
 
-function invalidContribution(
-  ownerPluginId: PluginId,
-  message: string,
-): never {
+function invalidContribution(ownerPluginId: PluginId, message: string): never {
   throw new PluginRuntimeContractError({
     code: 'INVALID_CONTRIBUTION',
     stage: 'assertion',
@@ -182,10 +179,7 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
-function validateRenderTarget(
-  ownerPluginId: PluginId,
-  target: HostRenderTarget,
-): void {
+function validateRenderTarget(ownerPluginId: PluginId, target: HostRenderTarget): void {
   if (target.kind === 'builtin') {
     if (target.render === undefined) {
       invalidContribution(
@@ -200,8 +194,7 @@ function validateRenderTarget(
     target.kind !== 'sandbox-surface' ||
     !isNonEmptyString(target.surfaceId) ||
     (target.layout !== undefined && !isJsonValue(target.layout)) ||
-    (target.initialParameters !== undefined &&
-      !isJsonValue(target.initialParameters))
+    (target.initialParameters !== undefined && !isJsonValue(target.initialParameters))
   ) {
     invalidContribution(
       ownerPluginId,
@@ -222,9 +215,9 @@ function stableOwned<T extends { readonly id: string }>(
   );
 }
 
-function visualOwned<
-  T extends { readonly id: string; readonly order?: number },
->(values: Iterable<OwnedContribution<T>>): readonly OwnedContribution<T>[] {
+function visualOwned<T extends { readonly id: string; readonly order?: number }>(
+  values: Iterable<OwnedContribution<T>>,
+): readonly OwnedContribution<T>[] {
   return Object.freeze(
     [...values].sort(
       (left, right) =>
@@ -236,23 +229,19 @@ function visualOwned<
   );
 }
 
-function owned<T>(
-  ownerPluginId: PluginId,
-  contribution: T,
-): OwnedContribution<T> {
+function owned<T>(ownerPluginId: PluginId, contribution: T): OwnedContribution<T> {
   return Object.freeze({
     ownerPluginId,
     contribution: frozenCopy(contribution),
   });
 }
 
-export function createContributionRegistry(contracts: PointContracts = {}): ContributionRegistryController {
+export function createContributionRegistry(
+  contracts: PointContracts = {},
+): ContributionRegistryController {
   const compilePoint = createPointCompiler(contracts);
   const routes = new Map<string, OwnedContribution<RouteContribution>>();
-  const navigation = new Map<
-    string,
-    OwnedContribution<NavigationContribution>
-  >();
+  const navigation = new Map<string, OwnedContribution<NavigationContribution>>();
   const extensions = new Map<string, OwnedContribution<UiExtensionContribution>>();
   const points = new Map<string, OwnedContribution<CompiledExtensionPointDefinition>>();
   const actions = new Map<string, OwnedContribution<ActionDefinition>>();
@@ -263,9 +252,23 @@ export function createContributionRegistry(contracts: PointContracts = {}): Cont
     listUiSurfaces: () => stableOwned(surfaces.values()),
     listRoutes: () => stableOwned(routes.values()),
     listNavigation: () => visualOwned(navigation.values()),
-    listExtensions: (point?: { ownerPluginId: string; id: string }) => Object.freeze([...extensions.values()]
-      .filter(e => !point || e.contribution.point.ownerPluginId === point.ownerPluginId && e.contribution.point.id === point.id)
-      .sort((a, b) => (a.contribution.order ?? 0) - (b.contribution.order ?? 0) || (uiKey(a.ownerPluginId, a.contribution.id) < uiKey(b.ownerPluginId, b.contribution.id) ? -1 : 1))),
+    listExtensions: (point?: { ownerPluginId: string; id: string }) =>
+      Object.freeze(
+        [...extensions.values()]
+          .filter(
+            (e) =>
+              !point ||
+              (e.contribution.point.ownerPluginId === point.ownerPluginId &&
+                e.contribution.point.id === point.id),
+          )
+          .sort(
+            (a, b) =>
+              (a.contribution.order ?? 0) - (b.contribution.order ?? 0) ||
+              (uiKey(a.ownerPluginId, a.contribution.id) < uiKey(b.ownerPluginId, b.contribution.id)
+                ? -1
+                : 1),
+          ),
+      ),
   });
 
   return {
@@ -297,7 +300,11 @@ export function createContributionRegistry(contracts: PointContracts = {}): Cont
       };
 
       const context: PluginContributionContext = Object.freeze({
-        registerAction(definition: ActionDefinition) { assertActive(); stagedActions.push(definition); validated = false; },
+        registerAction(definition: ActionDefinition) {
+          assertActive();
+          stagedActions.push(definition);
+          validated = false;
+        },
         registerRoute(contribution: RouteContribution) {
           assertActive();
           stagedRoutes.push(contribution);
@@ -308,8 +315,16 @@ export function createContributionRegistry(contracts: PointContracts = {}): Cont
           stagedNavigation.push(contribution);
           validated = false;
         },
-        registerExtensionPoint(definition: ExtensionPointDefinition) { assertActive(); stagedPoints.push(definition); validated = false; },
-        registerSurface(definition: UiSurfaceDefinition) { assertActive(); stagedSurfaces.push(definition); validated = false; },
+        registerExtensionPoint(definition: ExtensionPointDefinition) {
+          assertActive();
+          stagedPoints.push(definition);
+          validated = false;
+        },
+        registerSurface(definition: UiSurfaceDefinition) {
+          assertActive();
+          stagedSurfaces.push(definition);
+          validated = false;
+        },
         registerExtension(contribution: UiExtensionContribution) {
           assertActive();
           stagedExtensions.push(contribution);
@@ -323,7 +338,11 @@ export function createContributionRegistry(contracts: PointContracts = {}): Cont
         const routeIds = new Set(routes.keys());
         for (const route of stagedRoutes) {
           assertRouteMetadata(ownerPluginId, route);
-          if (routeIds.has(route.id)) invalidContribution(ownerPluginId, `Route ${route.id} from ${ownerPluginId} is invalid or duplicated.`);
+          if (routeIds.has(route.id))
+            invalidContribution(
+              ownerPluginId,
+              `Route ${route.id} from ${ownerPluginId} is invalid or duplicated.`,
+            );
           validateRenderTarget(ownerPluginId, route.target);
           routeIds.add(route.id);
         }
@@ -331,32 +350,27 @@ export function createContributionRegistry(contracts: PointContracts = {}): Cont
         const navigationIds = new Set(navigation.keys());
         for (const item of stagedNavigation) {
           assertNavigationMetadata(ownerPluginId, item);
-          if (navigationIds.has(item.id)) invalidContribution(ownerPluginId, `Navigation ${item.id} from ${ownerPluginId} is invalid or duplicated.`);
+          if (navigationIds.has(item.id))
+            invalidContribution(
+              ownerPluginId,
+              `Navigation ${item.id} from ${ownerPluginId} is invalid or duplicated.`,
+            );
           navigationIds.add(item.id);
         }
 
-        const routeReferenceIds = new Set([
-          ...routeIds,
-          ...(references?.routeIds ?? []),
-        ]);
+        const routeReferenceIds = new Set([...routeIds, ...(references?.routeIds ?? [])]);
         const navigationReferenceIds = new Set([
           ...navigationIds,
           ...(references?.navigationIds ?? []),
         ]);
         for (const item of stagedNavigation) {
-          if (
-            item.routeId !== undefined &&
-            !routeReferenceIds.has(item.routeId)
-          ) {
+          if (item.routeId !== undefined && !routeReferenceIds.has(item.routeId)) {
             invalidContribution(
               ownerPluginId,
               `Navigation ${item.id} references unknown route ${item.routeId}.`,
             );
           }
-          if (
-            item.parentId !== undefined &&
-            !navigationReferenceIds.has(item.parentId)
-          ) {
+          if (item.parentId !== undefined && !navigationReferenceIds.has(item.parentId)) {
             invalidContribution(
               ownerPluginId,
               `Navigation ${item.id} references unknown parent ${item.parentId}.`,
@@ -365,18 +379,35 @@ export function createContributionRegistry(contracts: PointContracts = {}): Cont
         }
 
         try {
-          for (const [staged, stored] of [[stagedExtensions, extensions], [stagedPoints, points], [stagedSurfaces, surfaces], [stagedActions, actions]] as const) {
+          for (const [staged, stored] of [
+            [stagedExtensions, extensions],
+            [stagedPoints, points],
+            [stagedSurfaces, surfaces],
+            [stagedActions, actions],
+          ] as const) {
             const ids = new Set<string>();
             for (const entry of staged) {
-              if (!isNonEmptyString(entry.id) || ids.has(entry.id) || stored.has(uiKey(ownerPluginId, entry.id))) throw Error('Duplicate UI definition.');
+              if (
+                !isNonEmptyString(entry.id) ||
+                ids.has(entry.id) ||
+                stored.has(uiKey(ownerPluginId, entry.id))
+              )
+                throw Error('Duplicate UI definition.');
               ids.add(entry.id);
             }
           }
           stagedExtensions.forEach(assertExtensionContribution);
-          stagedActions.forEach(a => { if (Object.keys(a).some(k => k !== 'id')) throw Error('Invalid Action definition.'); });
+          stagedActions.forEach((a) => {
+            if (Object.keys(a).some((k) => k !== 'id')) throw Error('Invalid Action definition.');
+          });
           compiledPoints = stagedPoints.map(compilePoint);
-          stagedSurfaces.forEach(s => validateRenderTarget(ownerPluginId, s.target));
-        } catch (error) { invalidContribution(ownerPluginId, error instanceof Error ? error.message : 'Invalid UI declaration.'); }
+          stagedSurfaces.forEach((s) => validateRenderTarget(ownerPluginId, s.target));
+        } catch (error) {
+          invalidContribution(
+            ownerPluginId,
+            error instanceof Error ? error.message : 'Invalid UI declaration.',
+          );
+        }
 
         validated = true;
       };
@@ -398,10 +429,14 @@ export function createContributionRegistry(contracts: PointContracts = {}): Cont
         for (const item of stagedNavigation) {
           navigation.set(item.id, owned(ownerPluginId, item));
         }
-        for (const extension of stagedExtensions) extensions.set(uiKey(ownerPluginId, extension.id), owned(ownerPluginId, extension));
-        for (const action of stagedActions) actions.set(uiKey(ownerPluginId, action.id), owned(ownerPluginId, action));
-        for (const point of compiledPoints) points.set(uiKey(ownerPluginId, point.id), owned(ownerPluginId, point));
-        for (const surface of stagedSurfaces) surfaces.set(uiKey(ownerPluginId, surface.id), owned(ownerPluginId, surface));
+        for (const extension of stagedExtensions)
+          extensions.set(uiKey(ownerPluginId, extension.id), owned(ownerPluginId, extension));
+        for (const action of stagedActions)
+          actions.set(uiKey(ownerPluginId, action.id), owned(ownerPluginId, action));
+        for (const point of compiledPoints)
+          points.set(uiKey(ownerPluginId, point.id), owned(ownerPluginId, point));
+        for (const surface of stagedSurfaces)
+          surfaces.set(uiKey(ownerPluginId, surface.id), owned(ownerPluginId, surface));
         active = false;
       };
 
@@ -426,7 +461,10 @@ export function createContributionRegistry(contracts: PointContracts = {}): Cont
 }
 
 /** Shared shape checks for registration and repository documentation; no relation admission. */
-export function assertRouteMetadata(ownerPluginId: string, route: Omit<RouteContribution, 'target'>): void {
+export function assertRouteMetadata(
+  ownerPluginId: string,
+  route: Omit<RouteContribution, 'target'>,
+): void {
   if (
     !isNonEmptyString(route.id) ||
     !isNonEmptyString(route.path) ||
@@ -442,7 +480,10 @@ export function assertRouteMetadata(ownerPluginId: string, route: Omit<RouteCont
   if (route.childPoint) assertPointRef(route.childPoint);
 }
 
-export function assertNavigationMetadata(ownerPluginId: string, item: NavigationContribution): void {
+export function assertNavigationMetadata(
+  ownerPluginId: string,
+  item: NavigationContribution,
+): void {
   if (
     !isNonEmptyString(item.id) ||
     !isNonEmptyString(item.label) ||

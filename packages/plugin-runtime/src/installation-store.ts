@@ -2,7 +2,12 @@ import { canonicalJson } from './ui/schema';
 import type { BridgeCapabilityContract } from './bridge-contract';
 import { validateRestrictedAgainstHost } from './bootstrap';
 import type { HostApiId, PluginId } from './identifiers';
-import { validateRestrictedInstallRecord, type InstalledPluginConfig, type InstalledPluginRecord, type RestrictedInstallValidationOptions } from './manifest';
+import {
+  validateRestrictedInstallRecord,
+  type InstalledPluginConfig,
+  type InstalledPluginRecord,
+  type RestrictedInstallValidationOptions,
+} from './manifest';
 
 export interface InstallationStoreSnapshot {
   readonly records: readonly InstalledPluginRecord[];
@@ -21,7 +26,9 @@ export interface InstallationStoreOptions extends RestrictedInstallValidationOpt
   readonly storage?: InstallationStorage;
 }
 
-export interface ReloadRequired { readonly reloadRequired: true }
+export interface ReloadRequired {
+  readonly reloadRequired: true;
+}
 
 export interface InstallationStore {
   list(): readonly InstalledPluginRecord[];
@@ -34,7 +41,10 @@ export interface InstallationStore {
 }
 
 export class PluginInstallationError extends Error {
-  constructor(readonly code: string) { super(code); this.name = 'PluginInstallationError'; }
+  constructor(readonly code: string) {
+    super(code);
+    this.name = 'PluginInstallationError';
+  }
 }
 
 const reloadRequired: ReloadRequired = Object.freeze({ reloadRequired: true });
@@ -42,12 +52,13 @@ const key = (id: string, version: string): string => JSON.stringify([id, version
 
 /** Configuration persistence only; this store never holds or mutates a running Runtime. */
 export function createInstallationStore(options: InstallationStoreOptions): InstallationStore {
-  const contracts = new Map(options.bridgeContracts.map(contract => [contract.id, contract]));
+  const contracts = new Map(options.bridgeContracts.map((contract) => [contract.id, contract]));
   const validate = (value: unknown): InstalledPluginRecord => {
     const record = validateRestrictedInstallRecord(value, options);
     const { issues } = validateRestrictedAgainstHost(
       [{ ...record, config: { ...record.config, enabled: true } }],
-      new Set(options.supportedHostApis), contracts,
+      new Set(options.supportedHostApis),
+      contracts,
     );
     if (issues.length) throw new PluginInstallationError(issues[0].code);
     return record;
@@ -56,8 +67,13 @@ export function createInstallationStore(options: InstallationStoreOptions): Inst
   let active = new Map<PluginId, string>();
   const saved = options.storage?.read();
   if (saved !== undefined && saved !== null) {
-    if (typeof saved !== 'object' || !('records' in saved) || !('activeVersions' in saved) ||
-        !Array.isArray(saved.records) || !Array.isArray(saved.activeVersions)) {
+    if (
+      typeof saved !== 'object' ||
+      !('records' in saved) ||
+      !('activeVersions' in saved) ||
+      !Array.isArray(saved.records) ||
+      !Array.isArray(saved.activeVersions)
+    ) {
       throw new PluginInstallationError('INVALID_INSTALLATION_STORE');
     }
     for (const value of saved.records) {
@@ -67,13 +83,19 @@ export function createInstallationStore(options: InstallationStoreOptions): Inst
       records.set(recordKey, record);
     }
     for (const selection of saved.activeVersions) {
-      if (!selection || typeof selection.id !== 'string' || typeof selection.version !== 'string' ||
-          active.has(selection.id) || !records.has(key(selection.id, selection.version))) {
+      if (
+        !selection ||
+        typeof selection.id !== 'string' ||
+        typeof selection.version !== 'string' ||
+        active.has(selection.id) ||
+        !records.has(key(selection.id, selection.version))
+      ) {
         throw new PluginInstallationError('INVALID_INSTALLATION_STORE');
       }
       active.set(selection.id, selection.version);
     }
-    if ([...records.values()].some(record => !active.has(record.manifest.id))) throw new PluginInstallationError('INVALID_INSTALLATION_STORE');
+    if ([...records.values()].some((record) => !active.has(record.manifest.id)))
+      throw new PluginInstallationError('INVALID_INSTALLATION_STORE');
   } else {
     for (const value of options.records ?? []) {
       const record = validateRestrictedInstallRecord(value, options);
@@ -84,24 +106,41 @@ export function createInstallationStore(options: InstallationStoreOptions): Inst
 
   const checkContextContracts = (values: readonly InstalledPluginRecord[]) => {
     const contracts = new Map<string, string>();
-    for (const record of values) for (const point of record.manifest.extensionPoints ?? []) {
-      const key = JSON.stringify([record.manifest.id, point.id, point.contractMajor]);
-      const schema = canonicalJson(point);
-      if (contracts.has(key) && contracts.get(key) !== schema) throw new PluginInstallationError('CONTEXT_MAJOR_FROZEN');
-      contracts.set(key, schema);
-    }
+    for (const record of values)
+      for (const point of record.manifest.extensionPoints ?? []) {
+        const key = JSON.stringify([record.manifest.id, point.id, point.contractMajor]);
+        const schema = canonicalJson(point);
+        if (contracts.has(key) && contracts.get(key) !== schema)
+          throw new PluginInstallationError('CONTEXT_MAJOR_FROZEN');
+        contracts.set(key, schema);
+      }
   };
   checkContextContracts([...records.values()]);
 
-  const snapshot = (packages = records, versions = active): InstallationStoreSnapshot => Object.freeze({
-    records: Object.freeze([...packages.values()].sort((a, b) => key(a.manifest.id, a.manifest.version).localeCompare(key(b.manifest.id, b.manifest.version)))),
-    activeVersions: Object.freeze([...versions].sort(([a], [b]) => a.localeCompare(b)).map(([id, version]) => Object.freeze({ id, version }))),
-  });
-  const commit = (nextRecords: Map<string, InstalledPluginRecord>, nextActive: Map<PluginId, string>): ReloadRequired => {
+  const snapshot = (packages = records, versions = active): InstallationStoreSnapshot =>
+    Object.freeze({
+      records: Object.freeze(
+        [...packages.values()].sort((a, b) =>
+          key(a.manifest.id, a.manifest.version).localeCompare(
+            key(b.manifest.id, b.manifest.version),
+          ),
+        ),
+      ),
+      activeVersions: Object.freeze(
+        [...versions]
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([id, version]) => Object.freeze({ id, version })),
+      ),
+    });
+  const commit = (
+    nextRecords: Map<string, InstalledPluginRecord>,
+    nextActive: Map<PluginId, string>,
+  ): ReloadRequired => {
     checkContextContracts([...nextRecords.values()]);
     // Publish only after durable persistence succeeds; a storage failure changes nothing.
     options.storage?.write(snapshot(nextRecords, nextActive));
-    records = nextRecords; active = nextActive;
+    records = nextRecords;
+    active = nextActive;
     return reloadRequired;
   };
   const requireRecord = (id: PluginId, version = active.get(id)): InstalledPluginRecord => {
@@ -110,8 +149,14 @@ export function createInstallationStore(options: InstallationStoreOptions): Inst
     return record;
   };
   const store: InstallationStore = {
-    list: () => Object.freeze([...active].sort(([a], [b]) => a.localeCompare(b)).map(([id, version]) => requireRecord(id, version))),
-    listVersions: id => Object.freeze(snapshot().records.filter(record => record.manifest.id === id)),
+    list: () =>
+      Object.freeze(
+        [...active]
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([id, version]) => requireRecord(id, version)),
+      ),
+    listVersions: (id) =>
+      Object.freeze(snapshot().records.filter((record) => record.manifest.id === id)),
     snapshot: () => snapshot(),
     install(value) {
       const record = validate(value);
@@ -125,18 +170,28 @@ export function createInstallationStore(options: InstallationStoreOptions): Inst
     },
     selectVersion(id, version, config) {
       const record = requireRecord(id, version);
-      const selected = validate({ manifest: record.manifest, config: config ?? { ...record.config, enabled: requireRecord(id).config.enabled } });
-      return commit(new Map(records).set(key(id, version), selected), new Map(active).set(id, version));
+      const selected = validate({
+        manifest: record.manifest,
+        config: config ?? { ...record.config, enabled: requireRecord(id).config.enabled },
+      });
+      return commit(
+        new Map(records).set(key(id, version), selected),
+        new Map(active).set(id, version),
+      );
     },
     setEnabled(id, enabled) {
       const record = requireRecord(id);
       const value = { manifest: record.manifest, config: { ...record.config, enabled } };
       const updated = enabled ? validate(value) : validateRestrictedInstallRecord(value, options);
-      return commit(new Map(records).set(key(id, record.manifest.version), updated), new Map(active));
+      return commit(
+        new Map(records).set(key(id, record.manifest.version), updated),
+        new Map(active),
+      );
     },
     uninstall(id) {
       const next = new Map([...records].filter(([, record]) => record.manifest.id !== id));
-      const versions = new Map(active); versions.delete(id);
+      const versions = new Map(active);
+      versions.delete(id);
       return commit(next, versions);
     },
   };

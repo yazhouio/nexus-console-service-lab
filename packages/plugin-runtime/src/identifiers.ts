@@ -13,4 +13,3 @@ export function isCapabilityId(value: unknown): value is CapabilityId {
 export function isHostApiId(value: unknown): value is HostApiId {
   return typeof value === 'string' && VERSIONED_ID_PATTERN.test(value);
 }
-

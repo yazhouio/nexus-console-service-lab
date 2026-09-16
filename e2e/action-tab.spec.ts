@@ -1,11 +1,18 @@
 import { expect, test } from '@playwright/test';
 
-test('Action-only Restricted execution uses the authorized capability session and cleans up after completion and cancel', async ({ page }) => {
+test('Action-only Restricted execution uses the authorized capability session and cleans up after completion and cancel', async ({
+  page,
+}) => {
   await page.goto('/clusters/demo/nodes/n1/events');
   await page.getByRole('button', { name: 'Check node context' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Action succeeded' })).toBeVisible();
   const result = JSON.parse(await page.getByLabel('Action result').innerText());
-  expect(result.context.itemRef).toEqual({ clusterId: 'demo', apiVersion: 'v1', kind: 'Node', name: 'n1' });
+  expect(result.context.itemRef).toEqual({
+    clusterId: 'demo',
+    apiVersion: 'v1',
+    kind: 'Node',
+    name: 'n1',
+  });
   expect(result.current.routeId).toBe('node-events');
   expect(result.current.pathname).toBeUndefined();
   await expect(page.locator('[data-nexus-action]')).toHaveCount(0);
@@ -16,7 +23,9 @@ test('Action-only Restricted execution uses the authorized capability session an
   await expect(page.locator('[data-nexus-action]')).toHaveCount(0);
 });
 
-test('Tabs load on selection, unmount on switch, and enter a new execution on return', async ({ page }) => {
+test('Tabs load on selection, unmount on switch, and enter a new execution on return', async ({
+  page,
+}) => {
   await page.goto('/clusters/demo/nodes/n1/events');
   await expect(page.getByRole('tab', { name: 'Node chart' })).toBeVisible();
   await expect(page.getByTestId('ui-c')).toHaveCount(0);
@@ -31,7 +40,9 @@ test('Tabs load on selection, unmount on switch, and enter a new execution on re
   await expect(page.getByTestId('c-instance')).not.toHaveText(first);
 });
 
-test('Core plugin actions use PluginRef and the same Builtin execution protocol', async ({ page }) => {
+test('Core plugin actions use PluginRef and the same Builtin execution protocol', async ({
+  page,
+}) => {
   await page.goto('/');
   // Labels are catalog-independent: inspect the first read-only Builtin entry.
   const button = page.getByRole('button', { name: 'Check plugin status' }).first();
@@ -40,7 +51,9 @@ test('Core plugin actions use PluginRef and the same Builtin execution protocol'
   await expect(page.locator('[data-nexus-action]')).toHaveCount(0);
 });
 
-test('Restricted navigation uses the granted Route ID protocol and leaves an owner-attributed audit', async ({ page }) => {
+test('Restricted navigation uses the granted Route ID protocol and leaves an owner-attributed audit', async ({
+  page,
+}) => {
   await page.goto('/kubeeye');
   await page.getByRole('button', { name: 'Open example node' }).click();
   await expect(page).toHaveURL(/\/clusters\/demo\/nodes\/n1$/);

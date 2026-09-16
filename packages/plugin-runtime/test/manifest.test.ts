@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  RestrictedManifestValidationError,
-  validateRestrictedInstallRecord,
-} from '../src';
+import { RestrictedManifestValidationError, validateRestrictedInstallRecord } from '../src';
 
 function validRecord() {
   return {
@@ -36,7 +33,8 @@ function validRecord() {
         extensions: [
           {
             id: 'workload-detail-tab',
-            kind: 'surface', point: { ownerPluginId: 'workload', id: 'detail', contractMajor: 1 },
+            kind: 'surface',
+            point: { ownerPluginId: 'workload', id: 'detail', contractMajor: 1 },
             surfaceId: 'workload-detail',
             order: 200,
           },
@@ -76,10 +74,7 @@ function expectInvalid(value: unknown, message: string): void {
 
 describe('validateRestrictedInstallRecord', () => {
   it('returns a frozen Manifest and Config pair for the next Runtime', () => {
-    const result = validateRestrictedInstallRecord(
-      validRecord(),
-      validationOptions,
-    );
+    const result = validateRestrictedInstallRecord(validRecord(), validationOptions);
 
     expect(result.manifest).toMatchObject({
       id: 'kubeeye',
@@ -97,9 +92,9 @@ describe('validateRestrictedInstallRecord', () => {
     expect(Object.isFrozen(result.manifest.surfaces)).toBe(true);
   });
 
-  it.each(['trustLevel', 'executionMode', 'critical']) (
+  it.each(['trustLevel', 'executionMode', 'critical'])(
     'rejects unsupported policy field %s',
-    field => {
+    (field) => {
       const input = validRecord();
       Object.assign(input.manifest, { [field]: 'unsupported' });
       expectInvalid(input, `unknown field ${field}`);
@@ -157,14 +152,18 @@ describe('validateRestrictedInstallRecord', () => {
   it('defers well-formed Surface references to contribution relation validation', () => {
     const input = validRecord();
     input.manifest.contributions.extensions[0].surfaceId = 'missing';
-    expect(validateRestrictedInstallRecord(input, validationOptions).manifest.contributions.extensions?.[0]).toMatchObject({ kind: 'surface', surfaceId: 'missing' });
+    expect(
+      validateRestrictedInstallRecord(input, validationOptions).manifest.contributions
+        .extensions?.[0],
+    ).toMatchObject({ kind: 'surface', surfaceId: 'missing' });
   });
 
   it('rejects duplicate contribution IDs even across different points', () => {
     const input = validRecord();
     input.manifest.contributions.extensions.push({
       id: 'workload-detail-tab',
-      kind: 'surface', point: { ownerPluginId: 'pod', id: 'detail', contractMajor: 1 },
+      kind: 'surface',
+      point: { ownerPluginId: 'pod', id: 'detail', contractMajor: 1 },
       surfaceId: 'workload-detail',
       order: 200,
     });
@@ -189,12 +188,21 @@ describe('validateRestrictedInstallRecord', () => {
   });
 });
 
-
 it('preflights new contribution fields before publishing to an old Host contract', () => {
   const legacy = validRecord();
-  expect(validateRestrictedInstallRecord(legacy, { ...validationOptions, contributionContractVersion: 1 }).manifest.id).toBe('kubeeye');
+  expect(
+    validateRestrictedInstallRecord(legacy, {
+      ...validationOptions,
+      contributionContractVersion: 1,
+    }).manifest.id,
+  ).toBe('kubeeye');
   const next = validRecord();
   Object.assign(next.manifest.contributions.routes[0], { parentRouteId: 'node-detail' });
-  expect(() => validateRestrictedInstallRecord(next, { ...validationOptions, contributionContractVersion: 1 })).toThrow('CONTRIBUTION_CONTRACT_UNSUPPORTED');
-  expect(validateRestrictedInstallRecord(next, { ...validationOptions, contributionContractVersion: 2 }).manifest.contributions.routes?.[0].parentRouteId).toBe('node-detail');
+  expect(() =>
+    validateRestrictedInstallRecord(next, { ...validationOptions, contributionContractVersion: 1 }),
+  ).toThrow('CONTRIBUTION_CONTRACT_UNSUPPORTED');
+  expect(
+    validateRestrictedInstallRecord(next, { ...validationOptions, contributionContractVersion: 2 })
+      .manifest.contributions.routes?.[0].parentRouteId,
+  ).toBe('node-detail');
 });
