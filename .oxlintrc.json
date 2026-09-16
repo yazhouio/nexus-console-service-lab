@@ -1,0 +1,86 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "eslint",
+    "typescript",
+    "unicorn",
+    "oxc",
+    "import",
+    "promise",
+    "react",
+    "jsx-a11y",
+    "vitest"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error"
+  },
+  "env": {
+    "browser": true,
+    "es2024": true,
+    "node": true
+  },
+  "rules": {
+    // --- Rules that do not hold for this codebase ---------------------------
+
+    // React 19 uses the automatic JSX runtime.
+    "react/react-in-jsx-scope": "off",
+
+    // Sequential awaits are deliberate: the Core Closure and plugin activation are ordered.
+    "eslint/no-await-in-loop": "off",
+
+    // Lifecycle code iterates a snapshot precisely because the loop body mutates the
+    // underlying Map or Set (endScope, endOccurrence, entry.remove). The spread is required.
+    "unicorn/no-useless-spread": "off",
+
+    // Runtime snapshots are readonly; `map` + spread is the intended idiom and the rule's
+    // suggested in-place mutation would break immutability.
+    "oxc/no-map-spread": "off",
+
+    // Identifier validation deliberately matches C0/C1 control characters to reject them.
+    "eslint/no-control-regex": "off",
+
+    // A single replaceable `on<event>` handler is the intended contract for host/plugin windows.
+    "unicorn/prefer-add-event-listener": "off",
+
+    // Fire-and-forget `then()` is intentional on UI activation paths.
+    "promise/always-return": "off",
+
+    // Side-effect imports are how stylesheets and plugin entries are loaded.
+    "import/no-unassigned-import": "off",
+
+    // Jest-flavoured assumptions that do not hold here: Vitest supports `expect(value, message)`,
+    // assertions run through helpers, and rejection promises are captured before being awaited
+    // later in the same test.
+    "vitest/valid-expect": "off",
+    "vitest/expect-expect": "off",
+    "vitest/no-conditional-expect": "off",
+    "vitest/require-mock-type-parameters": "off",
+    "vitest/require-to-throw-message": "off",
+
+    // Stylistic only; enabling these would churn existing code without changing behaviour.
+    "eslint/no-underscore-dangle": "off",
+    "eslint/no-shadow": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/no-array-sort": "off",
+    "unicorn/no-array-reverse": "off",
+
+    // --- Pre-existing backlog ----------------------------------------------
+    // These are real findings in code that predates the linter. They are warnings so the
+    // gate stays green, and CI caps the total so the backlog can only shrink. Promote each
+    // one back to "error" as its last occurrence is fixed.
+    "react/exhaustive-effect-dependencies": "warn",
+    "react/set-state-in-effect": "warn",
+    "react/no-unstable-nested-components": "warn",
+    "react/no-array-index-key": "warn",
+    "react/jsx-no-constructed-context-values": "warn",
+    "react/static-components": "warn",
+    "react/immutability": "warn",
+    "react/refs": "warn",
+    "react-hooks/exhaustive-deps": "warn",
+    "jsx-a11y/prefer-tag-over-role": "warn",
+    "import/no-named-as-default-member": "warn",
+    "promise/no-callback-in-promise": "warn"
+  }
+}

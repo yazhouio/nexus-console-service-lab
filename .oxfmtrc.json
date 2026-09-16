@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  // Matches the existing code; every other option is already oxfmt's default
+  // (printWidth 100, semicolons, trailing commas, 2-space indent via .editorconfig).
+  "singleQuote": true,
+
+  // Markdown is hand-authored prose and CJK tables that the table aligner mangles.
+  // The example plugin manifests are rewritten by build-manifest.mjs on every build.
+  "ignorePatterns": [
+    "pnpm-lock.yaml",
+    "**/*.md",
+    "apps/example-restricted-plugin/manifest.json",
+    "apps/example-restricted-plugin/manifest-v2.json",
+    "doc_build/",
+    "dist-validation/",
+    "apps/docs/docs/generated/"
+  ]
+}

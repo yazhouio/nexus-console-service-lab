@@ -1,0 +1,23 @@
+# Git hooks for the workspace. Installed by the `lefthook` postinstall; run
+# `pnpm exec lefthook install` if hooks ever go missing.
+#
+# Hooks stay fast and local: formatting and linting only. The slow gates
+# (typecheck, unit tests, Playwright, routing evidence) belong to CI.
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: oxfmt
+      glob: '*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,json,jsonc,css,html,yml,yaml}'
+      run: pnpm exec oxfmt --write {staged_files}
+      stage_fixed: true
+
+    - name: oxlint
+      glob: '*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}'
+      run: pnpm exec oxlint --fix {staged_files}
+      stage_fixed: true
+
+pre-push:
+  jobs:
+    - name: oxlint
+      run: pnpm lint

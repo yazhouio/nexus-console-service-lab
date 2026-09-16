@@ -25,3 +25,7 @@ catalog:
   typescript: 7.0.2
   vitest: 4.1.11
   wujie: 2.1.0
+
+# Native binary download for the git hook runner.
+allowBuilds:
+  lefthook: true
