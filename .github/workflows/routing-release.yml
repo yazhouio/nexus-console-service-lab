@@ -21,8 +21,6 @@ jobs:
           node-version-file: package.json
       - run: node scripts/check-node-version.mjs
       - uses: pnpm/action-setup@v4
-        with:
-          version: 12.3.1
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - name: Read trusted environment configuration

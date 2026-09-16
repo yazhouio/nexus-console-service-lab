@@ -13,8 +13,6 @@ jobs:
       - name: Verify Node gate positive and negative cases
         run: node --test scripts/test/node-version.test.mjs
       - uses: pnpm/action-setup@v4
-        with:
-          version: 12.3.1
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
