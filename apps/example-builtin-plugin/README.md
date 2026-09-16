@@ -1,5 +1,7 @@
 # Independently built extension-demo
 
+This is the **plugin implementation** layer: a trusted plugin consuming the Console and Cluster reference contracts. Independent build/deployment does not make it a Restricted installation; the Distribution explicitly selects it as trusted code. For a different business system, replace those API dependencies and contribution targets with its published contracts. See [the three layers](../docs/docs/framework-overview.md) and [example map](../docs/docs/example-plugins.md).
+
 Source of the extension-demo Builtin. Exposes `./plugin` (`plugin` and `css`) through Rspack Federation. This project has its own tsconfig and uses only public package exports.
 
 Build public packages first (`pnpm build:public`), then:

@@ -9,3 +9,4 @@ doc_build/
 dist-validation/
 
 /apps/docs/docs/generated/plugin-contract/
+.pet-upgrade-guga/

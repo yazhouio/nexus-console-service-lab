@@ -1,4 +1,6 @@
-# Plugin Author Guide
+# 插件开发指南
+
+本文面向已有目标业务插件系统的插件作者。先取得该系统的 API 包、Point/Profile、Host API 与权限约定；框架协议定义声明格式，业务契约决定具体 ID 和语义。本文的 Console/Cluster API、权限和设计 Token 均属于参考系统，不是每个宿主必须采用的协议。要定义自己的平台协议，请先阅读[构建业务插件系统](./build-plugin-system.md)。
 
 第一次使用建议先运行 [Deployment 完整案例](./deployment-example.md)，了解列表、详情、卡片、操作和 Tab 如何组合。
 
@@ -8,10 +10,10 @@ V1 只有两条正式执行路径：
 
 | 执行边界 | 装载 | 执行方式 | 适用场景 |
 | --- | --- | --- | --- |
-| Builtin Plugin | 与 Host / Kernel 同包构建 | Direct `activate(context)` | Host 自有、可信代码 |
+| Builtin Plugin | 随 Host 构建，或由 Distribution 明确选择的独立可信制品 | Direct `activate(context)` | Host 自有、可信代码 |
 | Restricted Plugin | 已安装的 Manifest | 按需 Wujie Execution + PluginBridge | 外部或合作方 UI 插件 |
 
-外部插件在 V1 统一为 `Restricted + Wujie`。Manifest 不能请求 Direct、iframe、Trust Level 或自定义安全策略。
+通过安装 Manifest 接入的插件使用 `Restricted + Wujie`。独立构建的可信 Builtin 见[示例地图](./example-plugins.md)，其信任和加载由 Distribution 决定。Manifest 不能请求 Direct、iframe、Trust Level 或自定义安全策略。
 
 角色 `roles: ["provider", "feature"]` 可重叠；来源 `provenance: "first-party" | "partner" | "third-party"` 与 Builtin/Restricted 独立。分类是元数据，不产生 Point 或 Capability grant。
 
@@ -132,7 +134,7 @@ V1 不提供：
 - Generic EventBus 或 Plugin-defined Service Registration；
 - Plugin 之间直接访问彼此内部实现；
 - Hot Install、Hot Upgrade、Hot Unload；
-- Trusted External Direct Plugin；
+- 通过 Restricted Manifest 请求 Direct 执行或提升为可信插件；
 - Hostile-code Containment 或独立 Origin 安全边界。
 
 同源 Wujie 的 `window.parent` 可能可访问。真实数据安全必须由 Backend Authorization 保证，Bridge Permission 不能替代后端鉴权。

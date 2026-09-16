@@ -1,4 +1,17 @@
-# Example Plugins
+# 示例地图
+
+示例按三层阅读，Console/Cluster 的业务命名可由自己的系统替换。
+
+| 层次 | 从哪里读 | 学习目标 |
+| --- | --- | --- |
+| 通用框架 | `packages/plugin-runtime`、`packages/browser-host`、`packages/plugin-build` | 理解公开机制和执行边界 |
+| 业务插件系统 | `packages/console-core-api` → `packages/console-core` → `apps/console/src/distribution.ts` → `main.tsx` | 定义协议、实现平台壳并组装系统；视觉约定见 `packages/design-tokens` |
+| 领域契约 | `packages/cluster-api` | 为业务资源定义引用、能力和扩展点 |
+| 可信插件 | `apps/console/src/plugins/extension-demo.tsx`、`apps/example-builtin-plugin` | 消费协议；分别观察宿主内组装和独立构建 |
+| Wujie 插件 | `apps/example-restricted-plugin` | Manifest、Surface、Bridge 与生命周期 |
+| 跨插件组合 | Deployment 案例；`apps/ui-composition-fixtures` 为验收 fixture | 观察页面 owner 与扩展贡献方协作 |
+
+搭建新系统从[搭建指南](./build-plugin-system.md)开始。开发插件时保留注册和通信方式，替换目标系统的 Point、Capability、权限和业务 schema；不要将示例私有实现变成依赖。
 
 第一次使用建议先运行 [Deployment 完整案例](./deployment-example.md)，了解列表、详情、卡片、操作和 Tab 如何组合。
 
