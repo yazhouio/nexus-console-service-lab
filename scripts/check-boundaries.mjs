@@ -10,59 +10,126 @@ function role(file) {
   if (file.startsWith('packages/browser-host/')) return 'host';
   if (file.startsWith('packages/console-core/')) return 'core';
   if (/^packages\/[^/]+-api\//.test(file)) return 'api';
-  if (file.startsWith('apps/console/src/plugins/') || /^apps\/(?:example-builtin-plugin|example-restricted-plugin|ui-composition-fixtures)\//.test(file)) return 'feature';
+  if (
+    file.startsWith('apps/console/src/plugins/') ||
+    /^apps\/(?:example-builtin-plugin|example-restricted-plugin|ui-composition-fixtures)\//.test(
+      file,
+    )
+  )
+    return 'feature';
   if (file.startsWith('apps/console/')) return 'distribution';
   return undefined;
 }
 const packageRoots = {
   '@nexus/example-restricted-plugin': 'apps/example-restricted-plugin',
   '@nexus/example-builtin-plugin': 'apps/example-builtin-plugin',
-  '@nexus/design-tokens': 'packages/design-tokens', '@nexus/plugin-runtime': 'packages/plugin-runtime', '@nexus/browser-host': 'packages/browser-host',
-  '@nexus/console-core': 'packages/console-core', '@nexus/console-core-api': 'packages/console-core-api', '@nexus/cluster-api': 'packages/cluster-api',
+  '@nexus/design-tokens': 'packages/design-tokens',
+  '@nexus/plugin-runtime': 'packages/plugin-runtime',
+  '@nexus/browser-host': 'packages/browser-host',
+  '@nexus/console-core': 'packages/console-core',
+  '@nexus/console-core-api': 'packages/console-core-api',
+  '@nexus/cluster-api': 'packages/cluster-api',
 };
 export function checkImport(file, specifier, typeOnly = false) {
   const sourceRole = role(file);
   if (!sourceRole) return;
-  const packageName = specifier.startsWith('@') ? specifier.split('/').slice(0, 2).join('/') : specifier.split('/')[0];
-  const targetFile = specifier.startsWith('.') ? relative(root, resolve(root, dirname(file), specifier)) : packageRoots[packageName] ? `${packageRoots[packageName]}/${specifier.slice(packageName.length + 1)}` : undefined;
+  const packageName = specifier.startsWith('@')
+    ? specifier.split('/').slice(0, 2).join('/')
+    : specifier.split('/')[0];
+  const targetFile = specifier.startsWith('.')
+    ? relative(root, resolve(root, dirname(file), specifier))
+    : packageRoots[packageName]
+      ? `${packageRoots[packageName]}/${specifier.slice(packageName.length + 1)}`
+      : undefined;
   const targetRole = targetFile ? role(targetFile) : undefined;
-  const samePackage = targetFile && file.split('/').slice(0, 2).join('/') === targetFile.split('/').slice(0, 2).join('/');
+  const samePackage =
+    targetFile &&
+    file.split('/').slice(0, 2).join('/') === targetFile.split('/').slice(0, 2).join('/');
   if (samePackage && !specifier.startsWith('@')) {
-    if (sourceRole === 'feature' && targetRole !== 'feature') return 'Feature cannot import Distribution internals';
+    if (sourceRole === 'feature' && targetRole !== 'feature')
+      return 'Feature cannot import Distribution internals';
     return;
   }
   if (sourceRole === 'distribution') {
-    if (specifier.startsWith('@nexus/browser-host/') && specifier !== '@nexus/browser-host/testing') return 'Distribution may use only public Host exports';
+    if (specifier.startsWith('@nexus/browser-host/') && specifier !== '@nexus/browser-host/testing')
+      return 'Distribution may use only public Host exports';
     return;
   }
-  if (targetFile && !specifier.startsWith('@nexus/')) return 'Cross-package relative imports bypass public exports';
-  if (specifier.startsWith('@nexus/plugin-runtime/') && !['@nexus/plugin-runtime/react', '@nexus/plugin-runtime/client', ...(sourceRole === 'host' ? ['@nexus/plugin-runtime/browser'] : [])].includes(specifier)) return 'Runtime private/browser entry is unavailable to this layer';
-  if (sourceRole === 'runtime' && targetRole && targetRole !== 'runtime') return 'Runtime cannot depend on Host or business packages';
-  if (sourceRole === 'host' && targetRole && !['runtime', 'host'].includes(targetRole)) return 'Host cannot depend on business implementations or APIs';
-  if (sourceRole === 'core' && targetRole && !['core', 'runtime', 'tokens'].includes(targetRole) && packageName !== '@nexus/console-core-api') return 'Core can depend only on its API and public Runtime contracts';
+  if (targetFile && !specifier.startsWith('@nexus/'))
+    return 'Cross-package relative imports bypass public exports';
+  if (
+    specifier.startsWith('@nexus/plugin-runtime/') &&
+    ![
+      '@nexus/plugin-runtime/react',
+      '@nexus/plugin-runtime/client',
+      ...(sourceRole === 'host' ? ['@nexus/plugin-runtime/browser'] : []),
+    ].includes(specifier)
+  )
+    return 'Runtime private/browser entry is unavailable to this layer';
+  if (sourceRole === 'runtime' && targetRole && targetRole !== 'runtime')
+    return 'Runtime cannot depend on Host or business packages';
+  if (sourceRole === 'host' && targetRole && !['runtime', 'host'].includes(targetRole))
+    return 'Host cannot depend on business implementations or APIs';
+  if (
+    sourceRole === 'core' &&
+    targetRole &&
+    !['core', 'runtime', 'tokens'].includes(targetRole) &&
+    packageName !== '@nexus/console-core-api'
+  )
+    return 'Core can depend only on its API and public Runtime contracts';
   // Compatibility re-exports for repository contract tooling; business plugins cannot import each other.
-  if (file === 'apps/console/src/plugins/extension-demo.tsx' && specifier === '@nexus/example-builtin-plugin/plugin' ||
-      file === 'apps/console/src/plugins/extension-demo-data.ts' && specifier === '@nexus/example-builtin-plugin/data' ||
-      file === 'apps/console/src/plugins/kubeeye-manifest.ts' && ['@nexus/example-restricted-plugin/manifest.json', '@nexus/example-restricted-plugin/manifest-v2.json'].includes(specifier)) return;
-  if (sourceRole === 'feature' && targetRole && !['runtime', 'api', 'tokens'].includes(targetRole)) return 'Feature cannot depend on Core implementations or Host';
-  if (sourceRole === 'api' && (!typeOnly || targetRole && !['runtime', 'api'].includes(targetRole))) return 'API packages import external contracts as types only';
-  if (specifier.startsWith('@nexus/') && !targetRole) return 'Unknown workspace dependency must declare its architecture boundary';
+  if (
+    (file === 'apps/console/src/plugins/extension-demo.tsx' &&
+      specifier === '@nexus/example-builtin-plugin/plugin') ||
+    (file === 'apps/console/src/plugins/extension-demo-data.ts' &&
+      specifier === '@nexus/example-builtin-plugin/data') ||
+    (file === 'apps/console/src/plugins/kubeeye-manifest.ts' &&
+      [
+        '@nexus/example-restricted-plugin/manifest.json',
+        '@nexus/example-restricted-plugin/manifest-v2.json',
+      ].includes(specifier))
+  )
+    return;
+  if (sourceRole === 'feature' && targetRole && !['runtime', 'api', 'tokens'].includes(targetRole))
+    return 'Feature cannot depend on Core implementations or Host';
+  if (
+    sourceRole === 'api' &&
+    (!typeOnly || (targetRole && !['runtime', 'api'].includes(targetRole)))
+  )
+    return 'API packages import external contracts as types only';
+  if (specifier.startsWith('@nexus/') && !targetRole)
+    return 'Unknown workspace dependency must declare its architecture boundary';
 }
 
 export function checkSource(file, source) {
-  const scanner = createScanner(true, undefined, source), tokens = [];
-  for (let kind = scanner.scan(); kind !== SyntaxKind.EndOfFile; kind = scanner.scan()) tokens.push({ kind, text: scanner.getTokenText(), value: scanner.getTokenValue(), start: scanner.getTokenStart() });
+  const scanner = createScanner(true, undefined, source),
+    tokens = [];
+  for (let kind = scanner.scan(); kind !== SyntaxKind.EndOfFile; kind = scanner.scan())
+    tokens.push({
+      kind,
+      text: scanner.getTokenText(),
+      value: scanner.getTokenValue(),
+      start: scanner.getTokenStart(),
+    });
   const errors = [];
   for (let i = 0; i < tokens.length; i++) {
-    const token = tokens[i], prev = tokens[i - 1];
-    if (token.kind !== SyntaxKind.StringLiteral && token.kind !== SyntaxKind.NoSubstitutionTemplateLiteral) continue;
+    const token = tokens[i],
+      prev = tokens[i - 1];
+    if (
+      token.kind !== SyntaxKind.StringLiteral &&
+      token.kind !== SyntaxKind.NoSubstitutionTemplateLiteral
+    )
+      continue;
     const call = prev?.text === '(' && ['import', 'require'].includes(tokens[i - 2]?.text);
     if (!call && !['from', 'import'].includes(prev?.text)) continue;
     let begin = i - 1;
     while (begin > 0 && !['import', 'export', ';'].includes(tokens[begin].text)) begin--;
     const typeOnly = !call && tokens[begin + 1]?.text === 'type';
     const message = checkImport(file, token.value, typeOnly);
-    if (message) errors.push(`${file}:${source.slice(0, token.start).split('\n').length}: ${message}: ${token.value}`);
+    if (message)
+      errors.push(
+        `${file}:${source.slice(0, token.start).split('\n').length}: ${message}: ${token.value}`,
+      );
   }
   return errors;
 }
@@ -70,29 +137,40 @@ async function files(directory) {
   const result = [];
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const path = resolve(directory, entry.name);
-    if (entry.isDirectory() && !['node_modules', 'dist', 'dist-validation', '.git'].includes(entry.name)) result.push(...await files(path));
+    if (
+      entry.isDirectory() &&
+      !['node_modules', 'dist', 'dist-validation', '.git'].includes(entry.name)
+    )
+      result.push(...(await files(path)));
     else if (entry.isFile()) result.push(path);
   }
   return result;
 }
 export async function checkWorkspace() {
   const errors = [];
-  for (const folder of ['packages', 'apps']) for (const path of await files(resolve(root, folder))) {
-    const file = relative(root, path);
-    if (!role(file)) continue;
-    if (file.includes('/src/') && /\.[cm]?[jt]sx?$/.test(file)) errors.push(...checkSource(file, await readFile(path, 'utf8')));
-    if (path.endsWith('/package.json') && !file.includes('/src/')) {
-      const manifest = JSON.parse(await readFile(path, 'utf8'));
-      for (const dependency of Object.keys({ ...manifest.dependencies, ...manifest.peerDependencies })) {
-        const message = checkImport(file, dependency, true);
-        if (message) errors.push(`${file}: ${message}: ${dependency}`);
+  for (const folder of ['packages', 'apps'])
+    for (const path of await files(resolve(root, folder))) {
+      const file = relative(root, path);
+      if (!role(file)) continue;
+      if (file.includes('/src/') && /\.[cm]?[jt]sx?$/.test(file))
+        errors.push(...checkSource(file, await readFile(path, 'utf8')));
+      if (path.endsWith('/package.json') && !file.includes('/src/')) {
+        const manifest = JSON.parse(await readFile(path, 'utf8'));
+        for (const dependency of Object.keys({
+          ...manifest.dependencies,
+          ...manifest.peerDependencies,
+        })) {
+          const message = checkImport(file, dependency, true);
+          if (message) errors.push(`${file}: ${message}: ${dependency}`);
+        }
       }
     }
-  }
   return errors;
 }
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const errors = await checkWorkspace();
-  if (errors.length) { console.error(errors.join('\n')); process.exitCode = 1; }
-  else console.log('Workspace dependency boundaries passed.');
+  if (errors.length) {
+    console.error(errors.join('\n'));
+    process.exitCode = 1;
+  } else console.log('Workspace dependency boundaries passed.');
 }

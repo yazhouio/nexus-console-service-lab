@@ -9,12 +9,21 @@ const endpoints = new Map([
 ]);
 createServer((request, response) => {
   response.setHeader('Content-Type', 'application/json');
-  if (request.url === '/health') { response.end('{}'); return; }
+  if (request.url === '/health') {
+    response.end('{}');
+    return;
+  }
   const permission = endpoints.get(request.url);
   const sessionId = /(?:^|;\s*)fixture-session=([^;]+)/u.exec(request.headers.cookie ?? '')?.[1];
   const permissions = sessions.get(sessionId);
-  if (!permission) { response.writeHead(404).end('{}'); return; }
-  if (!permissions) { response.writeHead(401).end(JSON.stringify({ code: 'BACKEND_UNAUTHENTICATED' })); return; }
+  if (!permission) {
+    response.writeHead(404).end('{}');
+    return;
+  }
+  if (!permissions) {
+    response.writeHead(401).end(JSON.stringify({ code: 'BACKEND_UNAUTHENTICATED' }));
+    return;
+  }
   if (!permissions.has(permission)) {
     response.writeHead(403).end(JSON.stringify({ code: 'BACKEND_PERMISSION_DENIED' }));
     return;

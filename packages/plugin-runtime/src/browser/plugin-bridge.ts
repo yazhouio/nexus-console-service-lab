@@ -1,7 +1,10 @@
 import { bindInvocationContext } from '../invocation-authority';
 import type { CreateUiControl } from './ui-control';
 import type { PluginRuntime } from '../bootstrap';
-import type { BridgeSubscriptionActionContract, OpenedBridgeSubscription } from '../bridge-contract';
+import type {
+  BridgeSubscriptionActionContract,
+  OpenedBridgeSubscription,
+} from '../bridge-contract';
 import { isJsonValue, type JsonValue } from '../contribution';
 import { isCapabilityId, type CapabilityId } from '../identifiers';
 import type { PermissionId } from '../manifest';
@@ -39,16 +42,28 @@ export interface BridgeSubscriptionResult {
 }
 
 export type BridgeErrorCode =
-  | 'BRIDGE_SESSION_INACTIVE' | 'UNDECLARED_CAPABILITY_REQUIRE'
-  | 'CAPABILITY_UNAVAILABLE' | 'UNKNOWN_ACTION' | 'INVALID_REQUEST'
-  | 'INVALID_RESULT' | 'PERMISSION_DENIED' | 'ACTION_FAILED'
-  | 'DUPLICATE_REQUEST' | 'MESSAGE_TOO_LARGE' | 'RATE_LIMITED'
-  | 'CONCURRENCY_LIMITED' | 'TIMEOUT' | 'INVALID_EVENT' | 'SUBSCRIPTION_LIMITED';
+  | 'BRIDGE_SESSION_INACTIVE'
+  | 'UNDECLARED_CAPABILITY_REQUIRE'
+  | 'CAPABILITY_UNAVAILABLE'
+  | 'UNKNOWN_ACTION'
+  | 'INVALID_REQUEST'
+  | 'INVALID_RESULT'
+  | 'PERMISSION_DENIED'
+  | 'ACTION_FAILED'
+  | 'DUPLICATE_REQUEST'
+  | 'MESSAGE_TOO_LARGE'
+  | 'RATE_LIMITED'
+  | 'CONCURRENCY_LIMITED'
+  | 'TIMEOUT'
+  | 'INVALID_EVENT'
+  | 'SUBSCRIPTION_LIMITED';
 
 export type BridgeResponse =
   | Readonly<{ type: 'response'; requestId: string; ok: true; result: JsonValue }>
   | Readonly<{
-      type: 'response'; requestId: string; ok: false;
+      type: 'response';
+      requestId: string;
+      ok: false;
       error: { readonly code: BridgeErrorCode; readonly message: string };
     }>;
 
@@ -88,9 +103,16 @@ export interface BridgeLimits {
 }
 
 export const DEFAULT_BRIDGE_LIMITS: BridgeLimits = Object.freeze({
-  maxMessageBytes: 65_536, maxConcurrentRequests: 16, requestsPerSecond: 100,
-  requestTimeoutMs: 10_000, maxProtocolViolations: 3, maxRequestIds: 10_000,
-  maxDiagnosticEntries: 200, maxSubscriptions: 32, maxBufferedEvents: 64, eventsPerSecond: 100,
+  maxMessageBytes: 65_536,
+  maxConcurrentRequests: 16,
+  requestsPerSecond: 100,
+  requestTimeoutMs: 10_000,
+  maxProtocolViolations: 3,
+  maxRequestIds: 10_000,
+  maxDiagnosticEntries: 200,
+  maxSubscriptions: 32,
+  maxBufferedEvents: 64,
+  eventsPerSecond: 100,
 });
 
 export interface PluginBridgeSession {
@@ -142,20 +164,31 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function parseRequest(value: unknown): BridgeRequest | BridgeUnsubscribeRequest | undefined {
   if (!isRecord(value)) return undefined;
-  if (value.type === 'unsubscribe' && Object.keys(value).length === 3 &&
-      typeof value.requestId === 'string' && value.requestId.length <= 128 && value.requestId.trim() !== '' &&
-      typeof value.subscriptionId === 'string' && value.subscriptionId.trim() !== '') {
+  if (
+    value.type === 'unsubscribe' &&
+    Object.keys(value).length === 3 &&
+    typeof value.requestId === 'string' &&
+    value.requestId.length <= 128 &&
+    value.requestId.trim() !== '' &&
+    typeof value.subscriptionId === 'string' &&
+    value.subscriptionId.trim() !== ''
+  ) {
     return value as unknown as BridgeUnsubscribeRequest;
   }
   const fields = ['type', 'requestId', 'capability', 'action', 'payload'];
   if (
     Object.keys(value).length !== fields.length ||
-    fields.some(field => !Object.hasOwn(value, field)) || value.type !== 'request' ||
-    typeof value.requestId !== 'string' || value.requestId.length > 128 || value.requestId.trim() === '' ||
+    fields.some((field) => !Object.hasOwn(value, field)) ||
+    value.type !== 'request' ||
+    typeof value.requestId !== 'string' ||
+    value.requestId.length > 128 ||
+    value.requestId.trim() === '' ||
     !isCapabilityId(value.capability) ||
-    typeof value.action !== 'string' || value.action.trim() === '' ||
+    typeof value.action !== 'string' ||
+    value.action.trim() === '' ||
     !isJsonValue(value.payload)
-  ) return undefined;
+  )
+    return undefined;
   return value as unknown as BridgeRequest;
 }
 
@@ -176,21 +209,26 @@ interface Subscription {
 }
 
 /** A session is created only by the Host after a successful handshake. */
-export function createPluginBridgeSession(options: CreatePluginBridgeSessionOptions): PluginBridgeSession {
+export function createPluginBridgeSession(
+  options: CreatePluginBridgeSessionOptions,
+): PluginBridgeSession {
   const { runtime, port } = options;
   const limits = { ...DEFAULT_BRIDGE_LIMITS, ...options.limits };
-  if (Object.values(limits).some(value => !Number.isSafeInteger(value) || value < 1)) {
+  if (Object.values(limits).some((value) => !Number.isSafeInteger(value) || value < 1)) {
     throw new Error('Bridge limits must be positive safe integers.');
   }
-  if (limits.maxMessageBytes < 256) throw new Error('Bridge messages require at least 256 bytes for control responses.');
+  if (limits.maxMessageBytes < 256)
+    throw new Error('Bridge messages require at least 256 bytes for control responses.');
   const identity: BridgeSessionIdentity = Object.freeze({
     ...options.identity,
     requires: Object.freeze([...options.identity.requires]),
     grantedPermissions: Object.freeze([...options.identity.grantedPermissions]),
   });
   const attribution: SurfaceInstanceIdentity = Object.freeze({
-    pluginId: identity.pluginId, pluginVersion: identity.pluginVersion,
-    surfaceId: identity.surfaceId, surfaceInstanceId: identity.surfaceInstanceId,
+    pluginId: identity.pluginId,
+    pluginVersion: identity.pluginVersion,
+    surfaceId: identity.surfaceId,
+    surfaceInstanceId: identity.surfaceInstanceId,
     mountPointId: identity.mountPointId,
     ...(identity.execution ? { execution: Object.freeze({ ...identity.execution }) } : {}),
   });
@@ -205,7 +243,10 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
   const resourceTasks = new Set<Promise<unknown>>();
   const trackResource = <T>(task: Promise<T>): Promise<T> => {
     resourceTasks.add(task);
-    void task.then(() => resourceTasks.delete(task), () => resourceTasks.delete(task));
+    void task.then(
+      () => resourceTasks.delete(task),
+      () => resourceTasks.delete(task),
+    );
     return task;
   };
   let nextSubscriptionId = 0;
@@ -217,27 +258,48 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
   };
   const recordAudit = (details: Omit<BridgeAuditEntry, keyof SurfaceInstanceIdentity>): void => {
     const entry: BridgeAuditEntry = Object.freeze({
-      ...attribution, ...details, requestId: details.requestId.slice(0, 128),
+      ...attribution,
+      ...details,
+      requestId: details.requestId.slice(0, 128),
       ...(details.capability === undefined ? {} : { capability: details.capability.slice(0, 256) }),
       ...(details.action === undefined ? {} : { action: details.action.slice(0, 128) }),
-      ...(details.subscriptionId === undefined ? {} : { subscriptionId: details.subscriptionId.slice(0, 128) }),
+      ...(details.subscriptionId === undefined
+        ? {}
+        : { subscriptionId: details.subscriptionId.slice(0, 128) }),
     });
     append(audit, entry);
-    try { options.onAudit?.(entry); } catch { /* Audit sinks do not control dispatch. */ }
+    try {
+      options.onAudit?.(entry);
+    } catch {
+      /* Audit sinks do not control dispatch. */
+    }
   };
   const fits = (value: unknown): boolean =>
     new TextEncoder().encode(JSON.stringify(value)).byteLength <= limits.maxMessageBytes;
   const recordHostError = (request: BridgeRequest, code: BridgeErrorCode, cause: unknown): void => {
     const issue: BridgeHostError = Object.freeze({
-      ...attribution, stage: 'bridge', code, requestId: request.requestId,
-      capability: request.capability, action: request.action, cause,
+      ...attribution,
+      stage: 'bridge',
+      code,
+      requestId: request.requestId,
+      capability: request.capability,
+      action: request.action,
+      cause,
     });
     append(hostErrors, issue);
-    try { options.onHostError?.(issue); } catch { /* Diagnostics cannot break dispatch. */ }
+    try {
+      options.onHostError?.(issue);
+    } catch {
+      /* Diagnostics cannot break dispatch. */
+    }
   };
   const failSession = (code: BridgeErrorCode): void => {
     session.dispose();
-    try { options.onSessionFailure?.(code); } catch { /* Host diagnostics only. */ }
+    try {
+      options.onSessionFailure?.(code);
+    } catch {
+      /* Host diagnostics only. */
+    }
   };
 
   const disposeProvider = (subscription: Subscription): void => {
@@ -245,10 +307,19 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     subscription.disposer = undefined;
     if (!disposer) return;
     try {
-      void trackResource(Promise.resolve(disposer()).catch(cause => recordHostError(subscription.request, 'ACTION_FAILED', cause)));
-    } catch (cause) { recordHostError(subscription.request, 'ACTION_FAILED', cause); }
+      void trackResource(
+        Promise.resolve(disposer()).catch((cause) =>
+          recordHostError(subscription.request, 'ACTION_FAILED', cause),
+        ),
+      );
+    } catch (cause) {
+      recordHostError(subscription.request, 'ACTION_FAILED', cause);
+    }
   };
-  const closeSubscription = (subscription: Subscription, code: BridgeErrorCode = 'BRIDGE_SESSION_INACTIVE'): void => {
+  const closeSubscription = (
+    subscription: Subscription,
+    code: BridgeErrorCode = 'BRIDGE_SESSION_INACTIVE',
+  ): void => {
     if (subscription.closed) return;
     subscription.closed = true;
     subscriptions.delete(subscription);
@@ -256,32 +327,57 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     subscription.controller.abort(code);
     disposeProvider(subscription);
   };
-  const eventFailure = (subscription: Subscription, code: BridgeErrorCode, cause: unknown): void => {
+  const eventFailure = (
+    subscription: Subscription,
+    code: BridgeErrorCode,
+    cause: unknown,
+  ): void => {
     recordHostError(subscription.request, code, cause);
     recordAudit({
-      type: 'event', requestId: subscription.request.requestId,
-      capability: subscription.request.capability, action: subscription.request.action,
+      type: 'event',
+      requestId: subscription.request.requestId,
+      capability: subscription.request.capability,
+      action: subscription.request.action,
       ...(subscription.subscriptionId ? { subscriptionId: subscription.subscriptionId } : {}),
-      resultCode: code, duration: 0, timestamp: Date.now(),
+      resultCode: code,
+      duration: 0,
+      timestamp: Date.now(),
     });
     closeSubscription(subscription, code);
   };
   const deliverEvent = (subscription: Subscription, payload: JsonValue): void => {
     if (state !== 'ACTIVE' || subscription.closed) return;
-    const event: BridgeEvent = { type: 'event', subscriptionId: subscription.subscriptionId!, payload };
-    if (!fits(event)) { eventFailure(subscription, 'MESSAGE_TOO_LARGE', undefined); return; }
+    const event: BridgeEvent = {
+      type: 'event',
+      subscriptionId: subscription.subscriptionId!,
+      payload,
+    };
+    if (!fits(event)) {
+      eventFailure(subscription, 'MESSAGE_TOO_LARGE', undefined);
+      return;
+    }
     const now = Date.now();
     while (eventTimes.length && eventTimes[0] <= now - 1000) eventTimes.shift();
-    if (eventTimes.length >= limits.eventsPerSecond) { eventFailure(subscription, 'RATE_LIMITED', undefined); return; }
+    if (eventTimes.length >= limits.eventsPerSecond) {
+      eventFailure(subscription, 'RATE_LIMITED', undefined);
+      return;
+    }
     eventTimes.push(now);
-    try { port.postMessage(event); }
-    catch { failSession('BRIDGE_SESSION_INACTIVE'); }
+    try {
+      port.postMessage(event);
+    } catch {
+      failSession('BRIDGE_SESSION_INACTIVE');
+    }
   };
   const emitEvent = (subscription: Subscription, value: JsonValue): void => {
     if (state !== 'ACTIVE' || subscription.closed) return;
     let payload: JsonValue;
-    try { payload = jsonCopy(subscription.action.eventSchema.parse(value)); }
-    catch (cause) { eventFailure(subscription, 'INVALID_EVENT', cause); return; }
+    try {
+      payload = jsonCopy(subscription.action.eventSchema.parse(value));
+    } catch (cause) {
+      eventFailure(subscription, 'INVALID_EVENT', cause);
+      return;
+    }
     if (!subscription.ready) {
       // Include the maximum session-local ID length when bounding buffered bytes.
       if (!fits({ type: 'event', subscriptionId: 'subscription-9007199254740991', payload })) {
@@ -301,12 +397,17 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     let request: BridgeRequest | BridgeUnsubscribeRequest | undefined;
     // Read only correlation metadata before validation. Authorization still uses
     // the parsed envelope and the immutable MessagePort-bound identity below.
-    let auditType: BridgeAuditEntry['type'] = fields.type === 'unsubscribe' ? 'unsubscribe' : 'request';
-    let subscriptionId = fields.type === 'unsubscribe' && typeof fields.subscriptionId === 'string'
-      ? fields.subscriptionId : undefined;
+    let auditType: BridgeAuditEntry['type'] =
+      fields.type === 'unsubscribe' ? 'unsubscribe' : 'request';
+    let subscriptionId =
+      fields.type === 'unsubscribe' && typeof fields.subscriptionId === 'string'
+        ? fields.subscriptionId
+        : undefined;
     let auditTarget: Pick<BridgeRequest, 'capability' | 'action'> | undefined;
     if (fields.type === 'unsubscribe') {
-      auditTarget = [...subscriptions].find(entry => entry.subscriptionId === subscriptionId)?.request;
+      auditTarget = [...subscriptions].find(
+        (entry) => entry.subscriptionId === subscriptionId,
+      )?.request;
     } else if (isCapabilityId(fields.capability) && typeof fields.action === 'string') {
       auditTarget = { capability: fields.capability, action: fields.action };
       const actions = runtime.bridgeContracts.get(fields.capability)?.actions;
@@ -315,30 +416,44 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     // Every exit, including pre-provider rejection and cancellation, is audited once.
     const finish = (response: BridgeResponse): BridgeResponse => {
       recordAudit({
-        type: auditType, requestId: requestId.slice(0, 128),
+        type: auditType,
+        requestId: requestId.slice(0, 128),
         ...(subscriptionId === undefined ? {} : { subscriptionId }),
         ...(auditTarget ? { capability: auditTarget.capability, action: auditTarget.action } : {}),
         resultCode: response.ok ? 'OK' : response.error.code,
-        duration: Math.max(0, Date.now() - started), timestamp: started,
+        duration: Math.max(0, Date.now() - started),
+        timestamp: started,
       });
       if (state === 'ACTIVE') {
-        try { port.postMessage(response); } catch { failSession('BRIDGE_SESSION_INACTIVE'); }
+        try {
+          port.postMessage(response);
+        } catch {
+          failSession('BRIDGE_SESSION_INACTIVE');
+        }
       }
       return response;
     };
     const reject = (code: BridgeErrorCode, severe = false): BridgeResponse => {
-      let response: BridgeResponse = { type: 'response', requestId, ok: false, error: { code, message: messages[code] } };
+      let response: BridgeResponse = {
+        type: 'response',
+        requestId,
+        ok: false,
+        error: { code, message: messages[code] },
+      };
       // An invalid correlation ID must not turn a rejection into another oversized message.
       if (!fits(response)) response = { ...response, requestId: '' };
       finish(response);
-      if (severe && ++violations >= limits.maxProtocolViolations && state === 'ACTIVE') failSession(code);
+      if (severe && ++violations >= limits.maxProtocolViolations && state === 'ACTIVE')
+        failSession(code);
       return response;
     };
     if (state !== 'ACTIVE') return reject('BRIDGE_SESSION_INACTIVE');
     try {
       if (!fits(value)) return reject('MESSAGE_TOO_LARGE', true);
       request = parseRequest(value);
-    } catch { /* Cyclic or non-JSON input is an invalid envelope. */ }
+    } catch {
+      /* Cyclic or non-JSON input is an invalid envelope. */
+    }
     if (request === undefined) return reject('INVALID_REQUEST', true);
     if (request.type === 'unsubscribe') subscriptionId = request.subscriptionId;
     if (requestIds.has(requestId)) return reject('DUPLICATE_REQUEST', true);
@@ -351,7 +466,9 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     violations = 0;
     if (request.type === 'unsubscribe') {
       subscriptionId = request.subscriptionId;
-      const subscription = [...subscriptions].find(entry => entry.subscriptionId === subscriptionId);
+      const subscription = [...subscriptions].find(
+        (entry) => entry.subscriptionId === subscriptionId,
+      );
       if (subscription) closeSubscription(subscription);
       return finish({ type: 'response', requestId, ok: true, result: null });
     }
@@ -360,53 +477,83 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     if (requestTimes.length >= limits.requestsPerSecond) return reject('RATE_LIMITED');
     requestTimes.push(started);
     const actionRequest = request;
-    if (!identity.requires.includes(request.capability)) return reject('UNDECLARED_CAPABILITY_REQUIRE');
+    if (!identity.requires.includes(request.capability))
+      return reject('UNDECLARED_CAPABILITY_REQUIRE');
     const contract = runtime.bridgeContracts.get(request.capability);
     if (contract === undefined) return reject('CAPABILITY_UNAVAILABLE');
-    const action = Object.hasOwn(contract.actions, request.action) ? contract.actions[request.action] : undefined;
+    const action = Object.hasOwn(contract.actions, request.action)
+      ? contract.actions[request.action]
+      : undefined;
     if (action === undefined) return reject('UNKNOWN_ACTION');
     auditType = action.kind;
     let payload: JsonValue;
-    try { payload = jsonCopy(action.requestSchema.parse(request.payload)); }
-    catch { return reject('INVALID_REQUEST'); }
-    if (action.requiredPermissions.some(permission => !identity.grantedPermissions.includes(permission))) return reject('PERMISSION_DENIED');
-    const provider = runtime.capabilities.list().find(entry => entry.id === request.capability);
-    if (provider === undefined || runtime.plugins.get(provider.providerPluginId)?.state !== 'ACTIVE') return reject('CAPABILITY_UNAVAILABLE');
+    try {
+      payload = jsonCopy(action.requestSchema.parse(request.payload));
+    } catch {
+      return reject('INVALID_REQUEST');
+    }
+    if (
+      action.requiredPermissions.some(
+        (permission) => !identity.grantedPermissions.includes(permission),
+      )
+    )
+      return reject('PERMISSION_DENIED');
+    const provider = runtime.capabilities.list().find((entry) => entry.id === request.capability);
+    if (
+      provider === undefined ||
+      runtime.plugins.get(provider.providerPluginId)?.state !== 'ACTIVE'
+    )
+      return reject('CAPABILITY_UNAVAILABLE');
     if (pending.size >= limits.maxConcurrentRequests) return reject('CONCURRENCY_LIMITED');
-    if (action.kind === 'subscription' && subscriptions.size >= limits.maxSubscriptions) return reject('SUBSCRIPTION_LIMITED');
+    if (action.kind === 'subscription' && subscriptions.size >= limits.maxSubscriptions)
+      return reject('SUBSCRIPTION_LIMITED');
     const controller = new AbortController();
-    const subscription: Subscription | undefined = action.kind === 'subscription'
-      ? { request: actionRequest, action, controller, buffer: [], ready: false, closed: false } : undefined;
+    const subscription: Subscription | undefined =
+      action.kind === 'subscription'
+        ? { request: actionRequest, action, controller, buffer: [], ready: false, closed: false }
+        : undefined;
     if (subscription) subscriptions.add(subscription);
     pending.add(controller);
     const cancelled = new Promise<never>((_resolve, rejectPromise) => {
-      controller.signal.addEventListener('abort', () => rejectPromise(controller.signal.reason), { once: true });
+      controller.signal.addEventListener('abort', () => rejectPromise(controller.signal.reason), {
+        once: true,
+      });
     });
     const timeout = setTimeout(() => controller.abort('TIMEOUT'), limits.requestTimeoutMs);
     try {
       let rawResult: unknown;
       try {
         const invocation = Promise.resolve().then(async () => {
-            if (controller.signal.aborted) throw controller.signal.reason;
-            const context = bindInvocationContext({
-              pluginId: identity.pluginId, surfaceId: identity.surfaceId,
-              surfaceInstanceId: identity.surfaceInstanceId, mountPointId: identity.mountPointId,
+          if (controller.signal.aborted) throw controller.signal.reason;
+          const context = bindInvocationContext(
+            {
+              pluginId: identity.pluginId,
+              surfaceId: identity.surfaceId,
+              surfaceInstanceId: identity.surfaceInstanceId,
+              mountPointId: identity.mountPointId,
               signal: controller.signal,
               ...(identity.execution ? { execution: identity.execution } : {}),
-            }, actionRequest.capability, actionRequest.action);
-            const capability = runtime.capabilities.require(actionRequest.capability);
-            if (action.kind === 'request') return action.invoke(capability, payload, context);
-            const opened = await action.open(capability, payload, context, event => emitEvent(subscription!, event));
-            subscription!.disposer = () => opened.dispose();
-            // A provider may finish opening after timeout/unmount. It still owes cleanup.
-            if (subscription!.closed) disposeProvider(subscription!);
-            return opened;
-
-          });
-        rawResult = await Promise.race([subscription ? trackResource(invocation) : invocation, cancelled]);
+            },
+            actionRequest.capability,
+            actionRequest.action,
+          );
+          const capability = runtime.capabilities.require(actionRequest.capability);
+          if (action.kind === 'request') return action.invoke(capability, payload, context);
+          const opened = await action.open(capability, payload, context, (event) =>
+            emitEvent(subscription!, event),
+          );
+          subscription!.disposer = () => opened.dispose();
+          // A provider may finish opening after timeout/unmount. It still owes cleanup.
+          if (subscription!.closed) disposeProvider(subscription!);
+          return opened;
+        });
+        rawResult = await Promise.race([
+          subscription ? trackResource(invocation) : invocation,
+          cancelled,
+        ]);
       } catch (cause) {
         const code = controller.signal.aborted
-          ? controller.signal.reason as BridgeErrorCode
+          ? (controller.signal.reason as BridgeErrorCode)
           : 'ACTION_FAILED';
         if (!controller.signal.aborted) recordHostError(request, code, cause);
         return reject(code);
@@ -417,14 +564,17 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
         if (action.kind === 'request') result = jsonCopy(action.resultSchema.parse(rawResult));
         else {
           const opened = rawResult as OpenedBridgeSubscription;
-          if (typeof opened.dispose !== 'function') throw Error('Subscription must have a disposer.');
+          if (typeof opened.dispose !== 'function')
+            throw Error('Subscription must have a disposer.');
           const snapshot = jsonCopy(action.snapshotSchema.parse(opened.snapshot));
           subscriptionId = `subscription-${++nextSubscriptionId}`;
           subscription!.subscriptionId = subscriptionId;
           result = { subscriptionId, snapshot };
         }
+      } catch (cause) {
+        recordHostError(request, 'INVALID_RESULT', cause);
+        return reject('INVALID_RESULT');
       }
-      catch (cause) { recordHostError(request, 'INVALID_RESULT', cause); return reject('INVALID_RESULT'); }
       const response: BridgeResponse = { type: 'response', requestId, ok: true, result };
       if (!fits(response)) return reject('MESSAGE_TOO_LARGE');
       finish(response);
@@ -441,23 +591,41 @@ export function createPluginBridgeSession(options: CreatePluginBridgeSessionOpti
     }
   };
 
-  const uiControl = options.createUiControl?.(value => { if (state === 'ACTIVE') port.postMessage(value); });
+  const uiControl = options.createUiControl?.((value) => {
+    if (state === 'ACTIVE') port.postMessage(value);
+  });
   const onMessage = (event: MessageEvent): void => {
     if (uiControl && event.data?.type === 'ui:request') {
-      try { uiControl.dispatch(event.data); } catch { failSession('BRIDGE_SESSION_INACTIVE'); }
+      try {
+        uiControl.dispatch(event.data);
+      } catch {
+        failSession('BRIDGE_SESSION_INACTIVE');
+      }
       return;
     }
     void dispatch(event.data).catch(() => failSession('BRIDGE_SESSION_INACTIVE'));
   };
   const session: PluginBridgeSession = Object.freeze({
     identity,
-    get state() { return state; },
-    get pendingRequestCount() { return pending.size; },
-    get subscriptionCount() { return [...subscriptions].filter(entry => entry.ready).length; },
-    get hostErrors() { return Object.freeze([...hostErrors]); },
-    get audit() { return Object.freeze([...audit]); },
+    get state() {
+      return state;
+    },
+    get pendingRequestCount() {
+      return pending.size;
+    },
+    get subscriptionCount() {
+      return [...subscriptions].filter((entry) => entry.ready).length;
+    },
+    get hostErrors() {
+      return Object.freeze([...hostErrors]);
+    },
+    get audit() {
+      return Object.freeze([...audit]);
+    },
     dispatch,
-    async settled() { while (resourceTasks.size) await Promise.allSettled([...resourceTasks]); },
+    async settled() {
+      while (resourceTasks.size) await Promise.allSettled([...resourceTasks]);
+    },
     dispose() {
       if (state === 'DISPOSED') return;
       state = 'DISPOSED';

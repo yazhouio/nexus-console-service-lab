@@ -40,14 +40,13 @@ function captureResolutionError(run: () => unknown): PluginResolutionError {
 }
 
 describe('versioned identifiers', () => {
-  it.each([
-    'kubesphere.cluster@2',
-    'kubesphere.console@1',
-    'scope-feature@0',
-  ])('accepts an explicit integer major in %s', value => {
-    expect(isCapabilityId(value)).toBe(true);
-    expect(isHostApiId(value)).toBe(true);
-  });
+  it.each(['kubesphere.cluster@2', 'kubesphere.console@1', 'scope-feature@0'])(
+    'accepts an explicit integer major in %s',
+    (value) => {
+      expect(isCapabilityId(value)).toBe(true);
+      expect(isHostApiId(value)).toBe(true);
+    },
+  );
 
   it.each([
     'kubesphere.cluster',
@@ -55,7 +54,7 @@ describe('versioned identifiers', () => {
     'kubesphere.cluster@2.1',
     'kubesphere.cluster@>=2',
     '@2',
-  ])('rejects missing majors and ranges in %s', value => {
+  ])('rejects missing majors and ranges in %s', (value) => {
     expect(isCapabilityId(value)).toBe(false);
     expect(isHostApiId(value)).toBe(false);
   });
@@ -128,15 +127,9 @@ describe('resolvePluginSet', () => {
     );
 
     expect(resolution.order).toEqual(['console-core']);
-    expect(resolution.skipped.get('cluster-a')?.code).toBe(
-      'DUPLICATE_CAPABILITY_PROVIDER',
-    );
-    expect(resolution.skipped.get('cluster-b')?.code).toBe(
-      'DUPLICATE_CAPABILITY_PROVIDER',
-    );
-    expect(resolution.skipped.get('workloads')?.code).toBe(
-      'DUPLICATE_CAPABILITY_PROVIDER',
-    );
+    expect(resolution.skipped.get('cluster-a')?.code).toBe('DUPLICATE_CAPABILITY_PROVIDER');
+    expect(resolution.skipped.get('cluster-b')?.code).toBe('DUPLICATE_CAPABILITY_PROVIDER');
+    expect(resolution.skipped.get('workloads')?.code).toBe('DUPLICATE_CAPABILITY_PROVIDER');
   });
 
   it('fails when a duplicate provider affects the Core Closure', () => {
@@ -206,13 +199,7 @@ describe('resolvePluginSet', () => {
     expect(resolution.order).toEqual(['console-core']);
     expect(resolution.skipped.get('alpha')).toMatchObject({
       code: 'CIRCULAR_DEPENDENCY',
-      path: [
-        'alpha',
-        'capability.beta@1',
-        'beta',
-        'capability.alpha@1',
-        'alpha',
-      ],
+      path: ['alpha', 'capability.beta@1', 'beta', 'capability.alpha@1', 'alpha'],
     });
     expect(resolution.skipped.get('beta')?.code).toBe('CIRCULAR_DEPENDENCY');
   });
@@ -234,18 +221,12 @@ describe('resolvePluginSet', () => {
     expect(error.issue).toMatchObject({
       code: 'CORE_DEPENDENCY_NOT_BUILTIN',
       pluginId: 'external-cluster-provider',
-      path: [
-        'console-core',
-        'kubesphere.cluster@2',
-        'external-cluster-provider',
-      ],
+      path: ['console-core', 'kubesphere.cluster@2', 'external-cluster-provider'],
     });
   });
 
   it('fails when a Core root is missing', () => {
-    const error = captureResolutionError(() =>
-      resolvePluginSet([], ['console-core']),
-    );
+    const error = captureResolutionError(() => resolvePluginSet([], ['console-core']));
 
     expect(error.issue).toMatchObject({
       code: 'CORE_ROOT_MISSING',
@@ -269,10 +250,7 @@ describe('resolvePluginSet', () => {
 
   it('treats duplicate Builtin ids as a Host build error', () => {
     const error = captureResolutionError(() =>
-      resolvePluginSet(
-        [plugin('console-core'), plugin('console-core')],
-        ['console-core'],
-      ),
+      resolvePluginSet([plugin('console-core'), plugin('console-core')], ['console-core']),
     );
 
     expect(error.issue.code).toBe('PLUGIN_ID_COLLISION');
@@ -282,15 +260,10 @@ describe('resolvePluginSet', () => {
     const invalid = plugin('invalid', {
       requires: ['kubesphere.cluster@^2' as CapabilityId],
     });
-    const resolution = resolvePluginSet(
-      [plugin('console-core'), invalid],
-      ['console-core'],
-    );
+    const resolution = resolvePluginSet([plugin('console-core'), invalid], ['console-core']);
 
     expect(resolution.order).toEqual(['console-core']);
-    expect(resolution.skipped.get('invalid')?.code).toBe(
-      'INVALID_PLUGIN_DESCRIPTOR',
-    );
+    expect(resolution.skipped.get('invalid')?.code).toBe('INVALID_PLUGIN_DESCRIPTOR');
     expect(resolution.rejected).toEqual([
       expect.objectContaining({
         candidate: invalid,

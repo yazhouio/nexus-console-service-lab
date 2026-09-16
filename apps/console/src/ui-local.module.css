@@ -8,4 +8,9 @@
   font-size: var(--nexus-font-size-body);
   line-height: var(--nexus-line-height-body);
 }
-.button { color: var(--nexus-color-action-primary); background: var(--nexus-color-surface); border: 1px solid var(--nexus-color-border-default); padding: var(--nexus-space-2); }
+.button {
+  color: var(--nexus-color-action-primary);
+  background: var(--nexus-color-surface);
+  border: 1px solid var(--nexus-color-border-default);
+  padding: var(--nexus-space-2);
+}

@@ -8,8 +8,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": [
-    "src",
-    "manifest.ts"
-  ]
+  "include": ["src", "manifest.ts"]
 }

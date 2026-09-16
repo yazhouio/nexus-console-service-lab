@@ -1,4 +1,11 @@
-import { assertPoint, assertPointRef, assertExtensionContribution, type ExtensionPointRef, type ContractId, type ExtensionPointDefinition } from './ui/definitions';
+import {
+  assertPoint,
+  assertPointRef,
+  assertExtensionContribution,
+  type ExtensionPointRef,
+  type ContractId,
+  type ExtensionPointDefinition,
+} from './ui/definitions';
 import { assertContributionContractCompatible } from './contribution-compatibility';
 import { frozenCopy } from './immutable';
 import { isCapabilityId, isHostApiId } from './identifiers';
@@ -10,11 +17,7 @@ import type {
   RestrictedRouteContribution,
   SandboxSurfaceDefinition,
 } from './contribution';
-import type {
-  CapabilityId,
-  HostApiId,
-  PluginId,
-} from './identifiers';
+import type { CapabilityId, HostApiId, PluginId } from './identifiers';
 import type { PluginDescriptor } from './plugin';
 
 export type PermissionId = string;
@@ -85,16 +88,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
     typeof value === 'object' &&
     value !== null &&
     !Array.isArray(value) &&
-    (Object.getPrototypeOf(value) === Object.prototype ||
-      Object.getPrototypeOf(value) === null)
+    (Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null)
   );
 }
 
-function record(
-  value: unknown,
-  label: string,
-  pluginId?: PluginId,
-): Record<string, unknown> {
+function record(value: unknown, label: string, pluginId?: PluginId): Record<string, unknown> {
   if (!isRecord(value)) {
     invalid(`${label} must be an object.`, pluginId);
   }
@@ -108,28 +106,20 @@ function assertClosed(
   pluginId?: PluginId,
 ): void {
   const allowed = new Set(fields);
-  const unknownField = Object.keys(value).find(field => !allowed.has(field));
+  const unknownField = Object.keys(value).find((field) => !allowed.has(field));
   if (unknownField !== undefined) {
     invalid(`${label} contains unknown field ${unknownField}.`, pluginId);
   }
 }
 
-function nonEmptyString(
-  value: unknown,
-  label: string,
-  pluginId?: PluginId,
-): string {
+function nonEmptyString(value: unknown, label: string, pluginId?: PluginId): string {
   if (typeof value !== 'string' || value.trim().length === 0) {
     invalid(`${label} must be a non-empty string.`, pluginId);
   }
   return value;
 }
 
-function optionalString(
-  value: unknown,
-  label: string,
-  pluginId?: PluginId,
-): string | undefined {
+function optionalString(value: unknown, label: string, pluginId?: PluginId): string | undefined {
   return value === undefined ? undefined : nonEmptyString(value, label, pluginId);
 }
 
@@ -138,23 +128,31 @@ function extensionMetadata(value: Record<string, unknown>, pluginId: string) {
     invalid('acceptsChildren must be a boolean.', pluginId);
   }
   const pointRefs: { point?: ExtensionPointRef; childPoint?: ExtensionPointRef } = {};
-  for (const key of ['point', 'childPoint'] as const) if (value[key] !== undefined) {
-    try { assertPointRef(value[key] as ExtensionPointRef); } catch { invalid(`Invalid ${key}.`, pluginId); }
-    pointRefs[key] = frozenCopy(value[key] as ExtensionPointRef);
-  }
+  for (const key of ['point', 'childPoint'] as const)
+    if (value[key] !== undefined) {
+      try {
+        assertPointRef(value[key] as ExtensionPointRef);
+      } catch {
+        invalid(`Invalid ${key}.`, pluginId);
+      }
+      pointRefs[key] = frozenCopy(value[key] as ExtensionPointRef);
+    }
   const assertions: { expectedProfile?: ContractId; expectedRefContract?: ContractId } = {};
-  for (const key of ['expectedProfile','expectedRefContract'] as const) if (value[key] !== undefined) {
-    if (!isCapabilityId(value[key])) invalid(`Invalid ${key}.`, pluginId);
-    assertions[key] = value[key] as ContractId;
-  }
-  return { ...pointRefs, ...assertions, ...(value.acceptsChildren === undefined ? {} : { acceptsChildren: value.acceptsChildren as boolean }) };
+  for (const key of ['expectedProfile', 'expectedRefContract'] as const)
+    if (value[key] !== undefined) {
+      if (!isCapabilityId(value[key])) invalid(`Invalid ${key}.`, pluginId);
+      assertions[key] = value[key] as ContractId;
+    }
+  return {
+    ...pointRefs,
+    ...assertions,
+    ...(value.acceptsChildren === undefined
+      ? {}
+      : { acceptsChildren: value.acceptsChildren as boolean }),
+  };
 }
 
-function optionalOrder(
-  value: unknown,
-  label: string,
-  pluginId?: PluginId,
-): number | undefined {
+function optionalOrder(value: unknown, label: string, pluginId?: PluginId): number | undefined {
   if (value === undefined) {
     return undefined;
   }
@@ -170,7 +168,7 @@ function uniqueStrings(
   validate: (entry: unknown) => entry is string,
   pluginId?: PluginId,
 ): readonly string[] {
-  if (!Array.isArray(value) || value.some(entry => !validate(entry))) {
+  if (!Array.isArray(value) || value.some((entry) => !validate(entry))) {
     invalid(`${label} must be an array of valid identifiers.`, pluginId);
   }
 
@@ -197,10 +195,7 @@ function optionalJsonValue(
   return frozenCopy(value);
 }
 
-function parseSurfaces(
-  value: unknown,
-  pluginId: PluginId,
-): readonly SandboxSurfaceDefinition[] {
+function parseSurfaces(value: unknown, pluginId: PluginId): readonly SandboxSurfaceDefinition[] {
   if (!Array.isArray(value)) {
     invalid('Manifest surfaces must be an array.', pluginId);
   }
@@ -238,17 +233,25 @@ function parseRoutes(
       const route = record(routeValue, `Route ${index}`, pluginId);
       assertClosed(
         route,
-        ['id', 'path', 'surfaceId', 'layout', 'initialParameters', 'parentRouteId', 'acceptsChildren', 'point', 'childPoint', 'expectedProfile', 'expectedRefContract'],
+        [
+          'id',
+          'path',
+          'surfaceId',
+          'layout',
+          'initialParameters',
+          'parentRouteId',
+          'acceptsChildren',
+          'point',
+          'childPoint',
+          'expectedProfile',
+          'expectedRefContract',
+        ],
         `Route ${index}`,
         pluginId,
       );
       const id = nonEmptyString(route.id, `Route ${index} id`, pluginId);
       const path = nonEmptyString(route.path, `Route ${id} path`, pluginId);
-      const surfaceId = nonEmptyString(
-        route.surfaceId,
-        `Route ${id} surfaceId`,
-        pluginId,
-      );
+      const surfaceId = nonEmptyString(route.surfaceId, `Route ${id} surfaceId`, pluginId);
       if (seen.has(id)) {
         invalid(`Route id ${id} is duplicated.`, pluginId);
       }
@@ -267,7 +270,15 @@ function parseRoutes(
       return Object.freeze({
         id,
         path,
-        ...(route.parentRouteId === undefined ? {} : { parentRouteId: optionalString(route.parentRouteId, `Route ${id} parentRouteId`, pluginId) }),
+        ...(route.parentRouteId === undefined
+          ? {}
+          : {
+              parentRouteId: optionalString(
+                route.parentRouteId,
+                `Route ${id} parentRouteId`,
+                pluginId,
+              ),
+            }),
         ...extensionMetadata(route, pluginId),
         surfaceId,
         ...(layout === undefined ? {} : { layout }),
@@ -277,10 +288,7 @@ function parseRoutes(
   );
 }
 
-function parseNavigation(
-  value: unknown,
-  pluginId: PluginId,
-): readonly NavigationContribution[] {
+function parseNavigation(value: unknown, pluginId: PluginId): readonly NavigationContribution[] {
   if (value === undefined) {
     return Object.freeze([]);
   }
@@ -291,46 +299,34 @@ function parseNavigation(
   const seen = new Set<string>();
   return Object.freeze(
     value.map((navigationValue, index) => {
-      const navigation = record(
-        navigationValue,
-        `Navigation ${index}`,
-        pluginId,
-      );
+      const navigation = record(navigationValue, `Navigation ${index}`, pluginId);
       assertClosed(
         navigation,
-        ['id', 'label', 'parentId', 'routeId', 'order', 'acceptsChildren', 'point', 'childPoint', 'expectedProfile', 'expectedRefContract', 'group'],
+        [
+          'id',
+          'label',
+          'parentId',
+          'routeId',
+          'order',
+          'acceptsChildren',
+          'point',
+          'childPoint',
+          'expectedProfile',
+          'expectedRefContract',
+          'group',
+        ],
         `Navigation ${index}`,
         pluginId,
       );
-      const id = nonEmptyString(
-        navigation.id,
-        `Navigation ${index} id`,
-        pluginId,
-      );
+      const id = nonEmptyString(navigation.id, `Navigation ${index} id`, pluginId);
       if (seen.has(id)) {
         invalid(`Navigation id ${id} is duplicated.`, pluginId);
       }
       seen.add(id);
-      const label = nonEmptyString(
-        navigation.label,
-        `Navigation ${id} label`,
-        pluginId,
-      );
-      const parentId = optionalString(
-        navigation.parentId,
-        `Navigation ${id} parentId`,
-        pluginId,
-      );
-      const routeId = optionalString(
-        navigation.routeId,
-        `Navigation ${id} routeId`,
-        pluginId,
-      );
-      const order = optionalOrder(
-        navigation.order,
-        `Navigation ${id} order`,
-        pluginId,
-      );
+      const label = nonEmptyString(navigation.label, `Navigation ${id} label`, pluginId);
+      const parentId = optionalString(navigation.parentId, `Navigation ${id} parentId`, pluginId);
+      const routeId = optionalString(navigation.routeId, `Navigation ${id} routeId`, pluginId);
+      const order = optionalOrder(navigation.order, `Navigation ${id} order`, pluginId);
 
       return Object.freeze({
         id,
@@ -339,18 +335,29 @@ function parseNavigation(
         ...(parentId === undefined ? {} : { parentId }),
         ...(routeId === undefined ? {} : { routeId }),
         ...(order === undefined ? {} : { order }),
-        ...(navigation.group === undefined ? {} : { group: nonEmptyString(navigation.group, 'Navigation group', pluginId) }),
+        ...(navigation.group === undefined
+          ? {}
+          : { group: nonEmptyString(navigation.group, 'Navigation group', pluginId) }),
       });
     }),
   );
 }
 
-function parseUiDefinitions<T extends { readonly id: string }>(value: unknown, validate: (v: T) => void, label: string, pluginId: string): readonly T[] {
+function parseUiDefinitions<T extends { readonly id: string }>(
+  value: unknown,
+  validate: (v: T) => void,
+  label: string,
+  pluginId: string,
+): readonly T[] {
   if (value === undefined) return Object.freeze([]);
   if (!Array.isArray(value)) invalid(`${label} must be an array.`, pluginId);
   const ids = new Set<string>();
   for (const entry of value) {
-    try { validate(entry as T); } catch { invalid(`Invalid ${label} declaration.`, pluginId); }
+    try {
+      validate(entry as T);
+    } catch {
+      invalid(`Invalid ${label} declaration.`, pluginId);
+    }
     if (ids.has(entry.id)) invalid(`Duplicate ${label} id.`, pluginId);
     ids.add(entry.id);
   }
@@ -373,7 +380,12 @@ function parseContributions(
   return Object.freeze({
     routes: parseRoutes(contributions.routes, surfaceIds, pluginId),
     navigation: parseNavigation(contributions.navigation, pluginId),
-    extensions: parseUiDefinitions(contributions.extensions, assertExtensionContribution, 'Extension contribution', pluginId),
+    extensions: parseUiDefinitions(
+      contributions.extensions,
+      assertExtensionContribution,
+      'Extension contribution',
+      pluginId,
+    ),
   });
 }
 
@@ -383,9 +395,7 @@ function parseManifest(
 ): RestrictedPluginManifest {
   const manifest = record(value, 'Manifest');
   const pluginId =
-    typeof manifest.id === 'string' && manifest.id.length > 0
-      ? manifest.id
-      : undefined;
+    typeof manifest.id === 'string' && manifest.id.length > 0 ? manifest.id : undefined;
   assertClosed(
     manifest,
     [
@@ -409,21 +419,29 @@ function parseManifest(
 
   const id = nonEmptyString(manifest.id, 'Manifest id', pluginId);
   const version = nonEmptyString(manifest.version, 'Manifest version', id);
-  const roles = manifest.roles === undefined ? undefined : uniqueStrings(manifest.roles, 'Manifest roles', (value): value is import('./plugin').PluginRole => value === 'provider' || value === 'feature', id);
+  const roles =
+    manifest.roles === undefined
+      ? undefined
+      : uniqueStrings(
+          manifest.roles,
+          'Manifest roles',
+          (value): value is import('./plugin').PluginRole =>
+            value === 'provider' || value === 'feature',
+          id,
+        );
   const provenance = manifest.provenance;
-  if (provenance !== undefined && !['first-party','partner','third-party'].includes(provenance as string)) invalid('Invalid plugin provenance.', id);
+  if (
+    provenance !== undefined &&
+    !['first-party', 'partner', 'third-party'].includes(provenance as string)
+  )
+    invalid('Invalid plugin provenance.', id);
   const requires = uniqueStrings(
     manifest.requires,
     'Manifest requires',
     isCapabilityId,
     id,
   ) as readonly CapabilityId[];
-  const provides = uniqueStrings(
-    manifest.provides,
-    'Manifest provides',
-    isCapabilityId,
-    id,
-  );
+  const provides = uniqueStrings(manifest.provides, 'Manifest provides', isCapabilityId, id);
   if (provides.length !== 0) {
     invalid('Restricted Manifest provides must be empty.', id);
   }
@@ -443,12 +461,8 @@ function parseManifest(
     id,
   );
   const surfaces = parseSurfaces(manifest.surfaces, id);
-  const surfaceIds = new Set(surfaces.map(surface => surface.id));
-  const contributions = parseContributions(
-    manifest.contributions,
-    surfaceIds,
-    id,
-  );
+  const surfaceIds = new Set(surfaces.map((surface) => surface.id));
+  const contributions = parseContributions(manifest.contributions, surfaceIds, id);
 
   return Object.freeze({
     id,
@@ -461,8 +475,14 @@ function parseManifest(
     hostApi,
     permissions,
     surfaces,
-    actions: manifest.actions === undefined ? Object.freeze([]) : parseSurfaces(manifest.actions, id),
-    extensionPoints: parseUiDefinitions(manifest.extensionPoints, assertPoint, 'Extension Point', id),
+    actions:
+      manifest.actions === undefined ? Object.freeze([]) : parseSurfaces(manifest.actions, id),
+    extensionPoints: parseUiDefinitions(
+      manifest.extensionPoints,
+      assertPoint,
+      'Extension Point',
+      id,
+    ),
     contributions,
   });
 }
@@ -476,11 +496,7 @@ function parseConfig(value: unknown, pluginId?: PluginId): InstalledPluginConfig
     pluginId,
   );
   const id = nonEmptyString(config.id, 'Installed config id', pluginId);
-  const version = nonEmptyString(
-    config.version,
-    'Installed config version',
-    id,
-  );
+  const version = nonEmptyString(config.version, 'Installed config version', id);
   if (typeof config.enabled !== 'boolean') {
     invalid('Installed config enabled must be a boolean.', id);
   }
@@ -505,20 +521,20 @@ export function validateRestrictedInstallRecord(
 ): InstalledPluginRecord {
   const installRecord = record(value, 'Installed plugin record');
   assertClosed(installRecord, ['manifest', 'config'], 'Installed plugin record');
-  assertContributionContractCompatible(installRecord.manifest, options.contributionContractVersion ?? 3);
+  assertContributionContractCompatible(
+    installRecord.manifest,
+    options.contributionContractVersion ?? 3,
+  );
   const manifest = parseManifest(installRecord.manifest, options);
   const config = parseConfig(installRecord.config, manifest.id);
 
   if (config.id !== manifest.id || config.version !== manifest.version) {
-    invalid(
-      'Installed config id and version must exactly match the Manifest.',
-      manifest.id,
-    );
+    invalid('Installed config id and version must exactly match the Manifest.', manifest.id);
   }
 
   const requestedPermissions = new Set(manifest.permissions);
   const unexpectedGrant = config.grantedPermissions.find(
-    permission => !requestedPermissions.has(permission),
+    (permission) => !requestedPermissions.has(permission),
   );
   if (unexpectedGrant !== undefined) {
     invalid(

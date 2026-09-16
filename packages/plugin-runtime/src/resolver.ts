@@ -71,12 +71,24 @@ function descriptorIssue(candidate: PluginCandidate): ResolutionIssue | undefine
     });
   }
 
-  if (descriptor.roles !== undefined && (!Array.isArray(descriptor.roles) || new Set(descriptor.roles).size !== descriptor.roles.length || descriptor.roles.some(role => !['provider','feature'].includes(role))) || descriptor.provenance !== undefined && !['first-party','partner','third-party'].includes(descriptor.provenance)) {
-    return createIssue({ code: 'INVALID_PLUGIN_DESCRIPTOR', validationStage: 'descriptor', message: 'Plugin classification is invalid.', pluginId: descriptor.id });
+  if (
+    (descriptor.roles !== undefined &&
+      (!Array.isArray(descriptor.roles) ||
+        new Set(descriptor.roles).size !== descriptor.roles.length ||
+        descriptor.roles.some((role) => !['provider', 'feature'].includes(role)))) ||
+    (descriptor.provenance !== undefined &&
+      !['first-party', 'partner', 'third-party'].includes(descriptor.provenance))
+  ) {
+    return createIssue({
+      code: 'INVALID_PLUGIN_DESCRIPTOR',
+      validationStage: 'descriptor',
+      message: 'Plugin classification is invalid.',
+      pluginId: descriptor.id,
+    });
   }
 
   const invalidCapability = [...descriptor.requires, ...descriptor.provides].find(
-    capability => !isCapabilityId(capability),
+    (capability) => !isCapabilityId(capability),
   );
 
   if (invalidCapability !== undefined) {
@@ -226,7 +238,7 @@ function computeCoreClosure(
       }
 
       if (providerGroup.length > 1) {
-        const providerIds = providerGroup.map(provider => provider.descriptor.id);
+        const providerIds = providerGroup.map((provider) => provider.descriptor.id);
         fail(
           createIssue({
             code: 'DUPLICATE_CAPABILITY_PROVIDER',
@@ -255,12 +267,10 @@ function computeCoreClosure(
       continue;
     }
 
-    const coreProviders = providerGroup.filter(provider =>
-      closure.has(provider.descriptor.id),
-    );
+    const coreProviders = providerGroup.filter((provider) => closure.has(provider.descriptor.id));
 
     if (coreProviders.length > 0) {
-      const providerIds = providerGroup.map(provider => provider.descriptor.id);
+      const providerIds = providerGroup.map((provider) => provider.descriptor.id);
       fail(
         createIssue({
           code: 'DUPLICATE_CAPABILITY_PROVIDER',
@@ -383,8 +393,7 @@ function expandCyclePath(
     const consumer = cycle[index];
     const provider = cycle[index + 1];
     const edge = dependencies.find(
-      dependency =>
-        dependency.consumer === consumer && dependency.provider === provider,
+      (dependency) => dependency.consumer === consumer && dependency.provider === provider,
     );
 
     path.push(consumer);
@@ -402,7 +411,7 @@ function stableTopologicalOrder(
   dependencies: readonly DependencyEdge[],
   skipped: ReadonlyMap<PluginId, ResolutionIssue>,
 ): readonly PluginId[] {
-  const activeIds = [...candidates.keys()].filter(pluginId => !skipped.has(pluginId));
+  const activeIds = [...candidates.keys()].filter((pluginId) => !skipped.has(pluginId));
   const activeSet = new Set(activeIds);
   const providerDependencies = new Map<PluginId, Set<PluginId>>();
   const consumersByProvider = new Map<PluginId, Set<PluginId>>();
@@ -422,7 +431,7 @@ function stableTopologicalOrder(
   }
 
   const ready = activeIds
-    .filter(pluginId => providerDependencies.get(pluginId)?.size === 0)
+    .filter((pluginId) => providerDependencies.get(pluginId)?.size === 0)
     .sort();
   const order: PluginId[] = [];
 
@@ -436,7 +445,11 @@ function stableTopologicalOrder(
     for (const consumerId of [...(consumersByProvider.get(pluginId) ?? [])].sort()) {
       const dependenciesForConsumer = providerDependencies.get(consumerId);
       dependenciesForConsumer?.delete(pluginId);
-      if (dependenciesForConsumer?.size === 0 && !order.includes(consumerId) && !ready.includes(consumerId)) {
+      if (
+        dependenciesForConsumer?.size === 0 &&
+        !order.includes(consumerId) &&
+        !ready.includes(consumerId)
+      ) {
         ready.push(consumerId);
         ready.sort();
       }
@@ -481,7 +494,7 @@ export function resolvePluginSet(
   for (const [pluginId, group] of [...candidatesById.entries()].sort(([left], [right]) =>
     left.localeCompare(right),
   )) {
-    const builtins = group.filter(candidate => candidate.kind === 'builtin');
+    const builtins = group.filter((candidate) => candidate.kind === 'builtin');
 
     if (builtins.length > 1) {
       fail(
@@ -490,14 +503,14 @@ export function resolvePluginSet(
           validationStage: 'resolve',
           message: `Builtin plugin id ${pluginId} is declared more than once.`,
           pluginId,
-          pluginIds: group.map(candidate => candidate.descriptor.id),
+          pluginIds: group.map((candidate) => candidate.descriptor.id),
         }),
       );
     }
 
     if (builtins.length === 1) {
       selected.set(pluginId, builtins[0]);
-      for (const restricted of group.filter(candidate => candidate.kind === 'restricted')) {
+      for (const restricted of group.filter((candidate) => candidate.kind === 'restricted')) {
         rejected.push({
           candidate: restricted,
           issue: createIssue({
@@ -559,7 +572,7 @@ export function resolvePluginSet(
       continue;
     }
 
-    const providerIds = providerGroup.map(provider => provider.descriptor.id);
+    const providerIds = providerGroup.map((provider) => provider.descriptor.id);
     for (const provider of providerGroup) {
       skipped.set(
         provider.descriptor.id,
@@ -600,7 +613,7 @@ export function resolvePluginSet(
       }
 
       if (providerGroup.length > 1) {
-        const providerIds = providerGroup.map(provider => provider.descriptor.id);
+        const providerIds = providerGroup.map((provider) => provider.descriptor.id);
         skipped.set(
           pluginId,
           createIssue({
@@ -621,7 +634,7 @@ export function resolvePluginSet(
   propagateSkippedProviders(selected, providers, skipped);
 
   const activePluginIds = new Set(
-    [...selected.keys()].filter(pluginId => !skipped.has(pluginId)),
+    [...selected.keys()].filter((pluginId) => !skipped.has(pluginId)),
   );
   const cycles = findDependencyCycles(activePluginIds, dependencies);
   for (const cycle of cycles) {
@@ -652,7 +665,8 @@ export function resolvePluginSet(
     coreClosure,
     dependencies,
     skipped: stableSkipped,
-    rejected: Object.freeze([...rejected].sort((left, right) => compareCandidates(left.candidate, right.candidate))),
+    rejected: Object.freeze(
+      [...rejected].sort((left, right) => compareCandidates(left.candidate, right.candidate)),
+    ),
   });
 }
-

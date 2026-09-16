@@ -5,17 +5,69 @@
   "configRevision": "REPLACE_WITH_DEPLOYMENT_CONFIG_REVISION",
   "contributionContractVersion": 2,
   "deepLinks": [
-    { "path": "/clusters/demo/nodes/n1/alert-messages", "routeId": "node-alert-messages", "params": { "cluster": "demo", "node": "n1" } }
+    {
+      "path": "/clusters/demo/nodes/n1/alert-messages",
+      "routeId": "node-alert-messages",
+      "params": { "cluster": "demo", "node": "n1" }
+    }
   ],
   "resources": [
-    { "kind": "api", "missing": false, "path": "/api/clusters/current", "status": 200, "contentType": "application/json" },
-    { "kind": "api", "missing": true, "path": "/api/does-not-exist", "status": 404, "contentType": "application/json" },
-    { "kind": "plugin", "missing": false, "path": "/plugins/kubeeye/2.0.0/", "status": 200, "contentType": "text/html" },
-    { "kind": "plugin", "missing": true, "path": "/plugins/kubeeye/does-not-exist/", "status": 404, "contentType": "text/plain" },
-    { "kind": "javascript", "missing": false, "path": "/static/js/index.REPLACE_HASH.js", "status": 200, "contentType": "application/javascript" },
-    { "kind": "javascript", "missing": true, "path": "/static/js/does-not-exist.js", "status": 404, "contentType": "text/plain" },
-    { "kind": "stylesheet", "missing": false, "path": "/static/css/index.REPLACE_HASH.css", "status": 200, "contentType": "text/css" },
-    { "kind": "stylesheet", "missing": true, "path": "/static/css/does-not-exist.css", "status": 404, "contentType": "text/plain" }
+    {
+      "kind": "api",
+      "missing": false,
+      "path": "/api/clusters/current",
+      "status": 200,
+      "contentType": "application/json"
+    },
+    {
+      "kind": "api",
+      "missing": true,
+      "path": "/api/does-not-exist",
+      "status": 404,
+      "contentType": "application/json"
+    },
+    {
+      "kind": "plugin",
+      "missing": false,
+      "path": "/plugins/kubeeye/2.0.0/",
+      "status": 200,
+      "contentType": "text/html"
+    },
+    {
+      "kind": "plugin",
+      "missing": true,
+      "path": "/plugins/kubeeye/does-not-exist/",
+      "status": 404,
+      "contentType": "text/plain"
+    },
+    {
+      "kind": "javascript",
+      "missing": false,
+      "path": "/static/js/index.REPLACE_HASH.js",
+      "status": 200,
+      "contentType": "application/javascript"
+    },
+    {
+      "kind": "javascript",
+      "missing": true,
+      "path": "/static/js/does-not-exist.js",
+      "status": 404,
+      "contentType": "text/plain"
+    },
+    {
+      "kind": "stylesheet",
+      "missing": false,
+      "path": "/static/css/index.REPLACE_HASH.css",
+      "status": 200,
+      "contentType": "text/css"
+    },
+    {
+      "kind": "stylesheet",
+      "missing": true,
+      "path": "/static/css/does-not-exist.css",
+      "status": 404,
+      "contentType": "text/plain"
+    }
   ],
   "performancePaths": {
     "initial": "/clusters/demo/nodes/n1/alert-messages",

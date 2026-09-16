@@ -1,4 +1,14 @@
 /* The complete document baseline: no product controls or visual selectors. */
-*, *::before, *::after { box-sizing: border-box; }
-html, body, #root { min-height: 100%; }
-body { margin: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  min-height: 100%;
+}
+body {
+  margin: 0;
+}

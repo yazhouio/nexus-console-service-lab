@@ -1,11 +1,11 @@
 {
   "name": "@nexus/design-tokens",
   "version": "1.0.0",
+  "files": [
+    "*.css"
+  ],
   "exports": {
     "./theme.css": "./theme.css",
     "./baseline.css": "./baseline.css"
-  },
-  "files": [
-    "*.css"
-  ]
+  }
 }

@@ -42,8 +42,7 @@ function readDescriptor(): BridgeBootstrapDescriptor | undefined {
   const bridge = props.bridge;
   if (
     Object.keys(bridge).some(
-      field =>
-        !['protocolVersion', 'surfaceInstanceId', 'nonce'].includes(field),
+      (field) => !['protocolVersion', 'surfaceInstanceId', 'nonce'].includes(field),
     ) ||
     typeof bridge.protocolVersion !== 'number' ||
     !Number.isInteger(bridge.protocolVersion) ||
@@ -70,9 +69,7 @@ function canAccessParent(): boolean {
 export function connectHostBridge(): Promise<HostConnection> {
   const descriptor = readDescriptor();
   if (descriptor === undefined) {
-    return Promise.resolve(
-      Object.freeze({ state: 'STANDALONE', parentAccessible: false }),
-    );
+    return Promise.resolve(Object.freeze({ state: 'STANDALONE', parentAccessible: false }));
   }
 
   return new Promise<HostConnection>((resolve, reject) => {
@@ -129,15 +126,26 @@ async function send(port: MessagePort, message: Record<string, unknown>): Promis
       port.removeEventListener('message', onMessage);
     };
     const onMessage = (event: MessageEvent): void => {
-      if (!isRecord(event.data) || event.data.type !== 'response' || event.data.requestId !== requestId) return;
+      if (
+        !isRecord(event.data) ||
+        event.data.type !== 'response' ||
+        event.data.requestId !== requestId
+      )
+        return;
       cleanup();
       if (event.data.ok === true) resolve(event.data.result);
       else {
-        const code = isRecord(event.data.error) && typeof event.data.error.code === 'string' ? event.data.error.code : 'INVALID_RESPONSE';
+        const code =
+          isRecord(event.data.error) && typeof event.data.error.code === 'string'
+            ? event.data.error.code
+            : 'INVALID_RESPONSE';
         reject(new Error(code));
       }
     };
-    const timeout = window.setTimeout(() => { cleanup(); reject(new Error('TIMEOUT')); }, 15_000);
+    const timeout = window.setTimeout(() => {
+      cleanup();
+      reject(new Error('TIMEOUT'));
+    }, 15_000);
     port.addEventListener('message', onMessage);
     port.postMessage({ ...message, requestId });
   });
@@ -151,24 +159,45 @@ async function connectedPort(): Promise<MessagePort> {
 
 export async function getCurrentCluster(): Promise<string> {
   const result = await send(await connectedPort(), {
-    type: 'request', capability: 'kubesphere.cluster@2', action: 'getCurrentCluster', payload: null,
+    type: 'request',
+    capability: 'kubesphere.cluster@2',
+    action: 'getCurrentCluster',
+    payload: null,
   });
   if (typeof result !== 'string') throw Error('INVALID_RESPONSE');
   return result;
 }
 
-export async function watchCurrentCluster(onValue: (name: string) => void): Promise<() => Promise<void>> {
+export async function watchCurrentCluster(
+  onValue: (name: string) => void,
+): Promise<() => Promise<void>> {
   const port = await connectedPort();
   let subscriptionId: string | undefined;
   let stopped = false;
   const onEvent = (event: MessageEvent): void => {
-    if (!stopped && isRecord(event.data) && event.data.type === 'event' &&
-        event.data.subscriptionId === subscriptionId && typeof event.data.payload === 'string') onValue(event.data.payload);
+    if (
+      !stopped &&
+      isRecord(event.data) &&
+      event.data.type === 'event' &&
+      event.data.subscriptionId === subscriptionId &&
+      typeof event.data.payload === 'string'
+    )
+      onValue(event.data.payload);
   };
   port.addEventListener('message', onEvent);
   try {
-    const result = await send(port, { type: 'request', capability: 'kubesphere.cluster@2', action: 'watchCurrentCluster', payload: null });
-    if (!isRecord(result) || typeof result.subscriptionId !== 'string' || typeof result.snapshot !== 'string') throw Error('INVALID_RESPONSE');
+    const result = await send(port, {
+      type: 'request',
+      capability: 'kubesphere.cluster@2',
+      action: 'watchCurrentCluster',
+      payload: null,
+    });
+    if (
+      !isRecord(result) ||
+      typeof result.subscriptionId !== 'string' ||
+      typeof result.snapshot !== 'string'
+    )
+      throw Error('INVALID_RESPONSE');
     subscriptionId = result.subscriptionId;
     onValue(result.snapshot);
     return async () => {
@@ -184,5 +213,10 @@ export async function watchCurrentCluster(onValue: (name: string) => void): Prom
 }
 
 export async function navigateToExampleNode(): Promise<void> {
-  await send(await connectedPort(), { type: 'request', capability: 'routes.navigate@1', action: 'navigate', payload: { routeId: 'node-detail', params: { cluster: 'demo', node: 'n1' } } });
+  await send(await connectedPort(), {
+    type: 'request',
+    capability: 'routes.navigate@1',
+    action: 'navigate',
+    payload: { routeId: 'node-detail', params: { cluster: 'demo', node: 'n1' } },
+  });
 }

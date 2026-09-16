@@ -21,5 +21,10 @@
   font: inherit;
   cursor: pointer;
 }
-.kubeeye-button:disabled { opacity: .55; cursor: not-allowed; }
-.kubeeye-button:focus-visible { outline: 2px solid var(--nexus-color-focus); }
+.kubeeye-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.kubeeye-button:focus-visible {
+  outline: 2px solid var(--nexus-color-focus);
+}

@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  createContributionRegistry,
-  DEFAULT_CONTRIBUTION_ORDER,
-} from '../src/contribution';
+import { createContributionRegistry, DEFAULT_CONTRIBUTION_ORDER } from '../src/contribution';
 import { PluginRuntimeContractError } from '../src/runtime-state';
 
 const render = () => null;
@@ -54,13 +51,8 @@ describe('ContributionRegistry', () => {
     expect(
       controller.registry
         .listNavigation()
-        .map(item => `${item.ownerPluginId}/${item.contribution.id}`),
-    ).toEqual([
-      'alpha/alpha-early',
-      'beta/beta-early',
-      'alpha/alpha-late',
-      'beta/beta-late',
-    ]);
+        .map((item) => `${item.ownerPluginId}/${item.contribution.id}`),
+    ).toEqual(['alpha/alpha-early', 'beta/beta-early', 'alpha/alpha-late', 'beta/beta-late']);
   });
 
   it('allows Navigation to reference an ACTIVE owner route and parent', () => {
@@ -107,12 +99,24 @@ describe('ContributionRegistry', () => {
     const controller = createContributionRegistry();
     for (const owner of ['cluster', 'workspace']) {
       const activation = controller.beginActivation(owner);
-      activation.context.registerExtension({ id: 'overview', kind: 'surface', point: { ownerPluginId: 'shell', id: 'cards', contractMajor: 1 }, surfaceId: 'card' });
+      activation.context.registerExtension({
+        id: 'overview',
+        kind: 'surface',
+        point: { ownerPluginId: 'shell', id: 'cards', contractMajor: 1 },
+        surfaceId: 'card',
+      });
       activation.commit();
     }
-    expect(controller.registry.listExtensions({ ownerPluginId: 'shell', id: 'cards' })).toHaveLength(2);
+    expect(
+      controller.registry.listExtensions({ ownerPluginId: 'shell', id: 'cards' }),
+    ).toHaveLength(2);
     const duplicate = controller.beginActivation('cluster');
-    duplicate.context.registerExtension({ id: 'overview', kind: 'surface', point: { ownerPluginId: 'shell', id: 'other', contractMajor: 1 }, surfaceId: 'card' });
+    duplicate.context.registerExtension({
+      id: 'overview',
+      kind: 'surface',
+      point: { ownerPluginId: 'shell', id: 'other', contractMajor: 1 },
+      surfaceId: 'card',
+    });
     expect(() => duplicate.commit()).toThrow();
   });
 });

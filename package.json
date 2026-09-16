@@ -2,11 +2,6 @@
   "name": "nexus-plugin-runtime-workspace",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@12.3.1+sha512.3c14c15408d1489d350f8ed7f93361d26cc707054f6849a4eea3bb7407ff4fe4564b413a1c421a773a176ab1168a8df1c7d548f2cd0dc7d344f58c4e680a5b18",
-  "engines": {
-    "node": ">=24.14.1 <25",
-    "pnpm": ">=12.0.0"
-  },
   "scripts": {
     "dev:docs": "pnpm --filter @nexus/docs dev",
     "build": "pnpm -r --if-present build",
@@ -50,5 +45,10 @@
     "postcss-selector-parser": "7.1.0",
     "tailwindcss": "4.3.3",
     "typescript": "catalog:"
-  }
+  },
+  "engines": {
+    "node": ">=24.14.1 <25",
+    "pnpm": ">=12.0.0"
+  },
+  "packageManager": "pnpm@12.3.1+sha512.3c14c15408d1489d350f8ed7f93361d26cc707054f6849a4eea3bb7407ff4fe4564b413a1c421a773a176ab1168a8df1c7d548f2cd0dc7d344f58c4e680a5b18"
 }

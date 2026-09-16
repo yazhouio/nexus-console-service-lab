@@ -24,18 +24,14 @@ export class BridgeBootstrapValidationError extends Error {
   }
 }
 
-export function validateBridgeBootstrapDescriptor(
-  value: unknown,
-): BridgeBootstrapDescriptor {
+export function validateBridgeBootstrapDescriptor(value: unknown): BridgeBootstrapDescriptor {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    throw new BridgeBootstrapValidationError(
-      'Bridge Bootstrap Descriptor must be an object.',
-    );
+    throw new BridgeBootstrapValidationError('Bridge Bootstrap Descriptor must be an object.');
   }
 
   const descriptor = value as Record<string, unknown>;
   const allowed = new Set(['protocolVersion', 'surfaceInstanceId', 'nonce']);
-  const unknownField = Object.keys(descriptor).find(field => !allowed.has(field));
+  const unknownField = Object.keys(descriptor).find((field) => !allowed.has(field));
   if (unknownField !== undefined) {
     throw new BridgeBootstrapValidationError(
       `Bridge Bootstrap Descriptor contains unknown field ${unknownField}.`,
@@ -47,9 +43,7 @@ export function validateBridgeBootstrapDescriptor(
     !Number.isInteger(descriptor.protocolVersion) ||
     descriptor.protocolVersion < 1
   ) {
-    throw new BridgeBootstrapValidationError(
-      'Bridge protocolVersion must be a positive integer.',
-    );
+    throw new BridgeBootstrapValidationError('Bridge protocolVersion must be a positive integer.');
   }
   if (
     typeof descriptor.surfaceInstanceId !== 'string' ||
@@ -60,9 +54,7 @@ export function validateBridgeBootstrapDescriptor(
     );
   }
   if (typeof descriptor.nonce !== 'string' || descriptor.nonce.length === 0) {
-    throw new BridgeBootstrapValidationError(
-      'Bridge nonce must be a non-empty string.',
-    );
+    throw new BridgeBootstrapValidationError('Bridge nonce must be a non-empty string.');
   }
 
   return Object.freeze({
@@ -71,4 +63,3 @@ export function validateBridgeBootstrapDescriptor(
     nonce: descriptor.nonce,
   });
 }
-

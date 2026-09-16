@@ -17,30 +17,18 @@
   },
   "builds": {
     "v1": {
-      "css": [
-        "/build/v1/static/css/index.93fdc06d0f.css"
-      ],
-      "js": [
-        "/build/v1/static/js/index.6fb8756fca.js"
-      ],
+      "css": ["/build/v1/static/css/index.93fdc06d0f.css"],
+      "js": ["/build/v1/static/js/index.6fb8756fca.js"],
       "manifestSha256": "05ae0dfb545cafe02ca49c5342ad6e96ede3f716c1e5c9ce07ac6daf3c552cce"
     },
     "v2": {
-      "css": [
-        "/build/v2/static/css/index.8489438222.css"
-      ],
-      "js": [
-        "/build/v2/static/js/index.806c7f04ec.js"
-      ],
+      "css": ["/build/v2/static/css/index.8489438222.css"],
+      "js": ["/build/v2/static/js/index.806c7f04ec.js"],
       "manifestSha256": "407d1a99c4052f0dc44a49d15d9427814b1f13840c64344c1e8b379afd6df1e8"
     },
     "v2stable": {
-      "css": [
-        "/build/v2stable/static/css/index.css"
-      ],
-      "js": [
-        "/build/v2stable/static/js/index.js"
-      ],
+      "css": ["/build/v2stable/static/css/index.css"],
+      "js": ["/build/v2stable/static/js/index.js"],
       "manifestSha256": "3a52a55ceb93a775017eeb3d45a6b5436dad78ece42b5a145babd57981581852"
     }
   },
@@ -54,16 +42,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -90,16 +70,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -184,16 +156,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -220,16 +184,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -314,16 +270,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -350,16 +298,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -444,16 +384,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": true
           }
         },
@@ -480,16 +412,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -598,16 +522,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -716,16 +632,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -810,16 +718,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -841,16 +741,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -935,16 +827,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -1054,16 +938,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -1173,16 +1049,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -1205,16 +1073,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -1295,16 +1155,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -1327,16 +1179,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -1413,16 +1257,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -1500,16 +1336,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -1536,16 +1364,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -1627,16 +1447,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -1663,16 +1475,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -1743,16 +1547,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -1779,16 +1575,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -1866,16 +1654,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -1902,16 +1682,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -1993,16 +1765,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -2029,16 +1793,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -2119,16 +1875,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -2155,16 +1903,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {
@@ -2246,16 +1986,8 @@
           "name": "theme-inheritance",
           "passed": true,
           "observed": {
-            "light": [
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)",
-              "rgb(20, 40, 60)"
-            ],
-            "dark": [
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)",
-              "rgb(180, 200, 220)"
-            ],
+            "light": ["rgb(20, 40, 60)", "rgb(20, 40, 60)", "rgb(20, 40, 60)"],
+            "dark": ["rgb(180, 200, 220)", "rgb(180, 200, 220)", "rgb(180, 200, 220)"],
             "explicitBridge": false
           }
         },
@@ -2282,16 +2014,8 @@
           "name": "actual-style-root",
           "passed": true,
           "observed": {
-            "linksPerRoot": [
-              1,
-              1,
-              1
-            ],
-            "padding": [
-              "17px",
-              "17px",
-              "17px"
-            ]
+            "linksPerRoot": [1, 1, 1],
+            "padding": ["17px", "17px", "17px"]
           }
         },
         {

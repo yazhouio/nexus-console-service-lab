@@ -45,9 +45,7 @@ describe('CapabilityRegistry', () => {
     const controller = createCapabilityRegistry();
     const activation = controller.beginActivation('cluster', descriptor);
 
-    expect(() =>
-      activation.context.register('kubesphere.unknown@1', {}),
-    ).toThrowError(
+    expect(() => activation.context.register('kubesphere.unknown@1', {})).toThrowError(
       expect.objectContaining<Partial<PluginRuntimeContractError>>({
         issue: expect.objectContaining({
           code: 'UNDECLARED_CAPABILITY_PROVIDE',
@@ -100,4 +98,3 @@ describe('CapabilityRegistry', () => {
     expect(controller.registry.list()).toEqual([]);
   });
 });
-

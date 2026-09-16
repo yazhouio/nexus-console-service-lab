@@ -2,7 +2,22 @@
   "name": "@nexus/ui-composition-fixtures",
   "private": true,
   "type": "module",
-  "scripts": { "build": "rspack build --mode production", "dev": "rspack serve --mode development", "typecheck": "tsc --noEmit" },
-  "dependencies": { "@nexus/plugin-runtime": "workspace:*", "react": "catalog:", "react-dom": "catalog:" },
-  "devDependencies": { "@rspack/cli": "catalog:", "@rspack/core": "catalog:", "@rspack/dev-server": "catalog:", "@types/react": "catalog:", "@types/react-dom": "catalog:", "typescript": "catalog:" }
+  "scripts": {
+    "build": "rspack build --mode production",
+    "dev": "rspack serve --mode development",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nexus/plugin-runtime": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@rspack/cli": "catalog:",
+    "@rspack/core": "catalog:",
+    "@rspack/dev-server": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
+  }
 }

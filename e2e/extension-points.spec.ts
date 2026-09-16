@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-test('host-owned extension points are discoverable and the demo plugin registers against them', async ({ page }) => {
+test('host-owned extension points are discoverable and the demo plugin registers against them', async ({
+  page,
+}) => {
   await page.goto('/extensions');
   await expect(page.getByRole('heading', { name: 'Extension points', exact: true })).toBeVisible();
   await expect(page.getByText('9 fixed points')).toBeVisible();
@@ -18,7 +20,11 @@ test('host-owned extension points are discoverable and the demo plugin registers
   await page.goto('/clusters/demo/nodes/n1/events');
   await expect(page.getByRole('button', { name: 'Check node health', exact: true })).toBeVisible();
   await page.getByRole('tab', { name: 'Health', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Node health checks', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Node health checks', exact: true }),
+  ).toBeVisible();
   await expect(page.getByText('ResourceRef accepted', { exact: true })).toBeVisible();
-  await expect(page.getByText('Demo tab mounted for n1 through the typed ResourceRef context.')).toBeVisible();
+  await expect(
+    page.getByText('Demo tab mounted for n1 through the typed ResourceRef context.'),
+  ).toBeVisible();
 });

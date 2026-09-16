@@ -1,1 +1,5 @@
-export declare function checkCss(css: string, namespace: string, options?: { allowFixed?: boolean }): void;
+export declare function checkCss(
+  css: string,
+  namespace: string,
+  options?: { allowFixed?: boolean },
+): void;

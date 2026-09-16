@@ -2,6 +2,10 @@
   "name": "@nexus/example-restricted-plugin",
   "private": true,
   "type": "module",
+  "exports": {
+    "./manifest.json": "./manifest.json",
+    "./manifest-v2.json": "./manifest-v2.json"
+  },
   "scripts": {
     "build": "node --experimental-strip-types build-manifest.mjs && rspack build --mode production",
     "dev": "rspack serve --mode development",
@@ -9,13 +13,14 @@
     "dev:preview": "NEXUS_STANDALONE_PREVIEW=true rspack serve --mode development"
   },
   "dependencies": {
-    "react": "catalog:",
-    "react-dom": "catalog:",
-    "@nexus/plugin-runtime": "workspace:*",
     "@nexus/cluster-api": "workspace:*",
-    "@nexus/console-core-api": "workspace:*"
+    "@nexus/console-core-api": "workspace:*",
+    "@nexus/plugin-runtime": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
+    "@nexus/design-tokens": "workspace:*",
     "@rspack/cli": "catalog:",
     "@rspack/core": "catalog:",
     "@rspack/dev-server": "catalog:",
@@ -23,11 +28,6 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "react-refresh": "catalog:",
-    "typescript": "catalog:",
-    "@nexus/design-tokens": "workspace:*"
-  },
-  "exports": {
-    "./manifest.json": "./manifest.json",
-    "./manifest-v2.json": "./manifest-v2.json"
+    "typescript": "catalog:"
   }
 }

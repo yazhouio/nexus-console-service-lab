@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-test('Deployment mock journey composes independent extensions and keeps resource data isolated', async ({ page }) => {
+test('Deployment mock journey composes independent extensions and keeps resource data isolated', async ({
+  page,
+}) => {
   await page.goto('/deployments');
   await expect(page.getByRole('heading', { name: 'Deployments', exact: true })).toBeVisible();
   await page.getByLabel('命名空间', { exact: true }).selectOption('staging');
@@ -19,7 +21,10 @@ test('Deployment mock journey composes independent extensions and keeps resource
   await page.getByRole('tab', { name: '网络', exact: true }).click();
   await expect(page.getByText('checkout.production.svc.cluster.local:8080')).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('tab', { name: '网络', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab', { name: '网络', exact: true })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
   await expect(page.getByText('checkout.production.svc.cluster.local:8080')).toBeVisible();
   await page.getByRole('link', { name: '← Deployments' }).click();
   await page.getByRole('link', { name: 'payments', exact: true }).click();

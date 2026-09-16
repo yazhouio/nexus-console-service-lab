@@ -14,7 +14,7 @@ let driverPromise: Promise<WujieDriver> | undefined;
  * browser package must not create a sandbox or execute Restricted Plugin code.
  */
 export function loadWujieDriver(): Promise<WujieDriver> {
-  driverPromise ??= import('wujie').then(module =>
+  driverPromise ??= import('wujie').then((module) =>
     Object.freeze({
       async startApp(options: WujieStartOptions) {
         let iframeReady: Promise<unknown> | undefined;
@@ -28,7 +28,8 @@ export function loadWujieDriver(): Promise<WujieDriver> {
             beforeLoad(appWindow) {
               // Version-specific Wujie adapter boundary: importHTML can reject
               // before startApp awaits this internal initialization promise.
-              iframeReady = (appWindow as Window & { __WUJIE?: { iframeReady?: Promise<unknown> } }).__WUJIE?.iframeReady;
+              iframeReady = (appWindow as Window & { __WUJIE?: { iframeReady?: Promise<unknown> } })
+                .__WUJIE?.iframeReady;
               options.beforeLoad?.(appWindow);
             },
           });

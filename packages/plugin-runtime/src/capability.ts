@@ -1,8 +1,5 @@
 import type { CapabilityId, PluginId } from './identifiers';
-import type {
-  PluginCapabilityContext,
-  PluginDescriptor,
-} from './plugin';
+import type { PluginCapabilityContext, PluginDescriptor } from './plugin';
 import { PluginRuntimeContractError } from './runtime-state';
 
 export interface CapabilityMetadata {
@@ -30,10 +27,7 @@ export interface CapabilityActivation {
 
 export interface CapabilityRegistryController {
   readonly registry: CapabilityRegistry;
-  beginActivation(
-    ownerPluginId: PluginId,
-    descriptor: PluginDescriptor,
-  ): CapabilityActivation;
+  beginActivation(ownerPluginId: PluginId, descriptor: PluginDescriptor): CapabilityActivation;
 }
 
 export function createCapabilityRegistry(): CapabilityRegistryController {
@@ -60,7 +54,7 @@ export function createCapabilityRegistry(): CapabilityRegistryController {
     list(): readonly CapabilityMetadata[] {
       return Object.freeze(
         [...records.values()]
-          .map(record =>
+          .map((record) =>
             Object.freeze({
               id: record.id,
               providerPluginId: record.providerPluginId,
@@ -74,10 +68,7 @@ export function createCapabilityRegistry(): CapabilityRegistryController {
   return {
     registry,
 
-    beginActivation(
-      ownerPluginId: PluginId,
-      descriptor: PluginDescriptor,
-    ): CapabilityActivation {
+    beginActivation(ownerPluginId: PluginId, descriptor: PluginDescriptor): CapabilityActivation {
       const staged = new Map<CapabilityId, CapabilityRecord>();
       let active = true;
       let validated = false;

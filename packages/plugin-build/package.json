@@ -1,12 +1,12 @@
 {
   "name": "@nexus/plugin-build",
   "version": "0.1.0",
-  "type": "module",
   "files": [
     "*.cjs",
     "*.mjs",
     "*.mts"
   ],
+  "type": "module",
   "exports": {
     "./artifact-css-loader": "./artifact-css-loader.cjs",
     "./reject-unmanaged-css": "./reject-unmanaged-css.cjs",

@@ -17,8 +17,8 @@
   --nexus-space-5: 20px;
   --nexus-space-6: 24px;
   --nexus-space-8: 32px;
-  --nexus-font-family-body: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --nexus-font-family-code: "SFMono-Regular", Consolas, monospace;
+  --nexus-font-family-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --nexus-font-family-code: 'SFMono-Regular', Consolas, monospace;
   --nexus-font-size-small: 12px;
   --nexus-font-size-body: 14px;
   --nexus-font-size-heading: 28px;

@@ -1,6 +1,9 @@
 {
   "name": "@nexus/browser-host",
   "version": "1.0.0",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -20,20 +23,17 @@
     "react-router": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "@types/react": "catalog:",
+    "@nexus/plugin-runtime": "workspace:*",
     "@types/node": "catalog:",
+    "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "@nexus/plugin-runtime": "workspace:*"
+    "typescript": "catalog:"
   },
-  "files": [
-    "dist"
-  ],
   "peerDependencies": {
+    "@nexus/plugin-runtime": "^0.1.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@nexus/plugin-runtime": "^0.1.0"
+    "react-dom": "^19.0.0"
   }
 }

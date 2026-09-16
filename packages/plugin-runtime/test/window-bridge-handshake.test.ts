@@ -8,14 +8,8 @@ import {
 } from '../src/browser';
 
 interface FakeHostWindow {
-  addEventListener(
-    type: 'message',
-    listener: (event: MessageEvent) => void,
-  ): void;
-  removeEventListener(
-    type: 'message',
-    listener: (event: MessageEvent) => void,
-  ): void;
+  addEventListener(type: 'message', listener: (event: MessageEvent) => void): void;
+  removeEventListener(type: 'message', listener: (event: MessageEvent) => void): void;
   dispatch(event: MessageEvent): void;
 }
 
@@ -36,10 +30,7 @@ function fakeHostWindow(): FakeHostWindow {
   };
 }
 
-function connectEvent(
-  data: Record<string, unknown>,
-  postMessage = vi.fn(),
-): MessageEvent {
+function connectEvent(data: Record<string, unknown>, postMessage = vi.fn()): MessageEvent {
   return {
     data,
     origin: 'http://localhost:3000',
@@ -63,8 +54,13 @@ describe('Window Bridge handshake', () => {
     const postMessage = vi.fn();
     const port = { close: vi.fn() };
     const createChannel = vi.fn(() => ({ port1: port, port2: port }) as unknown as MessageChannel);
-    const attempt = createWindowBridgeHandshakeCoordinator(hostWindow, createChannel).begin(request);
-    const event = connectEvent({ type: BRIDGE_CONNECT_MESSAGE, ...request.descriptor }, postMessage);
+    const attempt = createWindowBridgeHandshakeCoordinator(hostWindow, createChannel).begin(
+      request,
+    );
+    const event = connectEvent(
+      { type: BRIDGE_CONNECT_MESSAGE, ...request.descriptor },
+      postMessage,
+    );
     hostWindow.dispatch(event);
     hostWindow.dispatch(event);
     await attempt.result;
@@ -77,8 +73,12 @@ describe('Window Bridge handshake', () => {
 
   it('rejects channel allocation failure and removes the handshake listener', async () => {
     const hostWindow = fakeHostWindow();
-    const createChannel = vi.fn(() => { throw new Error('allocation failed'); });
-    const attempt = createWindowBridgeHandshakeCoordinator(hostWindow, createChannel).begin(request);
+    const createChannel = vi.fn(() => {
+      throw new Error('allocation failed');
+    });
+    const attempt = createWindowBridgeHandshakeCoordinator(hostWindow, createChannel).begin(
+      request,
+    );
     const event = connectEvent({ type: BRIDGE_CONNECT_MESSAGE, ...request.descriptor });
     hostWindow.dispatch(event);
     await expect(attempt.result).rejects.toMatchObject({ code: 'BRIDGE_BOOTSTRAP_FAILED' });
@@ -93,8 +93,7 @@ describe('Window Bridge handshake', () => {
     const postMessage = vi.fn();
     const coordinator = createWindowBridgeHandshakeCoordinator(
       hostWindow,
-      () =>
-        ({ port1: hostPort, port2: pluginPort }) as unknown as MessageChannel,
+      () => ({ port1: hostPort, port2: pluginPort }) as unknown as MessageChannel,
     );
     const attempt = coordinator.begin(request);
 
@@ -122,23 +121,15 @@ describe('Window Bridge handshake', () => {
   });
 
   it.each([
-    [
-      'BRIDGE_PROTOCOL_MISMATCH',
-      { ...request.descriptor, protocolVersion: 2 },
-    ],
+    ['BRIDGE_PROTOCOL_MISMATCH', { ...request.descriptor, protocolVersion: 2 }],
     ['BRIDGE_NONCE_INVALID', { ...request.descriptor, nonce: 'wrong' }],
-    [
-      'BRIDGE_BOOTSTRAP_FAILED',
-      { ...request.descriptor, pluginId: 'forged-plugin' },
-    ],
+    ['BRIDGE_BOOTSTRAP_FAILED', { ...request.descriptor, pluginId: 'forged-plugin' }],
   ] as const)('rejects invalid handshake facts with %s', async (code, fields) => {
     const hostWindow = fakeHostWindow();
     const coordinator = createWindowBridgeHandshakeCoordinator(hostWindow);
     const attempt = coordinator.begin(request);
 
-    hostWindow.dispatch(
-      connectEvent({ type: BRIDGE_CONNECT_MESSAGE, ...fields }),
-    );
+    hostWindow.dispatch(connectEvent({ type: BRIDGE_CONNECT_MESSAGE, ...fields }));
 
     await expect(attempt.result).rejects.toMatchObject({
       code,
