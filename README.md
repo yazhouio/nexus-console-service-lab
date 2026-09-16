@@ -1,6 +1,18 @@
 # Nexus Frontend Plugin Runtime
 
-V1 frontend plugin runtime workspace described by the normative documents in `spec/`.
+A frontend plugin framework with a Console reference system and example plugins. Normative framework documents live in `spec/`.
+
+## Three layers
+
+| Layer | Code | Responsibility |
+| --- | --- | --- |
+| General framework | `@nexus/plugin-runtime`, `@nexus/browser-host`, `@nexus/plugin-build` | Reusable execution, browser integration and build mechanisms |
+| Business plugin system reference | `@nexus/console-core`, `@nexus/console-core-api`, `@nexus/cluster-api`, `@nexus/design-tokens`, `apps/console` | Product shell, public business contracts, domain APIs, visual conventions and distribution |
+| Plugin examples | `apps/example-builtin-plugin`, `apps/example-restricted-plugin`, `apps/console/src/plugins` | Trusted and Wujie implementations consuming the framework and business contracts |
+
+Console and Cluster are replaceable reference choices, not required framework dependencies. Product API packages may be published separately for independent plugin authors. UI composition fixtures support regression validation.
+
+Read [the layer boundaries](apps/docs/docs/framework-overview.md), [build your own plugin system](apps/docs/docs/build-plugin-system.md), then [develop a plugin](apps/docs/docs/plugin-author-guide.md).
 
 ## Workspace
 

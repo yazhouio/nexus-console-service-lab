@@ -1,10 +1,10 @@
 # 宿主集成指南
 
-宿主负责组装插件、提供能力与授权，业务插件负责页面和扩展点。可运行的入口是 `apps/console/src/distribution.ts`。
+本文是业务插件系统的组装参考。先阅读[从零构建业务插件系统](./build-plugin-system.md)，再用 `apps/console/src/distribution.ts` 核对具体配置。Console Core 是本仓库的根呈现参考实现，可替换为自己的平台插件。
 
 ## 最小集成路径
 
-1. 注册 Console Core 作为根呈现插件，并设置根路由和导航扩展点。
+1. 注册自己的根呈现插件（参考实现为 Console Core），并设置该系统的根路由和导航扩展点。
 2. 将业务插件加入 `builtins`；外部 Restricted 插件通过安装配置接入。
 3. 注册插件使用的 `profiles` 和 `refContracts`。
 4. 在 `policyBundle` 中为跨插件贡献授予目标扩展点权限；能力调用另由 `capabilityGrants` 管理。

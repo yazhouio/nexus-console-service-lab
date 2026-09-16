@@ -13,7 +13,8 @@ export default defineConfig({
   globalStyles: resolve('docs/styles.css'),
   themeConfig: {
     nav: [
-      { text: '开始使用', link: '/deployment-example' },
+      { text: '通用框架', link: '/framework-overview' },
+      { text: '构建插件系统', link: '/build-plugin-system' },
       { text: '开发插件', link: '/plugin-author-guide' },
       { text: 'API 参考', link: '/plugin-api-reference' },
       { text: '维护者', link: '/maintainers/' },
@@ -35,17 +36,21 @@ export default defineConfig({
         ] },
       ],
       '/': [
-        { text: '开始使用', items: [
-          { text: '产品介绍', link: '/' },
-          { text: 'Deployment 完整案例', link: '/deployment-example' },
+        { text: '一、通用框架', items: [
+          { text: '项目介绍', link: '/' },
+          { text: '三层边界与包职责', link: '/framework-overview' },
+          { text: '生命周期与概念', link: '/lifecycle-architecture' },
           { text: '文档地图', link: '/README' },
         ] },
-        { text: '开发与集成', items: [
+        { text: '二、构建业务插件系统', items: [
+          { text: '从零搭建', link: '/build-plugin-system' },
+          { text: '宿主集成参考', link: '/host-integration' },
+          { text: '三层示例地图', link: '/example-plugins' },
+        ] },
+        { text: '三、开发插件', items: [
           { text: '插件开发指南', link: '/plugin-author-guide' },
+          { text: 'Deployment 完整案例', link: '/deployment-example' },
           { text: 'UI 组合指南', link: '/ui-composition-guide' },
-          { text: '宿主集成指南', link: '/host-integration' },
-          { text: '其他示例', link: '/example-plugins' },
-          { text: '生命周期与概念', link: '/lifecycle-architecture' },
         ] },
         { text: '接口与契约', items: [
           { text: 'Plugin API', link: '/plugin-api-reference' },
