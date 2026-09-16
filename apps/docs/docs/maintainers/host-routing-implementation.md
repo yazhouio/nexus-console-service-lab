@@ -74,7 +74,7 @@ NEXUS_ROUTING_EVIDENCE=<evidence.json> \
 pnpm build:routing-release
 ```
 
-`.github/workflows/routing-release.yml` 从 GitHub 目标 environment 的 `ROUTING_RELEASE_CONFIG` 读取可信配置，要求候选版本等于 workflow commit，运行 smoke 后才生成并上传验证过的 release artifact。它不执行部署。普通 `pnpm build` 会生成启用路由的生产产物；`pnpm build:routing-release` 额外要求目标配置和真实证据。
+`.github/workflows/routing-release.yml` 从 GitHub 目标 environment 的 `ROUTING_RELEASE_CONFIG` 读取可信配置，要求候选版本等于 workflow commit，运行 smoke 后才生成并上传验证过的 release artifact。`pnpm build:routing-release` 已包含公共包构建，Console 发布产物输出到 `apps/console/dist/`。上传前检查入口 `index.html` 与 `routing-evidence.json` 均存在且非空，再将整个产物目录和证据归档到 `gated-host-release`，避免只上传证据却遗漏页面产物。它不执行部署。普通 `pnpm build` 会生成启用路由的生产产物；`pnpm build:routing-release` 额外要求目标配置和真实证据。
 
 
 2026-09-08：Route Model 已迁入 Runtime，所有根与子 Route/Navigation 都要求版本化 Point；`acceptsChildren` 不再授权。React Router/browser history 属于 Browser Host，Navigation UI 属于 Console Core。当前声明与迁移说明见 [Console Core 架构](console-core-architecture.md)。

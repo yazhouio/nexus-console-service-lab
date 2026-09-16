@@ -34,11 +34,14 @@ jobs:
           writeFileSync(process.env.NEXUS_ROUTING_CONFIG, JSON.stringify(config));
           JS
       - run: pnpm routing:smoke "$NEXUS_ROUTING_CONFIG" "$NEXUS_ROUTING_EVIDENCE"
-      - run: pnpm --filter @nexus/plugin-runtime build
       - run: pnpm build:routing-release
+      - name: Verify release files before upload
+        run: |
+          test -s apps/console/dist/index.html
+          test -s routing-evidence.json
       - uses: actions/upload-artifact@v4
         with:
           name: gated-host-release
           path: |
-            apps/host/dist/
+            apps/console/dist/
             routing-evidence.json
