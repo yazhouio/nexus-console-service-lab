@@ -5,12 +5,16 @@
   "singleQuote": true,
 
   // Markdown is hand-authored prose and CJK tables that the table aligner mangles.
-  // The example plugin manifests are rewritten by build-manifest.mjs on every build.
+  // Everything else listed here is machine-written: the example plugin manifests come
+  // from build-manifest.mjs and the validation evidence from the scripts under
+  // docs/validation, all via JSON.stringify(_, null, 2). Formatting them would make the
+  // tree non-idempotent -- rerunning a validation script would fail format:check.
   "ignorePatterns": [
     "pnpm-lock.yaml",
     "**/*.md",
     "apps/example-restricted-plugin/manifest.json",
     "apps/example-restricted-plugin/manifest-v2.json",
+    "docs/validation/**/*.json",
     "doc_build/",
     "dist-validation/",
     "apps/docs/docs/generated/"

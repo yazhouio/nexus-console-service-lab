@@ -106,7 +106,9 @@
           "routeLink": false
         }
       },
-      "errors": ["Error: A Host-bound UiProvider is required."],
+      "errors": [
+        "Error: A Host-bound UiProvider is required."
+      ],
       "logs": [
         {
           "type": "error",
@@ -475,7 +477,9 @@
       "privateReact": []
     },
     "duplicatesdk": {
-      "privateSdk": ["./node_modules/@nexus/plugin-runtime/dist/ui-react.js"],
+      "privateSdk": [
+        "./node_modules/@nexus/plugin-runtime/dist/ui-react.js"
+      ],
       "privateReact": []
     }
   },

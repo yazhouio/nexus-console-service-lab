@@ -5,16 +5,19 @@
 # (typecheck, unit tests, Playwright, routing evidence) belong to CI.
 
 pre-commit:
-  parallel: true
+  # Deliberately serial (lefthook's default). Both jobs rewrite the same staged
+  # files and both restage them, so running them in parallel would make the
+  # committed result depend on which process finished last. oxlint goes first
+  # and oxfmt has the final word, which is what CI's format:check verifies.
   jobs:
-    - name: oxfmt
-      glob: '*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,json,jsonc,css,html,yml,yaml}'
-      run: pnpm exec oxfmt --write {staged_files}
-      stage_fixed: true
-
     - name: oxlint
       glob: '*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}'
       run: pnpm exec oxlint --fix {staged_files}
+      stage_fixed: true
+
+    - name: oxfmt
+      glob: '*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,json,jsonc,css,html,yml,yaml}'
+      run: pnpm exec oxfmt --write {staged_files}
       stage_fixed: true
 
 pre-push:
