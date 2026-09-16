@@ -71,6 +71,20 @@
   },
   "overrides": [
     {
+      // tsconfig sets allowJs: false, so the 38 Node and browser scripts under scripts/,
+      // e2e/, docs/validation/ and the plugin build helpers get no compiler pass at all.
+      // no-undef is the only thing standing between them and a typo in a branch CI does
+      // not exercise. Oxlint files it under nursery, so the categories above miss it.
+      //
+      // TypeScript keeps it off: the compiler already answers this question there, and
+      // build-time defines such as REMOTE_ORIGIN, declared for tsc but not present in the
+      // source, read as undefined identifiers to a rule that cannot see declarations.
+      "files": ["**/*.{js,jsx,mjs,cjs}"],
+      "rules": {
+        "eslint/no-undef": "error"
+      }
+    },
+    {
       // Baseline. These 14 files carry the 34 findings that predate the linter. The
       // rules are errors everywhere else, so no new file and no new module can
       // introduce one; `pnpm lint` caps the count inside these files. Drop a path from
