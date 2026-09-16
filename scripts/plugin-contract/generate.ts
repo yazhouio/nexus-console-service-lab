@@ -27,7 +27,7 @@ const notice = '> 本仓库选定声明的参考，非当前安装或可用状�
 const compare = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0;
 const sorted = <T extends { id: string }>(values: readonly T[]) => [...values].sort((a, b) => compare(a.id, b.id));
 // Escape prose and tables for both Markdown and MDX, including author-controlled text.
-export const escapeMarkdown = (value: string) => value.replace(/&/g, '&amp;').replace(/[<>\{\}|`*_[\]\\#!]/g, c => `&#${c.charCodeAt(0)};`).replace(/\r?\n/g, ' ');
+export const escapeMarkdown = (value: string) => value.replace(/&/g, '&amp;').replace(/[<>{}|`*_[\]\\#!]/g, c => `&#${c.charCodeAt(0)};`).replace(/\r?\n/g, ' ');
 function json(value: unknown): string {
   const text = JSON.stringify(value, (_key, item) => item && typeof item === 'object' && !Array.isArray(item)
     ? Object.fromEntries(Object.keys(item).sort(compare).map(key => [key, item[key]])) : item, 2);

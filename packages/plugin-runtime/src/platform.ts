@@ -2,7 +2,6 @@ import { requireInvocationContext } from './invocation-authority';
 import type { PluginRuntime } from './bootstrap';
 import type { PluginDefinition } from './plugin';
 import type { BridgeCapabilityContract, BridgeInvocationContext, RuntimeSchema } from './bridge-contract';
-import type { CapabilityId } from './identifiers';
 import type { InstallationStore } from './installation-store';
 import type { InstalledPluginRecord } from './manifest';
 import type { JsonValue } from './contribution';

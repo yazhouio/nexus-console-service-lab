@@ -2,7 +2,7 @@ import type { ActionRuntime, ActionOutcome } from './action-runtime';
 import type { ExtensionPointRef, ContributionRef } from './ui/definitions';
 import type { JsonValue } from './contribution';
 import { assertUiJson } from './ui/schema.js';
-import type { ContextSnapshot, OverlaySnapshot, SlotInput, SlotObservation, UiObservation } from './ui/runtime';
+import type { ContextSnapshot, OverlaySnapshot, SlotInput, UiObservation } from './ui/runtime';
 export type { ContextSnapshot, OverlaySnapshot, SlotInput, SlotObservation, UiObservation, UiSizing } from './ui/runtime';
 export interface UiPort { postMessage(value: unknown): void; addEventListener(type: 'message', listener: (event: MessageEvent) => void): void; removeEventListener(type: 'message', listener: (event: MessageEvent) => void): void; start(): void }
 export interface UiClient {

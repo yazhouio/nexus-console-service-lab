@@ -78,8 +78,8 @@ export function assertPoint(value: ExtensionPointDefinition): void {
 }
 export function assertExtensionContribution(value: ExtensionContributionDefinition): void {
   if (!value || !['surface','action','tab'].includes(value.kind)) throw Error('Invalid extension kind.');
-  const fields = ['id','kind','point','order','group','label','expectedProfile','expectedRefContract', ...(value.kind === 'action' ? ['actionId','visibleWhen','disabledWhen'] : value.kind === 'tab' ? ['tabId','surfaceId'] : ['surfaceId','initiallySelected'])];
-  if (Object.keys(value).some(k => !fields.includes(k)) || typeof value.id !== 'string' || !value.id.trim() || value.order !== undefined && !Number.isSafeInteger(value.order)) throw Error('Invalid contribution metadata.');
+  const fields = new Set(['id','kind','point','order','group','label','expectedProfile','expectedRefContract', ...(value.kind === 'action' ? ['actionId','visibleWhen','disabledWhen'] : value.kind === 'tab' ? ['tabId','surfaceId'] : ['surfaceId','initiallySelected'])]);
+  if (Object.keys(value).some(k => !fields.has(k)) || typeof value.id !== 'string' || !value.id.trim() || value.order !== undefined && !Number.isSafeInteger(value.order)) throw Error('Invalid contribution metadata.');
   for (const name of ['group','label','expectedProfile','expectedRefContract'] as const) if (value[name] !== undefined && (typeof value[name] !== 'string' || !value[name]!.trim())) throw Error('Invalid contribution metadata.');
   if (value.kind === 'surface' && value.initiallySelected !== undefined && typeof value.initiallySelected !== 'boolean') throw Error('Invalid initial selection.');
   if (value.kind !== 'surface' && !value.label) throw Error('A label is required.');

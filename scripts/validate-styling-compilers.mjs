@@ -7,7 +7,7 @@ import { chromium } from '@playwright/test';
 import { createRequire } from 'node:module';
 import { mkdtemp, readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { createServer } from 'node:http';
-import { dirname, join, resolve, extname } from 'node:path';
+import { join, resolve, extname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { checkCss } from './check-plugin-css.mjs';

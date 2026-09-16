@@ -14,14 +14,14 @@ export function checkCss(css, namespace, { allowFixed = false } = {}) {
   });
   root.walkAtRules(rule => {
     if (rule.name === 'import') throw Error('Unbundled CSS @import');
-    if (/keyframes$/.test(rule.name) && !privateName(rule.params)) throw Error(`Unowned keyframes: ${rule.params}`);
+    if (rule.name.endsWith('keyframes') && !privateName(rule.params)) throw Error(`Unowned keyframes: ${rule.params}`);
     if (rule.name === 'property' && !privateName(rule.params.replace(/^--/, ''))) throw Error(`Unowned property: ${rule.params}`);
     if (rule.name === 'layer' && rule.params.split(',').some(name => !privateName(name.trim()))) throw Error(`Unowned layer: ${rule.params}`);
     if (rule.name === 'counter-style' && !privateName(rule.params)) throw Error(`Unowned counter: ${rule.params}`);
     if (rule.name === 'font-face') rule.walkDecls('font-family', d => { if (!privateName(d.value.replace(/["']/g, ''))) throw Error(`Unowned font: ${d.value}`); });
   });
   root.walkRules(rule => {
-    if (/keyframes$/.test(rule.parent?.name ?? '')) return;
+    if ((rule.parent?.name ?? '').endsWith('keyframes')) return;
     selectorParser(selectors => selectors.each(selector => {
       selector.walk(node => {
         if (node.type === 'class' && !privateClass(node.value)) throw Error(`Unowned class: ${node.value}`);

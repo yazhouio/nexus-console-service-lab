@@ -34,7 +34,7 @@ test('preserves parent Layout state while changing siblings and remounting only 
   await expect(page.getByTestId('surface-state')).toHaveText('MOUNTED');
   await page.getByRole('button', { name: 'Toggle node details' }).click();
   const first = await instance(page);
-  const context = () => page.evaluate(() => (document.querySelector('iframe')?.contentWindow as Window & { $wujie: { props: { routeContext: unknown } } }).$wujie.props.routeContext);
+  const context = () => page.evaluate(() => (document.querySelector('iframe')!.contentWindow as Window & { $wujie: { props: { routeContext: unknown } } }).$wujie.props.routeContext);
   expect(await context()).toEqual({ routeId: 'node-alert-messages', pathname: '/clusters/demo/nodes/n1/alert-messages', params: { cluster: 'demo', node: 'n1' }, search: '' });
   await page.getByRole('navigation', { name: 'Node tabs' }).getByRole('link', { name: 'Events' }).click();
   await expect(page.getByRole('heading', { name: 'Node events' })).toBeVisible();

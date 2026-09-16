@@ -135,7 +135,7 @@ try {
     node: process.version, chromium: browser.version(), wujie: '2.1.0',
     scope: 'Experimental browser asset loader over unchanged production UI core, real Wujie and three real Rsbuild CSS Modules builds (two source revisions, one no-hash output replacement). No production Browser UI host, React presentation, bridge handshake, Tailwind or StyleX integration certification. Single-factor variants unless explicitly identified as equivalent replacements/additions.',
     sourceSha256: Object.fromEntries(await Promise.all(sources.map(async path => [path, digest(await readFile(join(root, path)))]))),
-    builds: Object.fromEntries(Object.entries(builds).map(([key, { directory, ...value }]) => [key, value])),
+    builds: Object.fromEntries(Object.entries(builds).map(([key, { directory: _directory, ...value }]) => [key, value])),
     results, characterization: { wujieRetry },
   };
   await writeFile(join(root, 'docs/validation/plugin-styling-ablation-results.json'), JSON.stringify(evidence, null, 2) + '\n');

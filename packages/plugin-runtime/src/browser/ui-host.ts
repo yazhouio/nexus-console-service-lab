@@ -4,7 +4,6 @@ import { createActionRuntime } from '../action-runtime';
 import { createBrowserActionDriver } from './action-driver';
 import type { PluginRuntime } from '../bootstrap';
 import type { HostRenderTarget, JsonValue, RouteContext } from '../contribution';
-import type { BridgeInvocationContext } from '../bridge-contract';
 import { createUiRuntime, UiError, type UiMounted, type UiSizing } from '../ui/runtime';
 import type { HostContributionPolicy } from '../ui/definitions';
 import { UI_OVERLAY_CAPABILITY, UI_OVERLAY_PERMISSION, type UiOverlayCapability } from '../ui/overlay-capability';

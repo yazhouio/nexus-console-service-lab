@@ -1,4 +1,4 @@
-import { assertPoint, assertPointRef, assertExtensionContribution, uiKey, type ExtensionPointRef, type ContractId, type CompiledExtensionPointDefinition, type ExtensionPointDefinition, type ActionDefinition, type ExtensionContributionDefinition, type SurfaceContributionDefinition, type UiSurfaceDefinition } from './ui/definitions';
+import { assertPointRef, assertExtensionContribution, uiKey, type ExtensionPointRef, type ContractId, type CompiledExtensionPointDefinition, type ExtensionPointDefinition, type ActionDefinition, type ExtensionContributionDefinition, type UiSurfaceDefinition } from './ui/definitions';
 import { createPointCompiler, type PointContracts } from './ui/point-compiler';
 import { frozenCopy } from './immutable';
 import type { PluginId } from './identifiers';

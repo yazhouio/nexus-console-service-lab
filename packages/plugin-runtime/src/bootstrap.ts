@@ -11,7 +11,6 @@ import type {
   ContributionReferenceCatalog,
   NavigationContribution,
   RestrictedRouteContribution,
-  RestrictedUiExtensionContribution,
   RouteContribution,
   UiExtensionContribution,
 } from './contribution';
@@ -23,7 +22,6 @@ import {
 import { isPermissionId } from './manifest';
 import type {
   InstalledPluginRecord,
-  RestrictedPluginManifest,
 } from './manifest';
 import type {
   PluginCandidate,
@@ -650,7 +648,7 @@ export async function bootstrapPluginRuntime(
       contributionActivation.apply();
       activeRestrictedRecords.set(manifest.id, declaration.record);
       pluginStates.set(manifest.id, Object.freeze({ state: 'ACTIVE' }));
-    } catch (error) {
+    } catch  {
       contributionActivation.discard();
       const issue = manifestIssue({
         code: 'INVALID_CONTRIBUTION',

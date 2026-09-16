@@ -8,7 +8,6 @@ import type {
   NavigationContribution,
   RestrictedContributions,
   RestrictedRouteContribution,
-  RestrictedUiExtensionContribution,
   SandboxSurfaceDefinition,
 } from './contribution';
 import type {

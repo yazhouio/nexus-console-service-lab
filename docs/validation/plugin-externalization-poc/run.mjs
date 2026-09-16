@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
-import { mkdtemp, mkdir, readFile, writeFile, cp, readdir } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, cp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve, join, extname } from 'node:path';
 import { chromium } from '@playwright/test';
