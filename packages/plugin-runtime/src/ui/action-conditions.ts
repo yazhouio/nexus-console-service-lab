@@ -1,12 +1,12 @@
-import type { JsonValue } from '../contribution';
-import { canonicalJson } from './schema';
+import type { JsonValue } from '../contribution.js';
+import { canonicalJson } from './schema.js';
 import type {
   ActionCondition,
   ActionContributionDefinition,
   ComparisonOperator,
   CompiledExtensionPointDefinition,
   ContractId,
-} from './definitions';
+} from './definitions.js';
 
 export function conditionError(
   point: CompiledExtensionPointDefinition,

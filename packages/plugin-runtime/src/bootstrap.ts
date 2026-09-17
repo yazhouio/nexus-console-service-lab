@@ -1,30 +1,30 @@
-import type { ActionHandler } from './action-runtime';
-import { uiKey, type ExtensionPointRef } from './ui/definitions';
-import type { PointContracts } from './ui/point-compiler';
-import { frozenCopy, readonlyMap, readonlySet } from './immutable';
-import { createCapabilityRegistry, type CapabilityRegistry } from './capability';
-import type { BridgeCapabilityContract } from './bridge-contract';
+import type { ActionHandler } from './action-runtime.js';
+import { uiKey, type ExtensionPointRef } from './ui/definitions.js';
+import type { PointContracts } from './ui/point-compiler.js';
+import { frozenCopy, readonlyMap, readonlySet } from './immutable.js';
+import { createCapabilityRegistry, type CapabilityRegistry } from './capability.js';
+import type { BridgeCapabilityContract } from './bridge-contract.js';
 import type {
   ContributionReferenceCatalog,
   NavigationContribution,
   RestrictedRouteContribution,
   RouteContribution,
   UiExtensionContribution,
-} from './contribution';
-import type { HostApiId, PluginId } from './identifiers';
-import { createContributionRegistry, type ContributionRegistry } from './contribution';
-import { isPermissionId } from './manifest';
-import type { InstalledPluginRecord } from './manifest';
-import type { PluginCandidate, PluginDefinition, Resolution } from './plugin';
-import { resolvePluginSet } from './resolver';
+} from './contribution.js';
+import type { HostApiId, PluginId } from './identifiers.js';
+import { createContributionRegistry, type ContributionRegistry } from './contribution.js';
+import { isPermissionId } from './manifest.js';
+import type { InstalledPluginRecord } from './manifest.js';
+import type { PluginCandidate, PluginDefinition, Resolution } from './plugin.js';
+import { resolvePluginSet } from './resolver.js';
 import {
   PluginRuntimeBootstrapError,
   PluginRuntimeContractError,
   type PluginRuntimeIssue,
   type PluginRuntimeState,
   type PluginValidationIssue,
-} from './runtime-state';
-import { projectSurfaceDefinitions, type SurfaceDefinitionRegistry } from './surface-definition';
+} from './runtime-state.js';
+import { projectSurfaceDefinitions, type SurfaceDefinitionRegistry } from './surface-definition.js';
 
 export interface RootPresentation {
   readonly ownerPluginId: PluginId;

@@ -1,5 +1,5 @@
 {
-  "name": "@nexus/docs",
+  "name": "@feforgejs/docs",
   "private": true,
   "type": "module",
   "scripts": {

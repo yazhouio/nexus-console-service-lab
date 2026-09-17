@@ -8,4 +8,4 @@ Plugins consume these properties with `var()`. They must not define or register 
 
 The initial publication contains the complete default light theme only. A future complete variant belongs in this same asset under `:root[data-nexus-theme='…']`; changing that Host attribute updates connected Builtin, Restricted Shadow DOM and Overlay consumers through ordinary inheritance. Do not ship incomplete dark-theme defaults. Independent previews load this package's theme in their preview document; integrated Restricted HTML must not include same-name defaults, because Wujie patches `:root` to `:host`.
 
-For the Restricted example, run `pnpm --filter @nexus/example-restricted-plugin dev:preview` on port 3004. That preview includes this theme and is explicitly rejected in production builds; the integration server on port 3001 does not include it.
+For the Restricted example, run `pnpm --filter @feforgejs/example-restricted-plugin dev:preview` on port 3004. That preview includes this theme and is explicitly rejected in production builds; the integration server on port 3001 does not include it.

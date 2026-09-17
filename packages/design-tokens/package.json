@@ -1,11 +1,19 @@
 {
-  "name": "@nexus/design-tokens",
+  "name": "@feforgejs/design-tokens",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yazhouio/nexus-console-service-lab.git",
+    "directory": "packages/design-tokens"
+  },
   "files": [
     "*.css"
   ],
   "exports": {
     "./theme.css": "./theme.css",
     "./baseline.css": "./baseline.css"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

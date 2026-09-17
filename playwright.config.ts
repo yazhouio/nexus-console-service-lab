@@ -12,7 +12,7 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'pnpm --filter @nexus/ui-composition-fixtures dev',
+      command: 'pnpm --filter @feforgejs/ui-composition-fixtures dev',
       url: 'http://localhost:3003/plugins/ui-a/1.0.0/',
       reuseExistingServer: !process.env.CI,
       timeout: 60000,

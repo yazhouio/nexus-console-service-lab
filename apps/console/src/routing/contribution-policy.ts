@@ -1,16 +1,16 @@
-import type { ContributionPolicyBundle } from '@nexus/plugin-runtime';
+import type { ContributionPolicyBundle } from '@feforgejs/plugin-runtime';
 import {
   CORE_ROUTES_POINT,
   PRIMARY_NAVIGATION_POINT,
   HOME_CARDS_POINT,
   SETTINGS_SECTIONS_POINT,
-} from '@nexus/console-core-api';
+} from '@feforgejs/console-core-api';
 import {
   NODE_CHILD_ROUTES_POINT,
   NODE_NAVIGATION_POINT,
   NODE_ACTIONS_POINT,
   NODE_TABS_POINT,
-} from '@nexus/cluster-api';
+} from '@feforgejs/cluster-api';
 export const contributionGovernance: ContributionPolicyBundle = {
   revision: 'console-contributions-v2',
   grants: [

@@ -1,6 +1,11 @@
 {
-  "name": "@nexus/console-core-api",
+  "name": "@feforgejs/console-core-api",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yazhouio/nexus-console-service-lab.git",
+    "directory": "packages/console-core-api"
+  },
   "files": [
     "dist"
   ],
@@ -11,12 +16,15 @@
       "import": "./dist/index.js"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@nexus/plugin-runtime": "workspace:*"
+    "@feforgejs/plugin-runtime": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:"

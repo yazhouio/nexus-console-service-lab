@@ -5,20 +5,20 @@ import {
   type ExtensionPointRef,
   type ContractId,
   type ExtensionPointDefinition,
-} from './ui/definitions';
-import { assertContributionContractCompatible } from './contribution-compatibility';
-import { frozenCopy } from './immutable';
-import { isCapabilityId, isHostApiId } from './identifiers';
-import { isJsonValue } from './contribution';
+} from './ui/definitions.js';
+import { assertContributionContractCompatible } from './contribution-compatibility.js';
+import { frozenCopy } from './immutable.js';
+import { isCapabilityId, isHostApiId } from './identifiers.js';
+import { isJsonValue } from './contribution.js';
 import type {
   JsonValue,
   NavigationContribution,
   RestrictedContributions,
   RestrictedRouteContribution,
   SandboxSurfaceDefinition,
-} from './contribution';
-import type { CapabilityId, HostApiId, PluginId } from './identifiers';
-import type { PluginDescriptor } from './plugin';
+} from './contribution.js';
+import type { CapabilityId, HostApiId, PluginId } from './identifiers.js';
+import type { PluginDescriptor } from './plugin.js';
 
 export type PermissionId = string;
 
@@ -425,7 +425,7 @@ function parseManifest(
       : uniqueStrings(
           manifest.roles,
           'Manifest roles',
-          (value): value is import('./plugin').PluginRole =>
+          (value): value is import('./plugin.js').PluginRole =>
             value === 'provider' || value === 'feature',
           id,
         );
@@ -468,8 +468,8 @@ function parseManifest(
     id,
     version,
     requires,
-    ...(roles ? { roles: roles as readonly import('./plugin').PluginRole[] } : {}),
-    ...(provenance ? { provenance: provenance as import('./plugin').PluginProvenance } : {}),
+    ...(roles ? { roles: roles as readonly import('./plugin.js').PluginRole[] } : {}),
+    ...(provenance ? { provenance: provenance as import('./plugin.js').PluginProvenance } : {}),
     provides: Object.freeze([]) as readonly [],
     entry,
     hostApi,

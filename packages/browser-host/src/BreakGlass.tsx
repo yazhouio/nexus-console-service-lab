@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { RecoveryConfiguration } from './distribution';
+import type { RecoveryConfiguration } from './distribution.js';
 
 /** This recovery tree has no plugin, Router, theme, or Capability dependencies. */
 export function BreakGlass({

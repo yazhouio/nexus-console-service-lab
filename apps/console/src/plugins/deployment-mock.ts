@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import type { ResourceRef } from '@nexus/cluster-api';
+import type { ResourceRef } from '@feforgejs/cluster-api';
 
 export interface DeploymentRecord {
   ref: ResourceRef;

@@ -2,9 +2,9 @@ import { kubeeyeManifest, kubeeyeManifestV2 } from './kubeeye-manifest';
 import {
   validateRestrictedInstallRecord,
   type BridgeCapabilityContract,
-} from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime';
 
-import type { ClusterCapability } from '@nexus/cluster-api';
+import type { ClusterCapability } from '@feforgejs/cluster-api';
 
 export const kubeeyeInstallation = validateRestrictedInstallRecord(
   {

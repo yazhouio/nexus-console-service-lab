@@ -1,13 +1,13 @@
-import { canonicalJson } from './ui/schema';
-import type { BridgeCapabilityContract } from './bridge-contract';
-import { validateRestrictedAgainstHost } from './bootstrap';
-import type { HostApiId, PluginId } from './identifiers';
+import { canonicalJson } from './ui/schema.js';
+import type { BridgeCapabilityContract } from './bridge-contract.js';
+import { validateRestrictedAgainstHost } from './bootstrap.js';
+import type { HostApiId, PluginId } from './identifiers.js';
 import {
   validateRestrictedInstallRecord,
   type InstalledPluginConfig,
   type InstalledPluginRecord,
   type RestrictedInstallValidationOptions,
-} from './manifest';
+} from './manifest.js';
 
 export interface InstallationStoreSnapshot {
   readonly records: readonly InstalledPluginRecord[];

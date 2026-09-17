@@ -232,7 +232,7 @@ Bootstrap 事务 → Host 关系接纳 → 执行/输入校验 → 现有 inspec
 执行了现有测试，未新增或修改测试：
 
 ```sh
-pnpm --filter @nexus/plugin-runtime exec vitest run \
+pnpm --filter @feforgejs/plugin-runtime exec vitest run \
   test/point-profiles.test.ts test/manifest.test.ts \
   test/ui-admission.test.ts test/route-admission.test.ts test/contribution.test.ts
 ```

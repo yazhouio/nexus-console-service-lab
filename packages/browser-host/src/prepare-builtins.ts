@@ -1,5 +1,5 @@
-import type { PluginDefinition, InstalledPluginRecord } from '@nexus/plugin-runtime';
-import type { PreparedBuiltins } from './distribution';
+import type { PluginDefinition, InstalledPluginRecord } from '@feforgejs/plugin-runtime';
+import type { PreparedBuiltins } from './distribution.js';
 
 /** Distribution selections reserve identities even when their code could not be obtained. */
 export function mergePreparedBuiltins(

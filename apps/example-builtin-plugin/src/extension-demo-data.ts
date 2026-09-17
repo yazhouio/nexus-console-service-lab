@@ -3,7 +3,7 @@ import type {
   RouteContribution,
   NavigationContribution,
   ExtensionContributionDefinition,
-} from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime';
 import {
   CONSOLE_CORE_CAPABILITY,
   CORE_ROUTES_POINT,
@@ -11,8 +11,8 @@ import {
   primaryNavigation,
   homeCard,
   settingsSection,
-} from '@nexus/console-core-api';
-import { NODE_ACTIONS_POINT, NODE_TABS_POINT } from '@nexus/cluster-api';
+} from '@feforgejs/console-core-api';
+import { NODE_ACTIONS_POINT, NODE_TABS_POINT } from '@feforgejs/cluster-api';
 
 export const extensionDemoDescriptor = {
   id: 'extension-demo',

@@ -1,6 +1,6 @@
-import { Slot } from '@nexus/plugin-runtime/react';
-import { SETTINGS_SECTIONS_POINT } from '@nexus/console-core-api';
-import { PluginConfiguration } from './PluginConfiguration';
+import { Slot } from '@feforgejs/plugin-runtime/react';
+import { SETTINGS_SECTIONS_POINT } from '@feforgejs/console-core-api';
+import { PluginConfiguration } from './PluginConfiguration.js';
 export function Settings() {
   return (
     <div className="core-el-div core-page">

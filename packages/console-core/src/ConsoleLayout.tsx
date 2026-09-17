@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { RouteOutlet, useCapabilitySubscription } from '@nexus/plugin-runtime/react';
-import type { PluginSummary, RoutesSnapshot } from '@nexus/plugin-runtime';
-import { Navigation } from './Navigation';
+import { RouteOutlet, useCapabilitySubscription } from '@feforgejs/plugin-runtime/react';
+import type { PluginSummary, RoutesSnapshot } from '@feforgejs/plugin-runtime';
+import { Navigation } from './Navigation.js';
 
 export function ConsoleLayout() {
   const plugins = useCapabilitySubscription<readonly PluginSummary[]>('plugins.query@1', 'watch');

@@ -21,14 +21,14 @@ function role(file) {
   return undefined;
 }
 const packageRoots = {
-  '@nexus/example-restricted-plugin': 'apps/example-restricted-plugin',
-  '@nexus/example-builtin-plugin': 'apps/example-builtin-plugin',
-  '@nexus/design-tokens': 'packages/design-tokens',
-  '@nexus/plugin-runtime': 'packages/plugin-runtime',
-  '@nexus/browser-host': 'packages/browser-host',
-  '@nexus/console-core': 'packages/console-core',
-  '@nexus/console-core-api': 'packages/console-core-api',
-  '@nexus/cluster-api': 'packages/cluster-api',
+  '@feforgejs/example-restricted-plugin': 'apps/example-restricted-plugin',
+  '@feforgejs/example-builtin-plugin': 'apps/example-builtin-plugin',
+  '@feforgejs/design-tokens': 'packages/design-tokens',
+  '@feforgejs/plugin-runtime': 'packages/plugin-runtime',
+  '@feforgejs/browser-host': 'packages/browser-host',
+  '@feforgejs/console-core': 'packages/console-core',
+  '@feforgejs/console-core-api': 'packages/console-core-api',
+  '@feforgejs/cluster-api': 'packages/cluster-api',
 };
 export function checkImport(file, specifier, typeOnly = false) {
   const sourceRole = role(file);
@@ -51,18 +51,21 @@ export function checkImport(file, specifier, typeOnly = false) {
     return;
   }
   if (sourceRole === 'distribution') {
-    if (specifier.startsWith('@nexus/browser-host/') && specifier !== '@nexus/browser-host/testing')
+    if (
+      specifier.startsWith('@feforgejs/browser-host/') &&
+      specifier !== '@feforgejs/browser-host/testing'
+    )
       return 'Distribution may use only public Host exports';
     return;
   }
-  if (targetFile && !specifier.startsWith('@nexus/'))
+  if (targetFile && !specifier.startsWith('@feforgejs/'))
     return 'Cross-package relative imports bypass public exports';
   if (
-    specifier.startsWith('@nexus/plugin-runtime/') &&
+    specifier.startsWith('@feforgejs/plugin-runtime/') &&
     ![
-      '@nexus/plugin-runtime/react',
-      '@nexus/plugin-runtime/client',
-      ...(sourceRole === 'host' ? ['@nexus/plugin-runtime/browser'] : []),
+      '@feforgejs/plugin-runtime/react',
+      '@feforgejs/plugin-runtime/client',
+      ...(sourceRole === 'host' ? ['@feforgejs/plugin-runtime/browser'] : []),
     ].includes(specifier)
   )
     return 'Runtime private/browser entry is unavailable to this layer';
@@ -74,19 +77,19 @@ export function checkImport(file, specifier, typeOnly = false) {
     sourceRole === 'core' &&
     targetRole &&
     !['core', 'runtime', 'tokens'].includes(targetRole) &&
-    packageName !== '@nexus/console-core-api'
+    packageName !== '@feforgejs/console-core-api'
   )
     return 'Core can depend only on its API and public Runtime contracts';
   // Compatibility re-exports for repository contract tooling; business plugins cannot import each other.
   if (
     (file === 'apps/console/src/plugins/extension-demo.tsx' &&
-      specifier === '@nexus/example-builtin-plugin/plugin') ||
+      specifier === '@feforgejs/example-builtin-plugin/plugin') ||
     (file === 'apps/console/src/plugins/extension-demo-data.ts' &&
-      specifier === '@nexus/example-builtin-plugin/data') ||
+      specifier === '@feforgejs/example-builtin-plugin/data') ||
     (file === 'apps/console/src/plugins/kubeeye-manifest.ts' &&
       [
-        '@nexus/example-restricted-plugin/manifest.json',
-        '@nexus/example-restricted-plugin/manifest-v2.json',
+        '@feforgejs/example-restricted-plugin/manifest.json',
+        '@feforgejs/example-restricted-plugin/manifest-v2.json',
       ].includes(specifier))
   )
     return;
@@ -97,7 +100,7 @@ export function checkImport(file, specifier, typeOnly = false) {
     (!typeOnly || (targetRole && !['runtime', 'api'].includes(targetRole)))
   )
     return 'API packages import external contracts as types only';
-  if (specifier.startsWith('@nexus/') && !targetRole)
+  if (specifier.startsWith('@feforgejs/') && !targetRole)
     return 'Unknown workspace dependency must declare its architecture boundary';
 }
 

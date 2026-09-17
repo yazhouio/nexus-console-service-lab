@@ -36,8 +36,8 @@ Restricted 入口连接一次 Host，使用通用 SDK：
 
 ```tsx
 import { createRoot } from 'react-dom/client';
-import { connectUiHost } from '@nexus/plugin-runtime/client';
-import { UiProvider, Slot, useSurfaceContext } from '@nexus/plugin-runtime/react';
+import { connectUiHost } from '@feforgejs/plugin-runtime/client';
+import { UiProvider, Slot, useSurfaceContext } from '@feforgejs/plugin-runtime/react';
 
 function Page({ nodeId }: { nodeId: string }) {
   return <Slot id="details" contextKey={nodeId} context={{ nodeId }}

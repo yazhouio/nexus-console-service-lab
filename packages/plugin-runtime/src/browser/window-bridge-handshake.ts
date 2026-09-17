@@ -1,7 +1,7 @@
 import {
   validateBridgeBootstrapDescriptor,
   type BridgeBootstrapDescriptor,
-} from '../bridge-bootstrap';
+} from '../bridge-bootstrap.js';
 
 export const BRIDGE_CONNECT_MESSAGE = 'nexus:bridge:connect';
 export const BRIDGE_CONNECTED_MESSAGE = 'nexus:bridge:connected';

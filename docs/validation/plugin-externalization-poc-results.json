@@ -50,7 +50,7 @@
       "passed": true,
       "result": {
         "ok": false,
-        "error": "Error: [ Federation Runtime ]: Version 0.1.0 from poc_host of shared singleton module @nexus/plugin-runtime/react does not satisfy the requirement of undefined which needs ^9.0.0)"
+        "error": "Error: [ Federation Runtime ]: Version 0.1.0 from poc_host of shared singleton module @feforgejs/plugin-runtime/react does not satisfy the requirement of undefined which needs ^9.0.0)"
       },
       "logs": []
     },
@@ -59,7 +59,7 @@
       "passed": true,
       "result": {
         "ok": false,
-        "error": "Error: The getter for the shared module is not a function. This may be caused by setting \"shared.import: false\" without the host providing the corresponding lib. #RUNTIME-012\nargs: {\"shareKey\":\"@nexus/plugin-runtime/react\"}\nView the docs to see how to solve: https://module-federation.io/guide/troubleshooting/runtime#runtime-012"
+        "error": "Error: The getter for the shared module is not a function. This may be caused by setting \"shared.import: false\" without the host providing the corresponding lib. #RUNTIME-012\nargs: {\"shareKey\":\"@feforgejs/plugin-runtime/react\"}\nView the docs to see how to solve: https://module-federation.io/guide/troubleshooting/runtime#runtime-012"
       },
       "logs": []
     },
@@ -163,7 +163,7 @@
       "@module-federation/runtime-tools": "2.9.0",
       "react": "19.2.8",
       "react-dom": "19.2.8",
-      "@nexus/plugin-runtime": "0.1.0"
+      "@feforgejs/plugin-runtime": "0.1.0"
     },
     "remote": {
       "@rsbuild/core": "2.2.2",
@@ -173,7 +173,7 @@
       "@module-federation/runtime-tools": "2.9.0",
       "react": "19.2.8",
       "react-dom": "19.2.8",
-      "@nexus/plugin-runtime": "0.1.0"
+      "@feforgejs/plugin-runtime": "0.1.0"
     }
   },
   "network": [
@@ -478,7 +478,7 @@
     },
     "duplicatesdk": {
       "privateSdk": [
-        "./node_modules/@nexus/plugin-runtime/dist/ui-react.js"
+        "./node_modules/@feforgejs/plugin-runtime/dist/ui-react.js"
       ],
       "privateReact": []
     }

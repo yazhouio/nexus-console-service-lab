@@ -13,7 +13,7 @@
 | Rsbuild / Rspack | 2.2.2 / **2.2.2** |
 | Federation | Host `@module-federation/enhanced/runtime`；enhanced、runtime、runtime-core、runtime-tools 为 **2.9.0** |
 | React / React DOM | 19.2.8 / 19.2.8 |
-| SDK | 当前 `@nexus/plugin-runtime` 0.1.0 源码的临时构建及 npm tarball |
+| SDK | 当前 `@feforgejs/plugin-runtime` 0.1.0 源码的临时构建及 npm tarball |
 | 构建模式 | 两侧均为 production；Remote 是 script/var `remoteEntry.js`，固定 `./plugin` expose |
 | 网络 | 两个 `127.0.0.1` 不同端口的 HTTP origin；Host 从 `/nested/console/path` 打开 |
 
@@ -42,7 +42,7 @@ Remote 使用当前 CSS loader、lint 和 ArtifactCssClosure 的**原样副本**
 
 不仅比较对象：Remote 的同一插件定义经真实 bootstrap 注册后，Host 同时创建两个 UI Root。两个实例都成功取得 UiClient、读出 Host 的 `host-context` 路由参数、呈现 Host outlet；RouteLink 的 href 为 Host 生成的 `/from-host/linked`，点击远程组件按钮将 hooks 状态从 0 更新为 1。
 
-**负例具有检出能力：**只移除 Remote 的 SDK React shared 配置，继续共享 React。此时 React 引用仍相同，UiProvider 引用不同，实际呈现失败并得到 `A Host-bound UiProvider is required.`。构建 stats 也显示：正确产物没有私有 React/SDK React 实现，负例包含自己的 `@nexus/plugin-runtime/dist/ui-react.js`。
+**负例具有检出能力：**只移除 Remote 的 SDK React shared 配置，继续共享 React。此时 React 引用仍相同，UiProvider 引用不同，实际呈现失败并得到 `A Host-bound UiProvider is required.`。构建 stats 也显示：正确产物没有私有 React/SDK React 实现，负例包含自己的 `@feforgejs/plugin-runtime/dist/ui-react.js`。
 
 这证明当前问题确实包含 SDK Context 的模块身份，不能只依赖 React singleton。
 

@@ -1,6 +1,6 @@
-import type { ActionRuntime } from '../action-runtime';
-import { assertUiJson } from '../ui/schema';
-import { UiError, type SlotInput, type UiRuntime } from '../ui/runtime';
+import type { ActionRuntime } from '../action-runtime.js';
+import { assertUiJson } from '../ui/schema.js';
+import { UiError, type SlotInput, type UiRuntime } from '../ui/runtime.js';
 export interface UiControlIngress {
   dispatch(value: unknown): void;
   dispose(): void;

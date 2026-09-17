@@ -1,6 +1,6 @@
-import type { RestrictedPluginManifest } from '@nexus/plugin-runtime';
-import { NODE_CHILD_ROUTES_POINT, NODE_NAVIGATION_POINT } from '@nexus/cluster-api';
-import { CORE_ROUTES_POINT, PRIMARY_NAVIGATION_POINT } from '@nexus/console-core-api';
+import type { RestrictedPluginManifest } from '@feforgejs/plugin-runtime';
+import { NODE_CHILD_ROUTES_POINT, NODE_NAVIGATION_POINT } from '@feforgejs/cluster-api';
+import { CORE_ROUTES_POINT, PRIMARY_NAVIGATION_POINT } from '@feforgejs/console-core-api';
 
 export const kubeeyeManifest = {
   id: 'kubeeye',

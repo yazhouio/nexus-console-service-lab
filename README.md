@@ -6,8 +6,8 @@ A frontend plugin framework with a Console reference system and example plugins.
 
 | Layer | Code | Responsibility |
 | --- | --- | --- |
-| General framework | `@nexus/plugin-runtime`, `@nexus/browser-host`, `@nexus/plugin-build` | Reusable execution, browser integration and build mechanisms |
-| Business plugin system reference | `@nexus/console-core`, `@nexus/console-core-api`, `@nexus/cluster-api`, `@nexus/design-tokens`, `apps/console` | Product shell, public business contracts, domain APIs, visual conventions and distribution |
+| General framework | `@feforgejs/plugin-runtime`, `@feforgejs/browser-host`, `@feforgejs/plugin-build` | Reusable execution, browser integration and build mechanisms |
+| Business plugin system reference | `@feforgejs/console-core`, `@feforgejs/console-core-api`, `@feforgejs/cluster-api`, `@feforgejs/design-tokens`, `apps/console` | Product shell, public business contracts, domain APIs, visual conventions and distribution |
 | Plugin examples | `apps/example-builtin-plugin`, `apps/example-restricted-plugin`, `apps/console/src/plugins` | Trusted and Wujie implementations consuming the framework and business contracts |
 
 Console and Cluster are replaceable reference choices, not required framework dependencies. Product API packages may be published separately for independent plugin authors. UI composition fixtures support regression validation.
@@ -57,6 +57,22 @@ Rspack dev server. Opening KubeEye mounts its Surface on demand; **Read current
 cluster** calls the Host's `kubesphere.cluster@2/getCurrentCluster` action over
 the Surface's dedicated MessagePort. Run `pnpm dev:docs` separately and open
 `http://localhost:3003` for the Rspress documentation site.
+
+## Package quality and releases
+
+```bash
+pnpm test:coverage     # vitest coverage with enforced thresholds (plugin-runtime)
+pnpm build:packages && pnpm check:packages   # publint + attw on every publishable package
+pnpm changeset         # record a version bump for changed packages
+```
+
+Published packages in `packages/*` are ESM-only and must resolve under both
+`bundler` and `node16` module resolution, so relative imports in their `src`
+carry explicit `.js` extensions. Versioning is driven by `.changeset/*.md`
+files, not by commit types. Publishing uses npm trusted publishing (OIDC) from
+`release.yml`; the one-time local bootstrap is in [.changeset/README.md](.changeset/README.md).
+Commit messages follow Conventional Commits and are checked by commitlint in the
+lefthook `commit-msg` hook and in CI.
 
 ## Browser regression tests
 

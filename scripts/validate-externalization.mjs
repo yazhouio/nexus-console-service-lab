@@ -90,11 +90,11 @@ async function serve(dir, remoteServer = false) {
 try {
   await run('pnpm', [
     '--filter',
-    '@nexus/browser-host...',
+    '@feforgejs/browser-host...',
     '--filter',
-    '@nexus/console-core...',
+    '@feforgejs/console-core...',
     '--filter',
-    '@nexus/cluster-api',
+    '@feforgejs/cluster-api',
     'build',
   ]);
   const deps = {};
@@ -102,7 +102,7 @@ try {
     const dir = join(repo, 'packages', name),
       pkg = JSON.parse(await readFile(join(dir, 'package.json')));
     await run('pnpm', ['pack', '--pack-destination', tarballs], dir);
-    const tgz = join(tarballs, `nexus-${name}-${pkg.version}.tgz`);
+    const tgz = join(tarballs, `feforgejs-${name}-${pkg.version}.tgz`);
     deps[pkg.name] = `file:${tgz}`;
     await run('tar', ['-xzf', tgz, '-C', tarballs]);
     const packed = JSON.parse(await readFile(join(tarballs, 'package/package.json'), 'utf8'));
@@ -189,7 +189,7 @@ try {
   await writeFile(
     join(host, 'kubeeye-manifest.ts'),
     (await readFile(join(repo, 'apps/console/src/plugins/kubeeye-manifest.ts'), 'utf8')).replaceAll(
-      '@nexus/example-restricted-plugin/',
+      '@feforgejs/example-restricted-plugin/',
       './',
     ),
   );
@@ -227,16 +227,16 @@ try {
   await writeFile(
     join(host, 'main.tsx'),
     `
-import '@nexus/design-tokens/theme.css';
-import '@nexus/design-tokens/baseline.css';
+import '@feforgejs/design-tokens/theme.css';
+import '@feforgejs/design-tokens/baseline.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserHost, type BrowserDistribution } from '@nexus/browser-host';
-import { consoleCore } from '@nexus/console-core';
-import { css } from '@nexus/console-core/styles.css?artifact';
-import { CONSOLE_PROFILES, PLUGIN_REF_CONTRACT, CORE_ROUTES_POINT, PRIMARY_NAVIGATION_POINT } from '@nexus/console-core-api';
-import { RESOURCE_REF_CONTRACT, DEPLOYMENT_PROFILES } from '@nexus/cluster-api';
-import { createInstallationStore } from '@nexus/plugin-runtime';
+import { BrowserHost, type BrowserDistribution } from '@feforgejs/browser-host';
+import { consoleCore } from '@feforgejs/console-core';
+import { css } from '@feforgejs/console-core/styles.css?artifact';
+import { CONSOLE_PROFILES, PLUGIN_REF_CONTRACT, CORE_ROUTES_POINT, PRIMARY_NAVIGATION_POINT } from '@feforgejs/console-core-api';
+import { RESOURCE_REF_CONTRACT, DEPLOYMENT_PROFILES } from '@feforgejs/cluster-api';
+import { createInstallationStore } from '@feforgejs/plugin-runtime';
 import { federationBuiltins } from './federation-builtins';
 import { contributionGovernance } from './policy';
 import { cluster } from './cluster';
@@ -267,13 +267,13 @@ import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
-import { ArtifactCssClosure } from '@nexus/plugin-build/closure';
+import { ArtifactCssClosure } from '@feforgejs/plugin-build/closure';
 const require = createRequire(import.meta.url);
-export default defineConfig({ plugins: [pluginReact({ fastRefresh: false })], source: { entry: { index: './main.tsx' }, define: { 'process.env.PUBLIC_TEST_FIXTURES': '"false"', NEXUS_SHARED_VERSIONS: JSON.stringify({ react: require('react/package.json').version, sdk: require('@nexus/plugin-runtime/package.json').version }) } }, output: { assetPrefix: '/' }, tools: { bundlerChain(chain, { CHAIN_ID }) {
+export default defineConfig({ plugins: [pluginReact({ fastRefresh: false })], source: { entry: { index: './main.tsx' }, define: { 'process.env.PUBLIC_TEST_FIXTURES': '"false"', NEXUS_SHARED_VERSIONS: JSON.stringify({ react: require('react/package.json').version, sdk: require('@feforgejs/plugin-runtime/package.json').version }) } }, output: { assetPrefix: '/' }, tools: { bundlerChain(chain, { CHAIN_ID }) {
   chain.plugin('closure').use(ArtifactCssClosure, [resolve(import.meta.dirname, 'main.tsx')]);
   chain.module.rule(CHAIN_ID.RULE.CSS).resourceQuery({ not: [/artifact/] });
-  chain.module.rule('artifact').include.add(require.resolve('@nexus/console-core/styles.css')).end().test(/\\.css$/).resourceQuery(/artifact/).type('javascript/auto').use('artifact').loader(require.resolve('@nexus/plugin-build/artifact-css-loader')).options({ namespace: 'core', allowFixed: true });
-  chain.module.rule('cluster').include.add(resolve(import.meta.dirname, 'cluster.css')).end().test(/\\.css$/).resourceQuery(/artifact/).type('javascript/auto').use('artifact').loader(require.resolve('@nexus/plugin-build/artifact-css-loader')).options({ namespace: 'cluster' });
+  chain.module.rule('artifact').include.add(require.resolve('@feforgejs/console-core/styles.css')).end().test(/\\.css$/).resourceQuery(/artifact/).type('javascript/auto').use('artifact').loader(require.resolve('@feforgejs/plugin-build/artifact-css-loader')).options({ namespace: 'core', allowFixed: true });
+  chain.module.rule('cluster').include.add(resolve(import.meta.dirname, 'cluster.css')).end().test(/\\.css$/).resourceQuery(/artifact/).type('javascript/auto').use('artifact').loader(require.resolve('@feforgejs/plugin-build/artifact-css-loader')).options({ namespace: 'cluster' });
 } } });
 `,
   );
@@ -409,7 +409,7 @@ export default defineConfig({ plugins: [pluginReact({ fastRefresh: false })], so
           '@module-federation/runtime-tools',
           'react',
           'react-dom',
-          '@nexus/plugin-runtime',
+          '@feforgejs/plugin-runtime',
         ].flatMap((name) =>
           installed[`node_modules/${name}`]
             ? [[name, installed[`node_modules/${name}`].version]]

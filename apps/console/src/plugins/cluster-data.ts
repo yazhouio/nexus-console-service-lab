@@ -3,18 +3,18 @@ import type {
   RouteContribution,
   NavigationContribution,
   ExtensionContributionDefinition,
-} from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime';
 import {
   CONSOLE_CORE_CAPABILITY,
   CORE_ROUTES_POINT,
   primaryNavigation,
   homeCard,
-} from '@nexus/console-core-api';
+} from '@feforgejs/console-core-api';
 import {
   NODE_CHILD_ROUTES_POINT,
   NODE_NAVIGATION_POINT,
   NODE_TABS_POINT,
-} from '@nexus/cluster-api';
+} from '@feforgejs/cluster-api';
 
 export const clusterDescriptor = {
   id: 'cluster',

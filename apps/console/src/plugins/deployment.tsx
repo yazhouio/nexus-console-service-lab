@@ -5,15 +5,15 @@ import {
   ActionMenu,
   useUiObservation,
   useRouteContext,
-} from '@nexus/plugin-runtime/react';
-import type { ContributionRef, PluginDefinition } from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime/react';
+import type { ContributionRef, PluginDefinition } from '@feforgejs/plugin-runtime';
 import { deploymentDescriptor, deploymentRoutes, deploymentNavigation } from './deployment-data';
 import {
   DEPLOYMENT_EXTENSION_POINTS,
   DEPLOYMENT_CARDS_POINT,
   DEPLOYMENT_TABS_POINT,
   DEPLOYMENT_ACTIONS_POINT,
-} from '@nexus/cluster-api';
+} from '@feforgejs/cluster-api';
 import { useDeployments } from './deployment-mock';
 
 function DeploymentList() {
@@ -231,7 +231,7 @@ function DeploymentTabs({
     <Slot
       id={DEPLOYMENT_TABS_POINT.id}
       contextKey={contextKey}
-      context={context as import('@nexus/plugin-runtime').JsonValue}
+      context={context as import('@feforgejs/plugin-runtime').JsonValue}
       selected={selected}
       feedback={(state, retry, error) => (
         <>
