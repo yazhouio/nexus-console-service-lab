@@ -36,8 +36,16 @@ npm only lets you attach a trusted publisher to a package that already exists, s
    ```
 
    For each package this runs `npm trust github <pkg> --file release.yml --repository
-   yazhouio/nexus-console-service-lab --environment npm`, then `npm access set mfa=publish <pkg>`
-   ("require 2FA and disallow tokens"). Re-running is safe; already-trusted packages are skipped.
+   yazhouio/nexus-console-service-lab --environment npm --allow-publish`, then
+   `npm access set mfa=publish <pkg>` ("require 2FA and disallow tokens"). The trust commands run
+   through a pinned `npm@11.19.1` via `npx`, because `--allow-publish` needs npm 11.15+ and the npm
+   bundled with Node 24.14.1 is older. Every trust command asks for 2FA.
+
+   Re-running is safe. A package is skipped only when an existing binding matches repository,
+   workflow, environment **and** publish permission. A binding for the same repository and workflow
+   with a missing/different environment or without publish permission is revoked and recreated,
+   and the result is re-read to confirm it. Bindings for other repositories or workflows are left
+   untouched and reported.
 
 3. **From now on only GitHub Actions publishes.** Do not run `pnpm release` locally again.
 
@@ -46,4 +54,5 @@ cannot trust a name that has never been published.
 
 The workflow file name `release.yml`, the job environment `npm`, and each package's
 `repository.url` are part of the trust binding. Changing any of them requires re-running
-`pnpm release:trust` (and revoking the old binding with `npm trust revoke`).
+`pnpm release:trust` (and revoking the old binding with `npm trust revoke`, since bindings for
+another workflow file are reported but not removed).
