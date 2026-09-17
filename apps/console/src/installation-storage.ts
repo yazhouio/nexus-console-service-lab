@@ -3,9 +3,9 @@ import {
   type BridgeCapabilityContract,
   type InstallationStore,
   type InstallationStoreSnapshot,
-} from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime';
 import { kubeeyeInstallation, clusterBridgeContract } from './plugins/kubeeye-installation';
-import { platformBridgeContracts, uiOverlayBridgeContract } from '@nexus/plugin-runtime';
+import { platformBridgeContracts, uiOverlayBridgeContract } from '@feforgejs/plugin-runtime';
 
 const key = 'nexus.plugin-installations.v1';
 const historyKey = `${key}.previous`;

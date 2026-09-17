@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Slot, useUiClient, useUiObservation } from '@nexus/plugin-runtime/react';
+import { Slot, useUiClient, useUiObservation } from '@feforgejs/plugin-runtime/react';
 import { mount, surfaceId } from './mount';
 function Dialog() {
   const client = useUiClient();

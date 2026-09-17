@@ -4,7 +4,7 @@ import {
   useSurfaceContext,
   useUiClient,
   useUiObservation,
-} from '@nexus/plugin-runtime/react';
+} from '@feforgejs/plugin-runtime/react';
 import { mount, surfaceId } from './mount';
 function Dialog() {
   const client = useUiClient();

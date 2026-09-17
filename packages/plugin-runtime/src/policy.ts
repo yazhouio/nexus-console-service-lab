@@ -1,5 +1,5 @@
-import { frozenCopy } from './immutable';
-import type { HostContributionPolicy, HostContributionPolicyRequest } from './ui/definitions';
+import { frozenCopy } from './immutable.js';
+import type { HostContributionPolicy, HostContributionPolicyRequest } from './ui/definitions.js';
 export interface ContributionPolicyBundle {
   readonly revision: string;
   readonly grants: readonly HostContributionPolicyRequest[];

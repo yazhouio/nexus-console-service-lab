@@ -4,10 +4,10 @@ import { resolve } from 'node:path';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { extensionDemoDescriptor } from './src/extension-demo-data';
-import { ArtifactCssClosure } from '@nexus/plugin-build/closure';
+import { ArtifactCssClosure } from '@feforgejs/plugin-build/closure';
 const require = createRequire(import.meta.url);
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
-const sdkVersion = require('@nexus/plugin-runtime/package.json').version;
+const sdkVersion = require('@feforgejs/plugin-runtime/package.json').version;
 if (pkg.version !== extensionDemoDescriptor.version)
   throw Error('Package and plugin descriptor versions must match');
 const base =
@@ -41,7 +41,7 @@ export default defineConfig({
         react: share(require('react/package.json').version),
         'react/jsx-runtime': share(require('react/package.json').version),
         'react/jsx-dev-runtime': share(require('react/package.json').version),
-        '@nexus/plugin-runtime/react': share(sdkVersion),
+        '@feforgejs/plugin-runtime/react': share(sdkVersion),
       },
     },
   },
@@ -58,14 +58,14 @@ export default defineConfig({
         .resourceQuery(/artifact/)
         .type('javascript/auto')
         .use('artifact')
-        .loader(require.resolve('@nexus/plugin-build/artifact-css-loader'))
+        .loader(require.resolve('@feforgejs/plugin-build/artifact-css-loader'))
         .options({ namespace: 'extension-demo' });
       chain.module
         .rule('unmanaged')
         .test(/\.css$/)
         .resourceQuery({ not: [/artifact/] })
         .use('reject')
-        .loader(require.resolve('@nexus/plugin-build/reject-unmanaged-css'));
+        .loader(require.resolve('@feforgejs/plugin-build/reject-unmanaged-css'));
     },
   },
 });

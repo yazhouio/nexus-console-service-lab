@@ -1,6 +1,6 @@
-import type { BridgeCapabilityContract, BridgeInvocationContext } from '../bridge-contract';
-import type { JsonValue } from '../contribution';
-import { assertUiJson } from './schema';
+import type { BridgeCapabilityContract, BridgeInvocationContext } from '../bridge-contract.js';
+import type { JsonValue } from '../contribution.js';
+import { assertUiJson } from './schema.js';
 export const UI_OVERLAY_CAPABILITY = 'nexus.ui-overlay@1' as const;
 export const UI_OVERLAY_PERMISSION = 'ui.overlay';
 export interface UiOverlayCapability {
@@ -53,7 +53,7 @@ export const uiOverlayBridgeContract: BridgeCapabilityContract = {
 
 export function createUiOverlayPlugin() {
   let service: UiOverlayCapability | undefined;
-  const plugin: import('../plugin').PluginDefinition = {
+  const plugin: import('../plugin.js').PluginDefinition = {
     id: 'nexus-ui-overlay',
     version: '1.0.0',
     requires: [],

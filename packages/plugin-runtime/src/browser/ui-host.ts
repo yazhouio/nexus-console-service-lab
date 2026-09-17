@@ -1,23 +1,23 @@
-import { createArtifactAssets } from './artifact-assets';
-import { frozenCopy } from '../immutable';
-import { createActionRuntime } from '../action-runtime';
-import { createBrowserActionDriver } from './action-driver';
-import type { PluginRuntime } from '../bootstrap';
-import type { HostRenderTarget, JsonValue, RouteContext } from '../contribution';
-import { createUiRuntime, UiError, type UiMounted, type UiSizing } from '../ui/runtime';
-import type { HostContributionPolicy } from '../ui/definitions';
+import { createArtifactAssets } from './artifact-assets.js';
+import { frozenCopy } from '../immutable.js';
+import { createActionRuntime } from '../action-runtime.js';
+import { createBrowserActionDriver } from './action-driver.js';
+import type { PluginRuntime } from '../bootstrap.js';
+import type { HostRenderTarget, JsonValue, RouteContext } from '../contribution.js';
+import { createUiRuntime, UiError, type UiMounted, type UiSizing } from '../ui/runtime.js';
+import type { HostContributionPolicy } from '../ui/definitions.js';
 import {
   UI_OVERLAY_CAPABILITY,
   UI_OVERLAY_PERMISSION,
   type UiOverlayCapability,
-} from '../ui/overlay-capability';
-import { createUiClient, type UiClient } from '../ui-client';
-import { createUiControl } from './ui-control';
-import { createPluginBridgeSession } from './plugin-bridge';
-import type { WujiePluginAdapter } from './wujie-plugin-adapter';
+} from '../ui/overlay-capability.js';
+import { createUiClient, type UiClient } from '../ui-client.js';
+import { createUiControl } from './ui-control.js';
+import { createPluginBridgeSession } from './plugin-bridge.js';
+import type { WujiePluginAdapter } from './wujie-plugin-adapter.js';
 
 export interface UiHostOptions {
-  onAudit?: (entry: import('./plugin-bridge').BridgeAuditEntry) => void;
+  onAudit?: (entry: import('./plugin-bridge.js').BridgeAuditEntry) => void;
   onError?: (cause: unknown, attemptId: string) => void;
   runtime: PluginRuntime;
   restrictedAdapter: WujiePluginAdapter;

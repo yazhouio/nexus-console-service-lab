@@ -1,4 +1,4 @@
-import { connectActionHost } from '@nexus/plugin-runtime/client';
+import { connectActionHost } from '@feforgejs/plugin-runtime/client';
 void connectActionHost(async ({ actionId, context, capabilities, signal }) => {
   if (actionId === 'slow')
     await new Promise<void>((resolve, reject) => {

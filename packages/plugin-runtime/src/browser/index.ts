@@ -7,7 +7,7 @@ export {
   type BridgeHandshakeCoordinator,
   type BridgeHandshakeErrorCode,
   type BridgeHandshakeRequest,
-} from './window-bridge-handshake';
+} from './window-bridge-handshake.js';
 export {
   createWujiePluginAdapter,
   SurfaceMountError,
@@ -22,8 +22,8 @@ export {
   type SurfaceMountErrorCode,
   type SurfaceMountIssue,
   type WujiePluginAdapter,
-} from './wujie-plugin-adapter';
-export type { WujieDriver, WujieStartOptions } from './wujie-driver';
+} from './wujie-plugin-adapter.js';
+export type { WujieDriver, WujieStartOptions } from './wujie-driver.js';
 export type {
   BridgeEvent,
   BridgeUnsubscribeRequest,
@@ -34,6 +34,6 @@ export type {
   BridgeHostError,
   BridgeRequest,
   BridgeResponse,
-} from './plugin-bridge';
-export { createUiHost } from './ui-host';
-export type { UiHost, UiHostOptions } from './ui-host';
+} from './plugin-bridge.js';
+export { createUiHost } from './ui-host.js';
+export type { UiHost, UiHostOptions } from './ui-host.js';

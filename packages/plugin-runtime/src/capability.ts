@@ -1,6 +1,6 @@
-import type { CapabilityId, PluginId } from './identifiers';
-import type { PluginCapabilityContext, PluginDescriptor } from './plugin';
-import { PluginRuntimeContractError } from './runtime-state';
+import type { CapabilityId, PluginId } from './identifiers.js';
+import type { PluginCapabilityContext, PluginDescriptor } from './plugin.js';
+import { PluginRuntimeContractError } from './runtime-state.js';
 
 export interface CapabilityMetadata {
   readonly id: CapabilityId;

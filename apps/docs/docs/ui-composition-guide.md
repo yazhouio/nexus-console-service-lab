@@ -32,7 +32,7 @@ Profile 和 RefContract 由宿主装配；贡献者使用包含 owner、id、con
 
 ## Restricted 插件入口
 
-使用 `connectUiHost()` 建立控制连接，再用 `UiProvider` 包装入口；从 `@nexus/plugin-runtime/client` 和 `@nexus/plugin-runtime/react` 导入公开 API。内容外层添加 `data-nexus-surface-content` 供尺寸测量。该标记不提供授权。Builtin 由宿主提供 UI 上下文。
+使用 `connectUiHost()` 建立控制连接，再用 `UiProvider` 包装入口；从 `@feforgejs/plugin-runtime/client` 和 `@feforgejs/plugin-runtime/react` 导入公开 API。内容外层添加 `data-nexus-surface-content` 供尺寸测量。该标记不提供授权。Builtin 由宿主提供 UI 上下文。
 
 ## Schema 与资源限制
 

@@ -4,7 +4,7 @@ import type {
   ExtensionPointDefinition,
   ExtensionPointRef,
   RefContract,
-} from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime';
 export interface ClusterCapability {
   getCurrentCluster(): string;
   setCurrentCluster(name: string): void;

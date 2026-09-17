@@ -1,16 +1,16 @@
-import type { ContributionRegistry, JsonValue, OwnedContribution } from './contribution';
-import { frozenCopy } from './immutable';
-import { UiError } from './ui/runtime';
-import { assertUiJson, matchesContext } from './ui/schema';
-import { actionAvailability, conditionError } from './ui/action-conditions';
-import { admitContribution, comparePointContributions } from './ui/admission';
+import type { ContributionRegistry, JsonValue, OwnedContribution } from './contribution.js';
+import { frozenCopy } from './immutable.js';
+import { UiError } from './ui/runtime.js';
+import { assertUiJson, matchesContext } from './ui/schema.js';
+import { actionAvailability, conditionError } from './ui/action-conditions.js';
+import { admitContribution, comparePointContributions } from './ui/admission.js';
 import {
   uiKey,
   type ActionContributionDefinition,
   type ContributionRef,
   type ExtensionPointRef,
   type HostContributionPolicy,
-} from './ui/definitions';
+} from './ui/definitions.js';
 
 export interface ActionInput {
   readonly invocationId: string;

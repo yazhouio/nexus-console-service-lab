@@ -1,9 +1,9 @@
-import '@nexus/design-tokens/theme.css';
-import '@nexus/design-tokens/baseline.css';
+import '@feforgejs/design-tokens/theme.css';
+import '@feforgejs/design-tokens/baseline.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { BrowserHost } from '@nexus/browser-host';
+import { BrowserHost } from '@feforgejs/browser-host';
 import { distribution } from './distribution';
 
 const root = document.getElementById('root');

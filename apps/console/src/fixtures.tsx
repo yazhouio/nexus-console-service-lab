@@ -1,7 +1,7 @@
 import {
   useHostTestServices as useHostServices,
   TestSurfaceMount as SurfaceMount,
-} from '@nexus/browser-host/testing';
+} from '@feforgejs/browser-host/testing';
 import type { ComponentType } from 'react';
 
 /** Included only in explicitly marked test builds. No additional production UI slot. */

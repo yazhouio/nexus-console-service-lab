@@ -1,18 +1,18 @@
-import { requireInvocationContext } from './invocation-authority';
-import type { PluginRuntime } from './bootstrap';
-import type { PluginDefinition } from './plugin';
+import { requireInvocationContext } from './invocation-authority.js';
+import type { PluginRuntime } from './bootstrap.js';
+import type { PluginDefinition } from './plugin.js';
 import type {
   BridgeCapabilityContract,
   BridgeInvocationContext,
   RuntimeSchema,
-} from './bridge-contract';
-import type { InstallationStore } from './installation-store';
-import type { InstalledPluginRecord } from './manifest';
-import type { JsonValue } from './contribution';
-import type { RouteModel, ResolvedNavigation } from './routing/route-model';
-import { inspect, type RuntimeSnapshot } from './inspection';
-import { frozenCopy } from './immutable';
-import { assertUiJson, matchesContext, type ContextSchema } from './ui/schema';
+} from './bridge-contract.js';
+import type { InstallationStore } from './installation-store.js';
+import type { InstalledPluginRecord } from './manifest.js';
+import type { JsonValue } from './contribution.js';
+import type { RouteModel, ResolvedNavigation } from './routing/route-model.js';
+import { inspect, type RuntimeSnapshot } from './inspection.js';
+import { frozenCopy } from './immutable.js';
+import { assertUiJson, matchesContext, type ContextSchema } from './ui/schema.js';
 
 export const PLATFORM_PLUGIN_ID = 'nexus-platform';
 export const PLATFORM_CAPABILITIES = [

@@ -1,10 +1,10 @@
 import * as React from 'react';
 import * as jsx from 'react/jsx-runtime';
 import * as jsxDev from 'react/jsx-dev-runtime';
-import * as sdk from '@nexus/plugin-runtime/react';
+import * as sdk from '@feforgejs/plugin-runtime/react';
 import { createInstance } from '@module-federation/enhanced/runtime';
-import type { BuiltinPreparationFailure, PreparedBuiltins } from '@nexus/browser-host';
-import type { PluginDefinition } from '@nexus/plugin-runtime';
+import type { BuiltinPreparationFailure, PreparedBuiltins } from '@feforgejs/browser-host';
+import type { PluginDefinition } from '@feforgejs/plugin-runtime';
 
 export interface BuiltinPin {
   readonly id: string;
@@ -44,7 +44,7 @@ export function federationBuiltins(
         react: shared(NEXUS_SHARED_VERSIONS.react, React),
         'react/jsx-runtime': shared(NEXUS_SHARED_VERSIONS.react, jsx),
         'react/jsx-dev-runtime': shared(NEXUS_SHARED_VERSIONS.react, jsxDev),
-        '@nexus/plugin-runtime/react': shared(NEXUS_SHARED_VERSIONS.sdk, sdk),
+        '@feforgejs/plugin-runtime/react': shared(NEXUS_SHARED_VERSIONS.sdk, sdk),
       },
     });
     const results = await Promise.all(

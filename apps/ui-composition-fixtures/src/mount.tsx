@@ -1,7 +1,7 @@
 import { StrictMode, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { connectUiHost } from '@nexus/plugin-runtime/client';
-import { UiProvider } from '@nexus/plugin-runtime/react';
+import { connectUiHost } from '@feforgejs/plugin-runtime/client';
+import { UiProvider } from '@feforgejs/plugin-runtime/react';
 export function surfaceId() {
   return (window as Window & { $wujie?: { props?: { surface?: { id?: string } } } }).$wujie?.props
     ?.surface?.id;

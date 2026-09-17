@@ -3,16 +3,16 @@ import {
   consoleCoreRoutes,
   consoleCoreNavigation,
   consoleCoreExtensions,
-} from './plugin-data';
-import type { PluginDefinition } from '@nexus/plugin-runtime';
+} from './plugin-data.js';
+import type { PluginDefinition } from '@feforgejs/plugin-runtime';
 import {
   CONSOLE_CORE_CAPABILITY,
   CONSOLE_ROOT_SURFACE,
   CONSOLE_EXTENSION_POINTS,
-} from '@nexus/console-core-api';
-import { ConsoleLayout } from './ConsoleLayout';
-import { Overview } from './Overview';
-import { Settings } from './Settings';
+} from '@feforgejs/console-core-api';
+import { ConsoleLayout } from './ConsoleLayout.js';
+import { Overview } from './Overview.js';
+import { Settings } from './Settings.js';
 
 export const consoleCore: PluginDefinition = {
   ...consoleCoreDescriptor,
@@ -28,7 +28,7 @@ export const consoleCore: PluginDefinition = {
         'plugins.query@1',
         'list',
         null,
-      )) as unknown as import('@nexus/plugin-runtime').PluginSummary[];
+      )) as unknown as import('@feforgejs/plugin-runtime').PluginSummary[];
       const plugin = plugins.find((plugin) => plugin.id === id);
       return plugin ? { id: plugin.id, state: plugin.state, version: plugin.version } : null;
     });

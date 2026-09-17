@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { useHostServices } from './HostContext';
-import type { UiHost } from '@nexus/plugin-runtime/browser';
-import type { RouteContext, SandboxRenderTarget } from '@nexus/plugin-runtime';
+import { useHostServices } from './HostContext.js';
+import type { UiHost } from '@feforgejs/plugin-runtime/browser';
+import type { RouteContext, SandboxRenderTarget } from '@feforgejs/plugin-runtime';
 
 type Presentation = { state: 'MOUNTING' | 'MOUNTED' } | { state: 'ERROR'; stage?: string };
 

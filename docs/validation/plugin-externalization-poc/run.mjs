@@ -105,7 +105,7 @@ try {
     ),
   );
   await command('pack-sdk', 'npm', ['pack', '--ignore-scripts'], sdkDir);
-  const tgz = join(sdkDir, `nexus-plugin-runtime-${pkg.version}.tgz`);
+  const tgz = join(sdkDir, `feforgejs-plugin-runtime-${pkg.version}.tgz`);
   await cp(join(fixture, 'host'), host, { recursive: true });
   await cp(join(fixture, 'remote'), remote, { recursive: true });
   await mkdir(join(remote, 'tools'), { recursive: true });
@@ -131,7 +131,7 @@ try {
     '@rsbuild/plugin-react': '2.1.0',
     react: '19.2.8',
     'react-dom': '19.2.8',
-    '@nexus/plugin-runtime': `file:${tgz}`,
+    '@feforgejs/plugin-runtime': `file:${tgz}`,
   };
   const overrides = { '@rspack/core': '2.2.2' };
   await writeFile(
@@ -193,7 +193,7 @@ try {
       '@module-federation/runtime-tools',
       'react',
       'react-dom',
-      '@nexus/plugin-runtime',
+      '@feforgejs/plugin-runtime',
     ]) {
       try {
         report.versions[label][name] = JSON.parse(

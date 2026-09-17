@@ -1,13 +1,13 @@
-import type { ContributionDiagnostic, HostContributionFact } from './host-contribution';
-import type { PluginRuntime } from './bootstrap';
-import type { CapabilityMetadata } from './capability';
-import type { DependencyEdge, PluginDescriptor, PluginKind } from './plugin';
-import type { HostRenderTarget } from './contribution';
-import type { PluginRuntimeState } from './runtime-state';
-import type { SurfaceFailureStage, SurfaceInstanceRecord } from './browser/wujie-plugin-adapter';
-import { frozenCopy } from './immutable';
-import { isCapabilityId } from './identifiers';
-import type { UiInspection } from './ui/runtime';
+import type { ContributionDiagnostic, HostContributionFact } from './host-contribution.js';
+import type { PluginRuntime } from './bootstrap.js';
+import type { CapabilityMetadata } from './capability.js';
+import type { DependencyEdge, PluginDescriptor, PluginKind } from './plugin.js';
+import type { HostRenderTarget } from './contribution.js';
+import type { PluginRuntimeState } from './runtime-state.js';
+import type { SurfaceFailureStage, SurfaceInstanceRecord } from './browser/wujie-plugin-adapter.js';
+import { frozenCopy } from './immutable.js';
+import { isCapabilityId } from './identifiers.js';
+import type { UiInspection } from './ui/runtime.js';
 
 export interface RuntimeErrorSnapshot {
   readonly code: string;
@@ -65,7 +65,7 @@ export interface ContributionSnapshot {
 }
 export interface RuntimeSnapshot {
   readonly ui?: UiInspection;
-  readonly actions?: ReturnType<import('./action-runtime').ActionRuntime['inspect']>;
+  readonly actions?: ReturnType<import('./action-runtime.js').ActionRuntime['inspect']>;
   readonly points?: ReturnType<PluginRuntime['contributions']['listExtensionPoints']>;
   readonly ready: boolean;
   readonly bootstrapError?: RuntimeErrorSnapshot;
@@ -202,7 +202,7 @@ function projectHostFact(fact: HostContributionFact): HostContributionFact {
 }
 export interface InspectionSource {
   inspectUi?(): UiInspection;
-  inspectActions?(): ReturnType<import('./action-runtime').ActionRuntime['inspect']>;
+  inspectActions?(): ReturnType<import('./action-runtime.js').ActionRuntime['inspect']>;
   listInstances?(): readonly SurfaceInstanceRecord[];
   listHostContributions?(): readonly HostContributionFact[];
 }

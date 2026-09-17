@@ -8,7 +8,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
-import type { UiClient, SlotInput, SlotObservation, ContextSnapshot } from './ui-client';
+import type { UiClient, SlotInput, SlotObservation, ContextSnapshot } from './ui-client.js';
 const ClientContext = createContext<UiClient | undefined>(undefined);
 export function UiProvider({ client, children }: { client: UiClient; children: ReactNode }) {
   return <ClientContext value={client}>{children}</ClientContext>;
@@ -140,7 +140,7 @@ export function Slot({ feedback, panel, ...input }: SlotProps) {
 }
 
 const RoutePresentation = createContext<
-  { context?: import('./contribution').RouteContext; outlet: ReactNode } | undefined
+  { context?: import('./contribution.js').RouteContext; outlet: ReactNode } | undefined
 >(undefined);
 /** Host adapter boundary. Plugins consume RouteOutlet/useRouteContext without importing the Host. */
 export function RoutePresentationProvider({
@@ -148,7 +148,7 @@ export function RoutePresentationProvider({
   outlet,
   children,
 }: {
-  context?: import('./contribution').RouteContext;
+  context?: import('./contribution.js').RouteContext;
   outlet: ReactNode;
   children: ReactNode;
 }) {
@@ -193,7 +193,7 @@ export function RouteLink(props: RouteLinkProps) {
 export function useCapabilitySubscription<T>(
   capability: `${string}@${number}`,
   action: string,
-  payload: import('./contribution').JsonValue = null,
+  payload: import('./contribution.js').JsonValue = null,
 ): { value: T | undefined; error: Error | undefined } {
   const client = useUiClient(),
     key = JSON.stringify(payload);
@@ -237,15 +237,15 @@ export function ActionMenu({
   classNames,
 }: {
   classNames?: ControlClassNames;
-  point: import('./ui/definitions').ExtensionPointRef;
-  context: import('./contribution').JsonValue;
+  point: import('./ui/definitions.js').ExtensionPointRef;
+  context: import('./contribution.js').JsonValue;
 }) {
   const client = useUiClient(),
     key = JSON.stringify({ point, context });
   const [choices, setChoices] = useState<Awaited<ReturnType<UiClient['actions']['query']>>>([]);
   const [pending, setPending] = useState<Awaited<ReturnType<UiClient['actions']['start']>>>();
   const [status, setStatus] = useState('');
-  const [result, setResult] = useState<import('./contribution').JsonValue>();
+  const [result, setResult] = useState<import('./contribution.js').JsonValue>();
   const active = useRef(true);
   useEffect(() => {
     active.current = true;
@@ -268,7 +268,7 @@ export function ActionMenu({
       current = false;
     };
   }, [client, key, status]);
-  const run = async (ref: import('./ui/definitions').ContributionRef) => {
+  const run = async (ref: import('./ui/definitions.js').ContributionRef) => {
     setStatus('Starting action…');
     setResult(undefined);
     try {
@@ -329,7 +329,7 @@ export function Tabs({
   classNames,
   ...input
 }: Omit<SlotInput, 'selected'> & { label: string; classNames?: ControlClassNames }) {
-  const [selected, setSelected] = useState<import('./ui/definitions').ContributionRef>();
+  const [selected, setSelected] = useState<import('./ui/definitions.js').ContributionRef>();
   const prefix = useRef(`tabs-${crypto.randomUUID()}`).current;
   const panel = `${prefix}-panel`;
   return (

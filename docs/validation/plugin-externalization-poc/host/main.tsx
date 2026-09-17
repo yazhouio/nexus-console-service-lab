@@ -3,9 +3,9 @@ import * as React from 'react';
 import * as jsx from 'react/jsx-runtime';
 import * as ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
-import * as sdk from '@nexus/plugin-runtime/react';
-import { bootstrapPluginRuntime } from '@nexus/plugin-runtime';
-import { createUiHost } from '@nexus/plugin-runtime/browser';
+import * as sdk from '@feforgejs/plugin-runtime/react';
+import { bootstrapPluginRuntime } from '@feforgejs/plugin-runtime';
+import { createUiHost } from '@feforgejs/plugin-runtime/browser';
 import { createInstance } from '@module-federation/enhanced/runtime';
 
 const variant = new URLSearchParams(location.search).get('variant') ?? 'good';
@@ -23,7 +23,7 @@ const mf = createInstance({
     react: shared('19.2.8', React),
     'react/jsx-runtime': shared('19.2.8', jsx),
     'react-dom': shared('19.2.8', ReactDOM),
-    ...(!missing ? { '@nexus/plugin-runtime/react': shared('0.1.0', sdk) } : {}),
+    ...(!missing ? { '@feforgejs/plugin-runtime/react': shared('0.1.0', sdk) } : {}),
   },
 });
 document.body.innerHTML =

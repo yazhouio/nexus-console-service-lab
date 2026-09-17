@@ -1,7 +1,7 @@
-export { isCapabilityId, isHostApiId } from './identifiers';
-export type { CapabilityId, HostApiId, PluginId } from './identifiers';
-export type { CapabilityMetadata, CapabilityRegistry } from './capability';
-export { DEFAULT_CONTRIBUTION_ORDER } from './contribution';
+export { isCapabilityId, isHostApiId } from './identifiers.js';
+export type { CapabilityId, HostApiId, PluginId } from './identifiers.js';
+export type { CapabilityMetadata, CapabilityRegistry } from './capability.js';
+export { DEFAULT_CONTRIBUTION_ORDER } from './contribution.js';
 export type {
   BuiltinRenderTarget,
   ContributionReferenceCatalog,
@@ -20,7 +20,7 @@ export type {
   SandboxRenderTarget,
   SandboxSurfaceDefinition,
   UiExtensionContribution,
-} from './contribution';
+} from './contribution.js';
 export type {
   BridgeActionContract,
   BridgeCapabilityContract,
@@ -29,10 +29,10 @@ export type {
   BridgeUnaryActionContract,
   OpenedBridgeSubscription,
   RuntimeSchema,
-} from './bridge-contract';
-export { bootstrapPluginRuntime } from './bootstrap';
-export type { BootstrapPluginRuntimeOptions, PluginRuntime } from './bootstrap';
-export { PluginResolutionError } from './plugin';
+} from './bridge-contract.js';
+export { bootstrapPluginRuntime } from './bootstrap.js';
+export type { BootstrapPluginRuntimeOptions, PluginRuntime } from './bootstrap.js';
+export { PluginResolutionError } from './plugin.js';
 export type {
   DependencyEdge,
   PluginCandidate,
@@ -48,13 +48,13 @@ export type {
   ResolutionErrorCode,
   ResolutionIssue,
   ResolutionValidationStage,
-} from './plugin';
-export { resolvePluginSet } from './resolver';
+} from './plugin.js';
+export { resolvePluginSet } from './resolver.js';
 export {
   isPermissionId,
   RestrictedManifestValidationError,
   validateRestrictedInstallRecord,
-} from './manifest';
+} from './manifest.js';
 export type {
   InstalledPluginConfig,
   InstalledPluginRecord,
@@ -62,13 +62,16 @@ export type {
   RestrictedInstallValidationOptions,
   RestrictedManifestValidationIssue,
   RestrictedPluginManifest,
-} from './manifest';
+} from './manifest.js';
 export {
   BridgeBootstrapValidationError,
   validateBridgeBootstrapDescriptor,
-} from './bridge-bootstrap';
-export type { BridgeBootstrapDescriptor, BridgeBootstrapValidationIssue } from './bridge-bootstrap';
-export { PluginRuntimeBootstrapError, PluginRuntimeContractError } from './runtime-state';
+} from './bridge-bootstrap.js';
+export type {
+  BridgeBootstrapDescriptor,
+  BridgeBootstrapValidationIssue,
+} from './bridge-bootstrap.js';
+export { PluginRuntimeBootstrapError, PluginRuntimeContractError } from './runtime-state.js';
 export type {
   PluginFailureStage,
   PluginRuntimeErrorCode,
@@ -76,18 +79,18 @@ export type {
   PluginRuntimeState,
   PluginValidationErrorCode,
   PluginValidationIssue,
-} from './runtime-state';
-export type { SurfaceDefinitionRecord, SurfaceDefinitionRegistry } from './surface-definition';
+} from './runtime-state.js';
+export type { SurfaceDefinitionRecord, SurfaceDefinitionRegistry } from './surface-definition.js';
 
-export { createInstallationStore, PluginInstallationError } from './installation-store';
+export { createInstallationStore, PluginInstallationError } from './installation-store.js';
 export type {
   InstallationStore,
   InstallationStoreOptions,
   InstallationStoreSnapshot,
   InstallationStorage,
   ReloadRequired,
-} from './installation-store';
-export { inspect } from './inspection';
+} from './installation-store.js';
+export { inspect } from './inspection.js';
 export type {
   InspectionSource,
   ContributionSnapshot,
@@ -96,7 +99,7 @@ export type {
   PluginSnapshot,
   SurfaceInstanceSnapshot,
   RuntimeErrorSnapshot,
-} from './inspection';
+} from './inspection.js';
 export type {
   ContributionState,
   ContributionKind,
@@ -104,8 +107,8 @@ export type {
   ContributionDiagnosticCode,
   ContributionDiagnostic,
   HostContributionFact,
-} from './host-contribution';
-export { assertContributionContractCompatible } from './contribution-compatibility';
+} from './host-contribution.js';
+export { assertContributionContractCompatible } from './contribution-compatibility.js';
 
 export type {
   ExtensionPointRef,
@@ -115,10 +118,10 @@ export type {
   ContributionRef,
   HostContributionPolicy,
   HostContributionPolicyRequest,
-} from './ui/definitions';
-export { validateContextSchema } from './ui/schema';
-export type { ContextSchema } from './ui/schema';
-export { createUiRuntime, UiError } from './ui/runtime';
+} from './ui/definitions.js';
+export { validateContextSchema } from './ui/schema.js';
+export type { ContextSchema } from './ui/schema.js';
+export { createUiRuntime, UiError } from './ui/runtime.js';
 export type {
   UiRuntime,
   UiRuntimeOptions,
@@ -133,17 +136,17 @@ export type {
   OverlaySnapshot,
   OverlayObservation,
   UiInspection,
-} from './ui/runtime';
+} from './ui/runtime.js';
 export {
   UI_OVERLAY_CAPABILITY,
   UI_OVERLAY_PERMISSION,
   uiOverlayBridgeContract,
-} from './ui/overlay-capability';
-export type { UiOverlayCapability } from './ui/overlay-capability';
-export { resolveRootPresentation } from './root-presentation';
-export type { RootPresentation } from './bootstrap';
+} from './ui/overlay-capability.js';
+export type { UiOverlayCapability } from './ui/overlay-capability.js';
+export { resolveRootPresentation } from './root-presentation.js';
+export type { RootPresentation } from './bootstrap.js';
 
-export { createRouteModel } from './routing/route-model';
+export { createRouteModel } from './routing/route-model.js';
 export type {
   RouteModel,
   ResolvedRoute,
@@ -151,7 +154,7 @@ export type {
   UrlResolution,
   NavigationDestination,
   ContributionPolicyRequest,
-} from './routing/route-model';
+} from './routing/route-model.js';
 
 export type {
   ExtensionKind,
@@ -161,10 +164,10 @@ export type {
   RefContract,
   PolicyDimension,
   CompiledExtensionPointDefinition,
-} from './ui/definitions';
-export type { PointContracts } from './ui/point-compiler';
+} from './ui/definitions.js';
+export type { PointContracts } from './ui/point-compiler.js';
 
-export { createActionRuntime } from './action-runtime';
+export { createActionRuntime } from './action-runtime.js';
 export type {
   ActionHandler,
   ActionRuntime,
@@ -172,23 +175,23 @@ export type {
   ActionSession,
   ActionOutcome,
   ActionInput,
-} from './action-runtime';
+} from './action-runtime.js';
 export type {
   ActionDefinition,
   ActionContributionDefinition,
   TabContributionDefinition,
   ExtensionContributionDefinition,
   PointContributionMetadata,
-} from './ui/definitions';
+} from './ui/definitions.js';
 
-export type { ActionCondition, ComparisonOperator } from './ui/definitions';
+export type { ActionCondition, ComparisonOperator } from './ui/definitions.js';
 
 export {
   createPlatformPlugin,
   platformBridgeContracts,
   PLATFORM_PLUGIN_ID,
   PLATFORM_CAPABILITIES,
-} from './platform';
+} from './platform.js';
 export type {
   PlatformEnvironment,
   PlatformCapabilityId,
@@ -198,7 +201,7 @@ export type {
   PublicNavigation,
   RoutesSnapshot,
   PluginSummary,
-} from './platform';
-export { createContributionPolicy } from './policy';
-export type { ContributionPolicyBundle } from './policy';
-export { createUiOverlayPlugin } from './ui/overlay-capability';
+} from './platform.js';
+export { createContributionPolicy } from './policy.js';
+export type { ContributionPolicyBundle } from './policy.js';
+export { createUiOverlayPlugin } from './ui/overlay-capability.js';

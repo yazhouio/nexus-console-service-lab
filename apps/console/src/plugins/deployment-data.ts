@@ -2,17 +2,17 @@ import type {
   PluginDescriptor,
   RouteContribution,
   ExtensionContributionDefinition,
-} from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime';
 import {
   CONSOLE_CORE_CAPABILITY,
   CORE_ROUTES_POINT,
   primaryNavigation,
-} from '@nexus/console-core-api';
+} from '@feforgejs/console-core-api';
 import {
   DEPLOYMENT_CARDS_POINT,
   DEPLOYMENT_TABS_POINT,
   DEPLOYMENT_ACTIONS_POINT,
-} from '@nexus/cluster-api';
+} from '@feforgejs/cluster-api';
 export const deploymentDescriptor = {
   id: 'deployment',
   version: '1.0.0',

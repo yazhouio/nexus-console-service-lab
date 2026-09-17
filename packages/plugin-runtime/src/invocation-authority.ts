@@ -1,5 +1,5 @@
-import type { BridgeInvocationContext } from './bridge-contract';
-import type { CapabilityId } from './identifiers';
+import type { BridgeInvocationContext } from './bridge-contract.js';
+import type { CapabilityId } from './identifiers.js';
 
 const invocations = new WeakMap<object, { capability: CapabilityId; action: string }>();
 /** Internal execution adapter boundary; never exported by the author SDK. */

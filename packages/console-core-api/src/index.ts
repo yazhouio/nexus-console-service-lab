@@ -7,7 +7,7 @@ import type {
   RouteContribution,
   NavigationContribution,
   SurfaceContributionDefinition,
-} from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime';
 
 export const CONSOLE_CORE_ID = 'console-core';
 export const CONSOLE_CORE_CAPABILITY = 'kubesphere.console-core@1';

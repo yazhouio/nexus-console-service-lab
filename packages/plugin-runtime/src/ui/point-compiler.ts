@@ -1,5 +1,5 @@
-import { frozenCopy } from '../immutable';
-import type { JsonValue } from '../contribution';
+import { frozenCopy } from '../immutable.js';
+import type { JsonValue } from '../contribution.js';
 import {
   assertPoint,
   type CompiledExtensionPointDefinition,
@@ -7,8 +7,13 @@ import {
   type PointConstraints,
   type PointProfile,
   type RefContract,
-} from './definitions';
-import { assertUiJson, canonicalJson, validateContextSchema, type ContextSchema } from './schema';
+} from './definitions.js';
+import {
+  assertUiJson,
+  canonicalJson,
+  validateContextSchema,
+  type ContextSchema,
+} from './schema.js';
 
 export interface PointContracts {
   readonly profiles?: readonly PointProfile[];
@@ -284,7 +289,7 @@ function narrowConstraints(
 
 /** Reject dimensions for which the Kind has no V1 execution/placement semantics. */
 function validateApplicableConstraints(
-  kind: import('./definitions').ExtensionKind,
+  kind: import('./definitions.js').ExtensionKind,
   constraints?: PointConstraints,
 ): void {
   if (!constraints) return;
