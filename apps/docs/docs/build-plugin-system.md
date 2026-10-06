@@ -14,7 +14,7 @@ packages/design-tokens   # 产品视觉约定（按需）
 plugins/example-feature  # 第一个业务插件
 ```
 
-Host 依赖 `@nexus/browser-host` 和 `@nexus/plugin-runtime`；API 与插件使用 Runtime 的公开导出；采用 artifact CSS 工具链时加入 `@nexus/plugin-build`。后者目前面向 Rsbuild/Rspack，不能作为任意构建器的通用适配器。
+Host 依赖 `@feforgejs/browser-host` 和 `@feforgejs/plugin-runtime`；API 与插件使用 Runtime 的公开导出；采用 artifact CSS 工具链时加入 `@feforgejs/plugin-build`。后者目前面向 Rsbuild/Rspack，不能作为任意构建器的通用适配器。
 
 跨仓库接入时使用已发布版本或本地打包的 tarball，替换本仓库的 `workspace:` / `catalog:` 依赖。不要把尚未发布的包当作已可从公共 npm 安装。
 
@@ -64,7 +64,7 @@ Host 依赖 `@nexus/browser-host` 和 `@nexus/plugin-runtime`；API 与插件使
 
 ```tsx
 import { createRoot } from 'react-dom/client';
-import { BrowserHost } from '@nexus/browser-host';
+import { BrowserHost } from '@feforgejs/browser-host';
 import { distribution } from './distribution';
 
 const root = document.getElementById('root');

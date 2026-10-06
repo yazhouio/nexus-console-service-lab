@@ -4,9 +4,13 @@ import type {
   PluginRuntime,
   RuntimeSnapshot,
   createPlatformPlugin,
-} from '@nexus/plugin-runtime';
-import type { UiHost, BridgeAuditEntry, WujiePluginAdapter } from '@nexus/plugin-runtime/browser';
-import type { RouteModel } from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime';
+import type {
+  UiHost,
+  BridgeAuditEntry,
+  WujiePluginAdapter,
+} from '@feforgejs/plugin-runtime/browser';
+import type { RouteModel } from '@feforgejs/plugin-runtime';
 
 export interface HostServices {
   readonly runtime: PluginRuntime;

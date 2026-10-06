@@ -1,11 +1,11 @@
 import { federationBuiltins, type BuiltinPin } from './federation-builtins';
 import { css as localCss } from './ui-local.module.css?artifact';
-import { css as coreCss } from '@nexus/console-core/styles.css?artifact';
+import { css as coreCss } from '@feforgejs/console-core/styles.css?artifact';
 import { css as clusterCss } from './plugins/cluster.css?artifact';
 import { css as deploymentCss } from './plugins/deployment-ui.css?artifact';
-import type { PluginDefinition } from '@nexus/plugin-runtime';
-import type { BrowserDistribution } from '@nexus/browser-host';
-import { consoleCore } from '@nexus/console-core';
+import type { PluginDefinition } from '@feforgejs/plugin-runtime';
+import type { BrowserDistribution } from '@feforgejs/browser-host';
+import { consoleCore } from '@feforgejs/console-core';
 import {
   CONSOLE_CORE_ID,
   CONSOLE_PROFILES,
@@ -13,8 +13,8 @@ import {
   CORE_ROUTES_POINT,
   PRIMARY_NAVIGATION_POINT,
   consoleRoute,
-} from '@nexus/console-core-api';
-import { RESOURCE_REF_CONTRACT, DEPLOYMENT_PROFILES } from '@nexus/cluster-api';
+} from '@feforgejs/console-core-api';
+import { RESOURCE_REF_CONTRACT, DEPLOYMENT_PROFILES } from '@feforgejs/cluster-api';
 import { cluster } from './plugins/cluster';
 import {
   kubeeyeInstallation,

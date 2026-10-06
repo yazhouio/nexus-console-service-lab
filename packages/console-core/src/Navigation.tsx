@@ -1,5 +1,5 @@
-import { RouteLink } from '@nexus/plugin-runtime/react';
-import type { PublicNavigation, PublicRouteLocation } from '@nexus/plugin-runtime';
+import { RouteLink } from '@feforgejs/plugin-runtime/react';
+import type { PublicNavigation, PublicRouteLocation } from '@feforgejs/plugin-runtime';
 
 export function Navigation({
   items,

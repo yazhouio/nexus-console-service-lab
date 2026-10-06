@@ -13,15 +13,15 @@ import {
   RouteLink,
   useRouteContext,
   useCapabilitySubscription,
-} from '@nexus/plugin-runtime/react';
-import type { PluginDefinition, PublicNavigation, RoutesSnapshot } from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime/react';
+import type { PluginDefinition, PublicNavigation, RoutesSnapshot } from '@feforgejs/plugin-runtime';
 
 import {
   CLUSTER_EXTENSION_POINTS,
   NODE_ACTIONS_POINT,
   NODE_TABS_POINT,
   type ClusterCapability,
-} from '@nexus/cluster-api';
+} from '@feforgejs/cluster-api';
 
 function NodeLayout() {
   const routeContext = useRouteContext();

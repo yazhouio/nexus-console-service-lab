@@ -1,7 +1,11 @@
-import { PLUGIN_DETAILS_ACTIONS_POINT } from '@nexus/console-core-api';
+import { PLUGIN_DETAILS_ACTIONS_POINT } from '@feforgejs/console-core-api';
 import { useState } from 'react';
-import { ActionMenu, useCapabilitySubscription, useUiClient } from '@nexus/plugin-runtime/react';
-import type { PluginSummary } from '@nexus/plugin-runtime';
+import {
+  ActionMenu,
+  useCapabilitySubscription,
+  useUiClient,
+} from '@feforgejs/plugin-runtime/react';
+import type { PluginSummary } from '@feforgejs/plugin-runtime';
 
 export function PluginConfiguration() {
   const client = useUiClient();

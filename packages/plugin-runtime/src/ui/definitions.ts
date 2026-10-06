@@ -1,5 +1,5 @@
-import type { HostRenderTarget } from '../contribution';
-import { assertUiJson, validateContextSchema, type ContextSchema } from './schema';
+import type { HostRenderTarget } from '../contribution.js';
+import { assertUiJson, validateContextSchema, type ContextSchema } from './schema.js';
 export interface ExtensionPointRef {
   readonly ownerPluginId: string;
   readonly id: string;
@@ -50,14 +50,14 @@ export type ActionCondition =
   | {
       readonly source: 'selectionCount';
       readonly op: ComparisonOperator;
-      readonly value?: import('../contribution').JsonValue;
+      readonly value?: import('../contribution.js').JsonValue;
     }
   | { readonly source: 'capability'; readonly id: ContractId; readonly available: boolean }
   | {
       readonly source: 'trait';
       readonly name: string;
       readonly op: ComparisonOperator;
-      readonly value?: import('../contribution').JsonValue;
+      readonly value?: import('../contribution.js').JsonValue;
       readonly match: 'all' | 'any';
     }
   | {
@@ -74,7 +74,7 @@ export interface RefContract {
       {
         readonly trait: string;
         readonly op: ComparisonOperator;
-        readonly value?: import('../contribution').JsonValue;
+        readonly value?: import('../contribution.js').JsonValue;
       }
     >
   >;

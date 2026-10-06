@@ -1,10 +1,10 @@
 import { useLayoutEffect, useRef, useState, type ComponentType, type ReactNode } from 'react';
-import type { BuiltinRenderTarget, RouteContext, UiMounted } from '@nexus/plugin-runtime';
-import type { UiHost } from '@nexus/plugin-runtime/browser';
-import type { UiClient } from '@nexus/plugin-runtime/client';
+import type { BuiltinRenderTarget, RouteContext, UiMounted } from '@feforgejs/plugin-runtime';
+import type { UiHost } from '@feforgejs/plugin-runtime/browser';
+import type { UiClient } from '@feforgejs/plugin-runtime/client';
 import { useOutlet } from 'react-router';
-import { UiProvider, RoutePresentationProvider } from '@nexus/plugin-runtime/react';
-import { SurfaceBoundary } from './SurfaceBoundary';
+import { UiProvider, RoutePresentationProvider } from '@feforgejs/plugin-runtime/react';
+import { SurfaceBoundary } from './SurfaceBoundary.js';
 
 interface Presentation {
   readonly id: string;

@@ -1,10 +1,10 @@
-import { frozenCopy } from '../immutable';
-import type { PluginRuntime } from '../bootstrap';
-import type { ActionDriver } from '../action-runtime';
-import { createUiClient } from '../ui-client';
-import { uiKey } from '../ui/definitions';
-import { createPluginBridgeSession, type BridgeAuditEntry } from './plugin-bridge';
-import type { WujiePluginAdapter } from './wujie-plugin-adapter';
+import { frozenCopy } from '../immutable.js';
+import type { PluginRuntime } from '../bootstrap.js';
+import type { ActionDriver } from '../action-runtime.js';
+import { createUiClient } from '../ui-client.js';
+import { uiKey } from '../ui/definitions.js';
+import { createPluginBridgeSession, type BridgeAuditEntry } from './plugin-bridge.js';
+import type { WujiePluginAdapter } from './wujie-plugin-adapter.js';
 
 export function createBrowserActionDriver(options: {
   runtime: PluginRuntime;

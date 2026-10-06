@@ -133,10 +133,10 @@ try {
   // Pin every workspace import to this temporary source tree, never installed dist.
   restoreArchitectureBaseline(root, scratch);
   const aliases = Object.entries({
-    '@nexus/plugin-runtime/browser': 'browser/index.ts',
-    '@nexus/plugin-runtime/client': 'ui-client.ts',
-    '@nexus/plugin-runtime/react': 'ui-react.tsx',
-    '@nexus/plugin-runtime': 'index.ts',
+    '@feforgejs/plugin-runtime/browser': 'browser/index.ts',
+    '@feforgejs/plugin-runtime/client': 'ui-client.ts',
+    '@feforgejs/plugin-runtime/react': 'ui-react.tsx',
+    '@feforgejs/plugin-runtime': 'index.ts',
   }).map(([find, path]) => ({ find, replacement: join(scratch, runtime, 'src', path) }));
   writeFileSync(
     join(scratch, 'vitest.substitution.mjs'),

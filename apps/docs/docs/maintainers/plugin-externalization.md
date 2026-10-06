@@ -7,13 +7,13 @@
 ```sh
 pnpm install --frozen-lockfile
 pnpm build:public
-pnpm --filter @nexus/plugin-runtime pack --pack-destination /tmp/nexus-packages
-pnpm --filter @nexus/browser-host pack --pack-destination /tmp/nexus-packages
-pnpm --filter @nexus/console-core pack --pack-destination /tmp/nexus-packages
-pnpm --filter @nexus/console-core-api pack --pack-destination /tmp/nexus-packages
-pnpm --filter @nexus/cluster-api pack --pack-destination /tmp/nexus-packages
-pnpm --filter @nexus/design-tokens pack --pack-destination /tmp/nexus-packages
-pnpm --filter @nexus/plugin-build pack --pack-destination /tmp/nexus-packages
+pnpm --filter @feforgejs/plugin-runtime pack --pack-destination /tmp/nexus-packages
+pnpm --filter @feforgejs/browser-host pack --pack-destination /tmp/nexus-packages
+pnpm --filter @feforgejs/console-core pack --pack-destination /tmp/nexus-packages
+pnpm --filter @feforgejs/console-core-api pack --pack-destination /tmp/nexus-packages
+pnpm --filter @feforgejs/cluster-api pack --pack-destination /tmp/nexus-packages
+pnpm --filter @feforgejs/design-tokens pack --pack-destination /tmp/nexus-packages
+pnpm --filter @feforgejs/plugin-build pack --pack-destination /tmp/nexus-packages
 ```
 
 这些包已移除 `private`，JS/类型通过 `dist` 发布，CSS 包与构建工具有 `files` 白名单。使用 `pnpm pack/publish`，由 pnpm 将 `workspace:` / `catalog:` 转换为可安装版本。先 build 再 pack；不要把源码目录直接当发布物。外部项目同时安装需要的包及配对的 React/ReactDOM；BrowserHost 和 Core 的 React/SDK 是 peer，发布包不打包私有 React 或 SDK Context。
@@ -22,24 +22,24 @@ ESM 输出面向 bundler，不是直接 HTTP import 的浏览器制品。源码�
 
 ## 独立 Builtin
 
-`apps/example-builtin-plugin` 拥有 extension-demo 定义、数据与样式，构建仅使用 npm 公共入口和 `@nexus/plugin-build`。独立目录的依赖需替换为已发布版本或上一步的 tarball；验证脚本自动完成此转换。
+`apps/example-builtin-plugin` 拥有 extension-demo 定义、数据与样式，构建仅使用 npm 公共入口和 `@feforgejs/plugin-build`。独立目录的依赖需替换为已发布版本或上一步的 tarball；验证脚本自动完成此转换。
 
 ```sh
 NEXUS_REMOTE_BASE=https://cdn.example.com/plugins/extension-demo/1.0.0/ \
-  pnpm --filter @nexus/example-builtin-plugin build
+  pnpm --filter @feforgejs/example-builtin-plugin build
 ```
 
 完整上传该项目 `dist/` 到这个不可变目录，包括 `remoteEntry.js`、JS chunks 和 `static/plugin-css` 等资产。不要只上传 entry，也不要覆盖已发布的版本目录。当前 1.0.0 的 container name 是 `nexus_extension_demo_1_0_0`；以构建配置中的实际 `name` 为准，并确保各制品的 name/uniqueName 不冲突。
 
 Remote 固定 expose `./plugin`，导出 `plugin` 与显式 `css` 数组。所有异步组件的 CSS 也必须从这个入口直接导入，构成完整闭包；无样式时显式 `export const css = []`。使用 `?artifact`，普通业务 CSS import 会被构建拒绝。构建不会自动向 Host 注入样式；UI Attempt 仍负责 CSS 等待、去重与释放。
 
-Host 登记自己实际导入的 React、JSX runtime 和 `@nexus/plugin-runtime/react`。版本从已安装的 package metadata 生成；Remote 使用同一安装基线，并启用 `import: false`、`singleton`、`strictVersion`。当前锁定 Rsbuild/Rspack 2.2.2 与 Federation enhanced/runtime-tools 2.9.0。独立 npm 项目同时设置 `overrides: { "@rspack/core": "2.2.2" }` 并提交 lockfile；仅固定 Rsbuild 版本仍可能使其传递依赖升级。验证脚本使用相同 override，并保存实际安装版本。Remote 若新增 `react-dom` 等运行时入口，必须同步补充 Host 供应和 Remote strict shared，并验证消费路径。
+Host 登记自己实际导入的 React、JSX runtime 和 `@feforgejs/plugin-runtime/react`。版本从已安装的 package metadata 生成；Remote 使用同一安装基线，并启用 `import: false`、`singleton`、`strictVersion`。当前锁定 Rsbuild/Rspack 2.2.2 与 Federation enhanced/runtime-tools 2.9.0。独立 npm 项目同时设置 `overrides: { "@rspack/core": "2.2.2" }` 并提交 lockfile；仅固定 Rsbuild 版本仍可能使其传递依赖升级。验证脚本使用相同 override，并保存实际安装版本。Remote 若新增 `react-dom` 等运行时入口，必须同步补充 Host 供应和 Remote strict shared，并验证消费路径。
 
 ## Console 选择固定制品
 
 ```sh
 NEXUS_BUILTIN_PINS='[{"id":"extension-demo","version":"1.0.0","name":"nexus_extension_demo_1_0_0","entry":"https://cdn.example.com/plugins/extension-demo/1.0.0/remoteEntry.js"}]' \
-  pnpm --filter @nexus/console build
+  pnpm --filter @feforgejs/console build
 ```
 
 Pins 是本次 Distribution 的构建输入。选中远程 extension-demo 时，构建分支排除本地实现和 CSS，不扫描该插件源码；未配置 pins 时仍使用本地例子。Deployment 及其扩展保持现有本地组装。
@@ -69,9 +69,9 @@ BrowserHost 在原 BOOTSTRAPPING effect 内等待，随后合并定义/CSS，再
 Manifest 声明归 `apps/example-restricted-plugin/manifest.ts` 所有。构建生成 JSON；Console 的发行组装消费 JSON，再通过原 `validateRestrictedInstallRecord` 验证，grants 仍由 Host 提供。
 
 ```sh
-pnpm --filter @nexus/example-restricted-plugin build
+pnpm --filter @feforgejs/example-restricted-plugin build
 # 或构建现有 v2 声明对应的制品
-NEXUS_PLUGIN_VERSION=2.0.0 pnpm --filter @nexus/example-restricted-plugin build
+NEXUS_PLUGIN_VERSION=2.0.0 pnpm --filter @feforgejs/example-restricted-plugin build
 ```
 
 输出的 `dist/manifest.json` 与 bundler publicPath 使用同一个已选择版本。将整个目录独立发布，并将 Console 同源 `/plugins/kubeeye/1.0.0/`（或 `/2.0.0/`）路由到对应静态目录。生产依赖网关/CDN 路由，不依赖 monorepo dev proxy。直接把另一个 origin 的 URL 设为 Wujie entry 仍会被拒绝。

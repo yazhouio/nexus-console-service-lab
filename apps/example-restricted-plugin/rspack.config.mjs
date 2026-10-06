@@ -17,7 +17,7 @@ export default defineConfig((_env, argv) => {
   return {
     mode: isDevelopment ? 'development' : 'production',
     entry: standalonePreview
-      ? ['@nexus/design-tokens/theme.css', './src/main.tsx']
+      ? ['@feforgejs/design-tokens/theme.css', './src/main.tsx']
       : './src/main.tsx',
     output: {
       clean: true,

@@ -1,5 +1,5 @@
-import type { PluginRuntime } from './bootstrap';
-import { UiError } from './ui/runtime';
+import type { PluginRuntime } from './bootstrap.js';
+import { UiError } from './ui/runtime.js';
 
 /** Resolve the distribution's root from accepted declarations; presentation never changes Ready. */
 export function resolveRootPresentation(runtime: PluginRuntime) {

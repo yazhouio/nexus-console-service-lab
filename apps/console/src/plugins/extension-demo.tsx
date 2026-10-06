@@ -1,1 +1,1 @@
-export * from '@nexus/example-builtin-plugin/plugin';
+export * from '@feforgejs/example-builtin-plugin/plugin';

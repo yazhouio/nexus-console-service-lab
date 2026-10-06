@@ -1,4 +1,4 @@
-import { UiError } from '../ui/runtime';
+import { UiError } from '../ui/runtime.js';
 
 type StyleRoot = Document | ShadowRoot;
 interface Entry {

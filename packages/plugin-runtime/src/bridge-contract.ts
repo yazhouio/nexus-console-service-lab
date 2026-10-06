@@ -1,13 +1,13 @@
-import type { CapabilityId, PluginId } from './identifiers';
-import type { JsonValue } from './contribution';
-import type { PermissionId } from './manifest';
+import type { CapabilityId, PluginId } from './identifiers.js';
+import type { JsonValue } from './contribution.js';
+import type { PermissionId } from './manifest.js';
 
 export interface RuntimeSchema<T> {
   parse(value: unknown): T;
 }
 
 export interface BridgeInvocationContext {
-  readonly execution?: import('./browser/wujie-plugin-adapter').ExecutionReference;
+  readonly execution?: import('./browser/wujie-plugin-adapter.js').ExecutionReference;
   readonly pluginId: PluginId;
   readonly surfaceId: string;
   readonly surfaceInstanceId: string;

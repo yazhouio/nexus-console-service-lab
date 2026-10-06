@@ -29,12 +29,12 @@ index 0055764..ce7e438 100644
 @@ -3,7 +3,7 @@ import type {
    ContributionDiagnostic, ContributionIdentity, ContributionState, HostContributionFact,
    NavigationContribution, OwnedContribution, RouteContext, RouteContribution,
- } from '@nexus/plugin-runtime';
+ } from '@feforgejs/plugin-runtime';
 -import { makePath, matchSpace, parsePath, relationship, type PathSpace } from './path-space';
 +import { makePath, parsePath, relationship, type PathSpace } from './path-space';
  
- export type { HostContributionPolicyRequest as ContributionPolicyRequest, HostContributionPolicy } from '@nexus/plugin-runtime';
- import type { HostContributionPolicy } from '@nexus/plugin-runtime';
+ export type { HostContributionPolicyRequest as ContributionPolicyRequest, HostContributionPolicy } from '@feforgejs/plugin-runtime';
+ import type { HostContributionPolicy } from '@feforgejs/plugin-runtime';
 @@ -131,7 +131,7 @@ export function createRouteModel(input: {
      const location = new URL(url.startsWith('/') ? `http://host.invalid${url}` : url, 'http://host.invalid');
      try { location.pathname.split('/').forEach(segment => decodeURIComponent(segment)); }

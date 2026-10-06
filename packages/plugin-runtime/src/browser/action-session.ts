@@ -1,6 +1,6 @@
-import type { JsonValue } from '../contribution';
-import { assertUiJson } from '../ui/schema';
-import type { CreateUiControl } from './ui-control';
+import type { JsonValue } from '../contribution.js';
+import { assertUiJson } from '../ui/schema.js';
+import type { CreateUiControl } from './ui-control.js';
 
 /** One execution channel, sharing the same authenticated port as capability RPC. */
 export function createActionExecutionChannel(signal: AbortSignal) {

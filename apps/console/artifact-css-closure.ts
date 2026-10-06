@@ -1,1 +1,1 @@
-export { ArtifactCssClosure } from '@nexus/plugin-build/closure';
+export { ArtifactCssClosure } from '@feforgejs/plugin-build/closure';

@@ -9,11 +9,11 @@ import {
   type ActionDefinition,
   type ExtensionContributionDefinition,
   type UiSurfaceDefinition,
-} from './ui/definitions';
-import { createPointCompiler, type PointContracts } from './ui/point-compiler';
-import { frozenCopy } from './immutable';
-import type { PluginId } from './identifiers';
-import { PluginRuntimeContractError } from './runtime-state';
+} from './ui/definitions.js';
+import { createPointCompiler, type PointContracts } from './ui/point-compiler.js';
+import { frozenCopy } from './immutable.js';
+import type { PluginId } from './identifiers.js';
+import { PluginRuntimeContractError } from './runtime-state.js';
 
 export type JsonValue =
   | null

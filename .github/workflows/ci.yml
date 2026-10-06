@@ -1,6 +1,27 @@
 name: CI
 on: [push, pull_request]
 jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      # Only lint commits introduced by this push/PR; history before commitlint was adopted is left as-is.
+      - name: Lint pull request commits
+        if: github.event_name == 'pull_request'
+        run: pnpm exec commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}" --verbose
+      - name: Lint pushed commits
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        run: pnpm exec commitlint --from "${{ github.event.before }}" --to "${{ github.event.after }}" --verbose
+      - name: Lint pushed commit on new branch
+        if: github.event_name == 'push' && github.event.before == '0000000000000000000000000000000000000000'
+        run: pnpm exec commitlint --last --verbose
   verify:
     runs-on: ubuntu-latest
     steps:
@@ -18,7 +39,9 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - run: pnpm test:coverage
       - run: pnpm build
+      - run: pnpm check:packages
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - run: pnpm build:routing-validation
@@ -31,3 +54,4 @@ jobs:
           path: |
             test-results/
             playwright-report/
+            packages/*/coverage/

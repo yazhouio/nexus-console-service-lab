@@ -4,7 +4,7 @@
 
 ## 平台资产与样式归属
 
-`@nexus/design-tokens` 独立于 Console Core。`theme.css` 是 Token 数值的唯一来源，`README.md` 说明契约版本与单位；`baseline.css` 只包含 document 高度、body margin 和 box-sizing。Console 的入口只静态加载这两个平台资产，业务 CSS 全部由 Runtime 加载。
+`@feforgejs/design-tokens` 独立于 Console Core。`theme.css` 是 Token 数值的唯一来源，`README.md` 说明契约版本与单位；`baseline.css` 只包含 document 高度、body margin 和 box-sizing。Console 的入口只静态加载这两个平台资产，业务 CSS 全部由 Runtime 加载。
 
 公开 Token 覆盖颜色语义、间距、字体、字号、字重、行高、圆角与阴影。长度使用 px，行高与字重无单位，字体使用系统栈。目前发布完整的默认浅色主题；验收中的主题属性使用测试覆盖值，**没有将不完整的暗色主题当作产品功能发布**。新增完整主题时，在同一资产中以 `:root[data-nexus-theme='…']` 声明，Host 切换根属性即可更新普通 DOM、Shadow DOM 和 Overlay，不需要重挂 UI。
 
@@ -58,7 +58,7 @@ Runtime dispose 先关闭 acquire，再结束执行并等待清理，最后释�
 
 Restricted 示例从入口 HTML 正常加载自己的 `main.css`，其中只消费平台变量，不定义平台默认值。Wujie 继续独立负责加载、`loadError`、实例销毁和附加字体节点；Builtin loader 不重复注入其 CSS。本轮没有增加 Wujie 缓存兼容层。
 
-独立预览运行 `pnpm --filter @nexus/example-restricted-plugin dev:preview`，使用 3004 端口并由平台包提供默认主题；正常集成开发继续使用 3001。预览模式禁止生产构建，以免默认主题进入集成产物。
+独立预览运行 `pnpm --filter @feforgejs/example-restricted-plugin dev:preview`，使用 3004 端口并由平台包提供默认主题；正常集成开发继续使用 3001。预览模式禁止生产构建，以免默认主题进入集成产物。
 
 实施前已核对现有 `manifest.ts` 的 Route 白名单：它已支持 `parentRouteId`。本轮没有改变 Restricted schema、声明代际、路由解析或业务 Point/Profile 语义，CSS 依赖仍由 Restricted HTML 描述。
 

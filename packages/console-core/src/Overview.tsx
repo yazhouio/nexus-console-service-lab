@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Slot, useCapabilitySubscription, useUiObservation } from '@nexus/plugin-runtime/react';
-import type { ContributionRef, PluginSummary } from '@nexus/plugin-runtime';
-import { CONSOLE_EXTENSION_POINT_CATALOG, HOME_CARDS_POINT } from '@nexus/console-core-api';
-import { PluginConfiguration } from './PluginConfiguration';
-import { RuntimeInspector } from './RuntimeInspector';
+import { Slot, useCapabilitySubscription, useUiObservation } from '@feforgejs/plugin-runtime/react';
+import type { ContributionRef, PluginSummary } from '@feforgejs/plugin-runtime';
+import { CONSOLE_EXTENSION_POINT_CATALOG, HOME_CARDS_POINT } from '@feforgejs/console-core-api';
+import { PluginConfiguration } from './PluginConfiguration.js';
+import { RuntimeInspector } from './RuntimeInspector.js';
 
 export function Overview() {
   const { value: plugins } = useCapabilitySubscription<readonly PluginSummary[]>(

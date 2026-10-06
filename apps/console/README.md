@@ -1,6 +1,6 @@
 # Console reference plugin system
 
-This application demonstrates the **business plugin system** layer built on `@nexus/plugin-runtime`, `@nexus/browser-host` and `@nexus/plugin-build`. It is a runnable reference and framework regression host, not a complete Nexus service platform.
+This application demonstrates the **business plugin system** layer built on `@feforgejs/plugin-runtime`, `@feforgejs/browser-host` and `@feforgejs/plugin-build`. It is a runnable reference and framework regression host, not a complete Nexus service platform.
 
 Read in order:
 

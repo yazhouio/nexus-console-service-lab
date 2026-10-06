@@ -18,7 +18,7 @@
 | Bootstrap 输入是已取得的 Builtin definitions；resolver 一次运行，注册事务提交 | bootstrap.ts（`packages/plugin-runtime/src/bootstrap.ts:69`）、启动实现（`packages/plugin-runtime/src/bootstrap.ts:419`） | 远程定义在 bootstrap 前取得，继续复用 Core Closure、能力依赖和 Admission。 |
 | BrowserHost 已只依赖 Runtime，Distribution 注入具体插件和恢复能力 | Host exports（`packages/browser-host/src/index.ts:1`）、BrowserDistribution（`packages/browser-host/src/distribution.ts:9`） | Host 公共化优先完成现有包发布，无需新增 Console Host Facade。 |
 | Builtin 都由 Console 静态 import | distribution.ts（`apps/console/src/distribution.ts:6`） | 新接入点是异步取得定义，不是重新实现注册机制。 |
-| Host 和插件共同使用 SDK React Context | ui-react.tsx（`packages/plugin-runtime/src/ui-react.tsx:3`）、ManagedBuiltin（`packages/browser-host/src/ManagedBuiltin.tsx:84`） | 必须共享 `@nexus/plugin-runtime/react` 的模块身份；仅共享 React 不够。 |
+| Host 和插件共同使用 SDK React Context | ui-react.tsx（`packages/plugin-runtime/src/ui-react.tsx:3`）、ManagedBuiltin（`packages/browser-host/src/ManagedBuiltin.tsx:84`） | 必须共享 `@feforgejs/plugin-runtime/react` 的模块身份；仅共享 React 不够。 |
 | 根呈现/Route Layout 在 Host Router 树内，独立 Slot 由 Host 创建 React Root | ManagedBuiltin（`packages/browser-host/src/ManagedBuiltin.tsx:43`）、render-builtin-ui（`packages/browser-host/src/render-builtin-ui.tsx:10`） | Remote 导出定义及组件引用，由原有 Host renderer 执行；不能远程自行 mount 整个应用代替此语义。 |
 | CSS URL 数组、就绪门禁、按真实样式根去重和引用回收已经实现 | builtinCss（`packages/browser-host/src/distribution.ts:10`）、ui-host（`packages/plugin-runtime/src/browser/ui-host.ts:155`）、artifact-assets（`packages/plugin-runtime/src/browser/artifact-assets.ts:46`） | 只改变这些 URL 的构建来源，不增加 AssetManager。 |
 | Restricted 是独立 HTML 应用，但 adapter 强制入口同源 | Manifest（`packages/plugin-runtime/src/manifest.ts:23`）、Wujie origin 检查（`packages/plugin-runtime/src/browser/wujie-plugin-adapter.ts:280`） | 最小 CDN 接入是同源 URL 代理/CDN 路由；允许域名或 CORS 配置本身不能解除此限制。 |
@@ -115,12 +115,12 @@ Remote module 求值只能提供定义与构建资产数据，不自动 activate
 | --- | --- | --- |
 | `react` | Host 提供同一实例，Remote 不内置 fallback | Hooks 必须连接 Host renderer 使用的 React。 |
 | `react/jsx-runtime` | 明确共享；开发产物另处理 `react/jsx-dev-runtime` | 自动 JSX 是实际子路径导入，配置包根不等于覆盖所有子路径。 |
-| `@nexus/plugin-runtime/react` | 必须作为确切入口共享同一实例 | 包含 `ClientContext`、`RoutePresentation`、`RouteLinks` 三个模块级 Context。 |
+| `@feforgejs/plugin-runtime/react` | 必须作为确切入口共享同一实例 | 包含 `ClientContext`、`RoutePresentation`、`RouteLinks` 三个模块级 Context。 |
 | `react-dom` | 当前由 Host 选择与 React 配对的版本；Remote 若实际使用 Portal 等入口，则共享该入口 | 当前 Builtin 没有直接 import ReactDOM。 |
 | `react-dom/client` | 当前由 Host 持有 renderer；只有实际需要此 import 时才覆盖子路径 | Remote 不应另建根来绕开已有 Surface 执行。 |
-| `@nexus/plugin-runtime` 根、API 包 | 类型和纯数据不要求 singleton；只按实际运行时导入评估 bundle | 共享 SDK React 入口不代表必须共享整个 Runtime 内核和 Wujie。 |
+| `@feforgejs/plugin-runtime` 根、API 包 | 类型和纯数据不要求 singleton；只按实际运行时导入评估 bundle | 共享 SDK React 入口不代表必须共享整个 Runtime 内核和 Wujie。 |
 | `react-router` | 继续由 Host 实现路由；不作为插件公共共享前提 | 插件使用已有 RouteLink/RouteOutlet/RouteContext。 |
-| `@nexus/design-tokens` | Host 的公共 CSS 资产，插件消费变量 | 目前是 CSS-only，没有 JS Provider 或组件库实例。 |
+| `@feforgejs/design-tokens` | Host 的公共 CSS 资产，插件消费变量 | 目前是 CSS-only，没有 JS Provider 或组件库实例。 |
 | 将来引入的 Design System JS | 出现实际共享 Context/缓存/运行时身份需求时再加入 | 不因名称是 Design System 就预先整包 singleton。 |
 
 Host pure runtime 的 `lib` 必须返回 Host 自己实际使用的导入值；不能指向另一份从 CDN 新加载的 React。发布 Host 时也须 externalize 对应 React/SDK 入口，避免公共包内部私有打包一份，再在应用层登记另一份。版本字符串由实际安装包/构建信息生成，Remote 的兼容范围来自自身依赖声明，不能另维护一张相互漂移的手工版本表。
@@ -131,7 +131,7 @@ Remote 对必要共享依赖采用 `import: false`、`singleton: true` 和显式
 
 共享版本检查发生在实际消费模块时。入口依赖不兼容可在取得 definition 时失败；只有惰性 chunk 才消费的依赖可能在 UI 执行阶段失败，交给原有呈现失败机制。`loadRemote` 成功不代表验证了全部未来代码路径；本阶段不为提前证明这一点再增加运行时依赖清单或扫描器，改由跨仓库构建检查与集成测试覆盖。
 
-PoC 初始固定仓库实际基线 React/DOM 19.2.8 与 SDK 0.1.0；之后是否放宽版本范围由兼容性测试决定。SDK 包当前处于 0.x，不能把 `@nexus/plugin-runtime/react` 同实例与“任意 SDK 版本兼容”混为一谈。
+PoC 初始固定仓库实际基线 React/DOM 19.2.8 与 SDK 0.1.0；之后是否放宽版本范围由兼容性测试决定。SDK 包当前处于 0.x，不能把 `@feforgejs/plugin-runtime/react` 同实例与“任意 SDK 版本兼容”混为一谈。
 
 以下版本继续各自负责已有问题，不合成新的 `pluginAbiVersion`：npm SDK/React 的代码兼容；plugin version 的发行身份；Capability、Point、Profile/Ref 的既有 major；Restricted `hostApi`、Bridge protocolVersion 与 contribution contract version。Module Federation shared 协商只校验 JS 依赖供应，不替代这些 Contract 和业务权限。
 
@@ -157,11 +157,11 @@ JS 模块缓存寿命可持续整页；Scope/Attempt 的 DOM、订阅、Action �
 
 | 现有模块 | 必要发布工作 |
 | --- | --- |
-| `@nexus/plugin-runtime` 的 `. /browser /client /react` | 保留入口与类型，核验 tarball 文件完整、依赖版本可解析；React 继续 peer。不新建等价 SDK 包。 |
-| `@nexus/browser-host` | 构建 JS + `.d.ts`，导出已有 BrowserHost/Distribution；React、ReactDOM 及有身份要求的 SDK 依赖采用 peer/external 方式由应用供应，保证一个实际实例。 |
-| `@nexus/console-core` | 外部 Console 需要默认核心业务时发布其定义、JS/类型与 CSS；它仍是 Distribution 选择的插件，不并回 Host。 |
-| `@nexus/console-core-api`、按需 `@nexus/cluster-api` | 输出独立 JS/类型，继续承载现有 Point/Profile/Ref 和 helper；不通过 Host 私有源码消费。 |
-| `@nexus/design-tokens` | 发布现有 CSS 并补 files 白名单；不需要 JS runtime。 |
+| `@feforgejs/plugin-runtime` 的 `. /browser /client /react` | 保留入口与类型，核验 tarball 文件完整、依赖版本可解析；React 继续 peer。不新建等价 SDK 包。 |
+| `@feforgejs/browser-host` | 构建 JS + `.d.ts`，导出已有 BrowserHost/Distribution；React、ReactDOM 及有身份要求的 SDK 依赖采用 peer/external 方式由应用供应，保证一个实际实例。 |
+| `@feforgejs/console-core` | 外部 Console 需要默认核心业务时发布其定义、JS/类型与 CSS；它仍是 Distribution 选择的插件，不并回 Host。 |
+| `@feforgejs/console-core-api`、按需 `@feforgejs/cluster-api` | 输出独立 JS/类型，继续承载现有 Point/Profile/Ref 和 helper；不通过 Host 私有源码消费。 |
+| `@feforgejs/design-tokens` | 发布现有 CSS 并补 files 白名单；不需要 JS runtime。 |
 | 已有 CSS loader、lint、闭包检查 | 提取为一个仅构建期使用的小包（名称待实施确定），带齐 Lightning CSS/PostCSS 等依赖；Host 与插件都复用同一实现。 |
 
 最后一项是本阶段唯一有明确理由的新物理包：外部构建无法使用 `../../scripts`，把这些工具放进 Runtime 主入口会混入 Node/bundler 依赖，复制到每个仓库又会使样式规则漂移。只搬现有能力和必要发行入口配置，不建设多 bundler Adapter、插件脚手架平台或通用 compiler。

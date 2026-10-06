@@ -1,6 +1,11 @@
 {
-  "name": "@nexus/browser-host",
+  "name": "@feforgejs/browser-host",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yazhouio/nexus-console-service-lab.git",
+    "directory": "packages/browser-host"
+  },
   "files": [
     "dist"
   ],
@@ -15,6 +20,9 @@
       "import": "./dist/testing.js"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json"
@@ -23,7 +31,7 @@
     "react-router": "catalog:"
   },
   "devDependencies": {
-    "@nexus/plugin-runtime": "workspace:*",
+    "@feforgejs/plugin-runtime": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -32,7 +40,7 @@
     "typescript": "catalog:"
   },
   "peerDependencies": {
-    "@nexus/plugin-runtime": "^0.1.0",
+    "@feforgejs/plugin-runtime": "^0.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   }

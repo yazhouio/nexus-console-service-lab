@@ -1,4 +1,4 @@
-import { createUiClient } from '@nexus/plugin-runtime/client';
+import { createUiClient } from '@feforgejs/plugin-runtime/client';
 
 const CONNECT_MESSAGE = 'nexus:bridge:connect';
 const CONNECTED_MESSAGE = 'nexus:bridge:connected';

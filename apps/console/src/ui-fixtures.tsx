@@ -3,14 +3,14 @@ import {
   validateRestrictedInstallRecord,
   UI_OVERLAY_CAPABILITY,
   type PluginDefinition,
-} from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime';
 import classes from './ui-local.module.css?artifact';
-import { useSurfaceContext, useUiClient } from '@nexus/plugin-runtime/react';
+import { useSurfaceContext, useUiClient } from '@feforgejs/plugin-runtime/react';
 import {
   useHostTestServices as useHostServices,
   TestSurfaceMount as SurfaceMount,
   TestBuiltinMount,
-} from '@nexus/browser-host/testing';
+} from '@feforgejs/browser-host/testing';
 
 const schema = {
   type: 'object',

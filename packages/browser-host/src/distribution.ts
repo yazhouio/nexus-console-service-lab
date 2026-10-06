@@ -5,7 +5,7 @@ import type {
   InstallationStore,
   InstalledPluginRecord,
   PlatformCatalogEntry,
-} from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime';
 export interface RecoveryChange {
   readonly id: string;
   readonly label: string;

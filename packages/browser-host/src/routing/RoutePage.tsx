@@ -1,10 +1,10 @@
 import { createContext, useContext } from 'react';
 import { useLocation, useParams, useRoutes } from 'react-router';
-import type { RouteContext } from '@nexus/plugin-runtime';
-import { useHostServices } from '../HostContext';
-import { ManagedBuiltin } from '../ManagedBuiltin';
-import { SurfaceMount } from '../SurfaceMount';
-import type { ResolvedRoute, RouteModel, UrlResolution } from '@nexus/plugin-runtime';
+import type { RouteContext } from '@feforgejs/plugin-runtime';
+import { useHostServices } from '../HostContext.js';
+import { ManagedBuiltin } from '../ManagedBuiltin.js';
+import { SurfaceMount } from '../SurfaceMount.js';
+import type { ResolvedRoute, RouteModel, UrlResolution } from '@feforgejs/plugin-runtime';
 
 const ResolutionContext = createContext<UrlResolution>({ state: 'NOT_FOUND' });
 function RoutePage({ route }: { readonly route: ResolvedRoute }) {

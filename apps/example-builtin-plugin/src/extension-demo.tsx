@@ -5,10 +5,10 @@ import {
   extensionDemoExtensions,
 } from './extension-demo-data';
 import { useState } from 'react';
-import { useSurfaceContext } from '@nexus/plugin-runtime/react';
-import type { PluginDefinition, JsonValue } from '@nexus/plugin-runtime';
-import { CONSOLE_EXTENSION_POINT_CATALOG } from '@nexus/console-core-api';
-import { CLUSTER_EXTENSION_POINT_CATALOG } from '@nexus/cluster-api';
+import { useSurfaceContext } from '@feforgejs/plugin-runtime/react';
+import type { PluginDefinition, JsonValue } from '@feforgejs/plugin-runtime';
+import { CONSOLE_EXTENSION_POINT_CATALOG } from '@feforgejs/console-core-api';
+import { CLUSTER_EXTENSION_POINT_CATALOG } from '@feforgejs/cluster-api';
 
 const pointCatalog = [...CONSOLE_EXTENSION_POINT_CATALOG, ...CLUSTER_EXTENSION_POINT_CATALOG];
 

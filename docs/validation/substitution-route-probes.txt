@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
 import { createRouteModel } from '../src/routing/route-model';
 import { createRouteModel as reference } from './reference/route-model';
-import type { OwnedContribution, RouteContribution } from '@nexus/plugin-runtime';
+import type { OwnedContribution, RouteContribution } from '@feforgejs/plugin-runtime';
 
 it('substitution: URL membership preserves observable resolution across encoding and conflict families', () => {
   const paths = ['/', '/x', '/x/:id', '/x/*', '/:id/x', '/:id', '/*', '/x/:id/end'];

@@ -3,14 +3,14 @@ import type {
   RouteContribution,
   NavigationContribution,
   ExtensionContributionDefinition,
-} from '@nexus/plugin-runtime';
+} from '@feforgejs/plugin-runtime';
 import {
   CONSOLE_CORE_ID,
   CONSOLE_CORE_CAPABILITY,
   CORE_ROUTES_POINT,
   PLUGIN_DETAILS_ACTIONS_POINT,
   primaryNavigation,
-} from '@nexus/console-core-api';
+} from '@feforgejs/console-core-api';
 
 export const consoleCoreDescriptor = {
   id: CONSOLE_CORE_ID,

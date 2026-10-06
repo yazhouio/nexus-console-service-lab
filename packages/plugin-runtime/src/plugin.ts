@@ -1,5 +1,5 @@
-import type { CapabilityId, PluginId } from './identifiers';
-import type { PluginContributionContext } from './contribution';
+import type { CapabilityId, PluginId } from './identifiers.js';
+import type { PluginContributionContext } from './contribution.js';
 
 export type PluginRole = 'provider' | 'feature';
 export type PluginProvenance = 'first-party' | 'partner' | 'third-party';
@@ -19,7 +19,7 @@ export interface PluginCapabilityContext {
 
 export interface PluginContext {
   readonly actions: {
-    register(id: string, handler: import('./action-runtime').ActionHandler): void;
+    register(id: string, handler: import('./action-runtime.js').ActionHandler): void;
   };
   readonly capabilities: PluginCapabilityContext;
   readonly contributions: PluginContributionContext;

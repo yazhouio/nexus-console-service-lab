@@ -1,1 +1,1 @@
-export { consoleCore } from './plugin';
+export { consoleCore } from './plugin.js';

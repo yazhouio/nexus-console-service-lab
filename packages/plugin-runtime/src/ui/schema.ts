@@ -1,4 +1,4 @@
-import type { JsonValue } from '../contribution';
+import type { JsonValue } from '../contribution.js';
 
 export type ContextSchema = { readonly [key: string]: JsonValue };
 export const UI_JSON_LIMITS = Object.freeze({ bytes: 65_536, depth: 32, nodes: 10_000 });

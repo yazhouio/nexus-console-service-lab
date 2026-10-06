@@ -1,6 +1,6 @@
-import type { ContributionRegistry, HostRenderTarget, JsonValue } from '../contribution';
-import { admitContribution, comparePointContributions } from './admission';
-import { frozenCopy } from '../immutable';
+import type { ContributionRegistry, HostRenderTarget, JsonValue } from '../contribution.js';
+import { admitContribution, comparePointContributions } from './admission.js';
+import { frozenCopy } from '../immutable.js';
 import {
   uiKey,
   type ContributionRef,
@@ -8,8 +8,8 @@ import {
   type HostContributionPolicy,
   type SurfaceContributionDefinition,
   type TabContributionDefinition,
-} from './definitions';
-import { assertUiJson, matchesContext, canonicalJson } from './schema';
+} from './definitions.js';
+import { assertUiJson, matchesContext, canonicalJson } from './schema.js';
 
 export class UiError extends Error {
   constructor(
@@ -205,7 +205,7 @@ export function createUiRuntime(options: UiRuntimeOptions) {
       .filter(
         (
           entry,
-        ): entry is import('../contribution').OwnedContribution<
+        ): entry is import('../contribution.js').OwnedContribution<
           SurfaceContributionDefinition | TabContributionDefinition
         > => entry.contribution.kind !== 'action',
       ),

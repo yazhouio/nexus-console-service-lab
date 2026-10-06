@@ -1,8 +1,8 @@
 // Throwaway gate probe, not a production plugin template.
 import * as React from 'react';
 import * as jsx from 'react/jsx-runtime';
-import * as sdk from '@nexus/plugin-runtime/react';
-import type { PluginDefinition } from '@nexus/plugin-runtime';
+import * as sdk from '@feforgejs/plugin-runtime/react';
+import type { PluginDefinition } from '@feforgejs/plugin-runtime';
 import classes, { css as mainCss } from './main.module.css?artifact';
 import { css as lazyCss } from './lazy.module.css?artifact';
 

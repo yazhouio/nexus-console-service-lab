@@ -1,14 +1,14 @@
-import { bindInvocationContext } from '../invocation-authority';
-import type { CreateUiControl } from './ui-control';
-import type { PluginRuntime } from '../bootstrap';
+import { bindInvocationContext } from '../invocation-authority.js';
+import type { CreateUiControl } from './ui-control.js';
+import type { PluginRuntime } from '../bootstrap.js';
 import type {
   BridgeSubscriptionActionContract,
   OpenedBridgeSubscription,
-} from '../bridge-contract';
-import { isJsonValue, type JsonValue } from '../contribution';
-import { isCapabilityId, type CapabilityId } from '../identifiers';
-import type { PermissionId } from '../manifest';
-import type { SurfaceInstanceIdentity } from './wujie-plugin-adapter';
+} from '../bridge-contract.js';
+import { isJsonValue, type JsonValue } from '../contribution.js';
+import { isCapabilityId, type CapabilityId } from '../identifiers.js';
+import type { PermissionId } from '../manifest.js';
+import type { SurfaceInstanceIdentity } from './wujie-plugin-adapter.js';
 
 export interface BridgeSessionIdentity extends SurfaceInstanceIdentity {
   readonly protocolVersion: number;

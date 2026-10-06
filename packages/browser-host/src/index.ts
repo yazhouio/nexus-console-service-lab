@@ -1,7 +1,7 @@
-export { BrowserHost } from './App';
+export { BrowserHost } from './App.js';
 export type {
   BrowserDistribution,
   RecoveryConfiguration,
   PreparedBuiltins,
   BuiltinPreparationFailure,
-} from './distribution';
+} from './distribution.js';

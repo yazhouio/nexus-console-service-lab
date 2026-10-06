@@ -1,27 +1,27 @@
-import type { ActionInput, ActionSession } from '../action-runtime';
-import { createActionExecutionChannel } from './action-session';
-import type { CreateUiControl } from './ui-control';
+import type { ActionInput, ActionSession } from '../action-runtime.js';
+import { createActionExecutionChannel } from './action-session.js';
+import type { CreateUiControl } from './ui-control.js';
 import {
   validateBridgeBootstrapDescriptor,
   type BridgeBootstrapDescriptor,
-} from '../bridge-bootstrap';
-import { isJsonValue, type JsonValue, type RouteContext } from '../contribution';
-import type { PluginId } from '../identifiers';
-import type { PluginRuntime } from '../bootstrap';
+} from '../bridge-bootstrap.js';
+import { isJsonValue, type JsonValue, type RouteContext } from '../contribution.js';
+import type { PluginId } from '../identifiers.js';
+import type { PluginRuntime } from '../bootstrap.js';
 import {
   BridgeHandshakeError,
   createWindowBridgeHandshakeCoordinator,
   type BridgeHandshakeAttempt,
   type BridgeHandshakeCoordinator,
-} from './window-bridge-handshake';
-import { loadWujieDriver, type WujieDriver, type WujieStartOptions } from './wujie-driver';
+} from './window-bridge-handshake.js';
+import { loadWujieDriver, type WujieDriver, type WujieStartOptions } from './wujie-driver.js';
 import {
   createPluginBridgeSession,
   type BridgeHostError,
   type BridgeLimits,
   type BridgeAuditEntry,
   type PluginBridgeSession,
-} from './plugin-bridge';
+} from './plugin-bridge.js';
 
 let nextWujieName = 0;
 

@@ -11,16 +11,16 @@ import {
   uiOverlayBridgeContract,
   createRouteModel,
   type BootstrapFailure,
-} from '@nexus/plugin-runtime';
-import { RouteLinkProvider } from '@nexus/plugin-runtime/react';
-import { renderBuiltinUi } from './render-builtin-ui';
-import { HostContext, type HostServices } from './HostContext';
-import { ManagedBuiltin } from './ManagedBuiltin';
-import { BreakGlass } from './BreakGlass';
-import { SurfaceMount } from './SurfaceMount';
-import { RoutedContent } from './routing/RoutePage';
-import { mergePreparedBuiltins } from './prepare-builtins';
-import type { BrowserDistribution } from './distribution';
+} from '@feforgejs/plugin-runtime';
+import { RouteLinkProvider } from '@feforgejs/plugin-runtime/react';
+import { renderBuiltinUi } from './render-builtin-ui.js';
+import { HostContext, type HostServices } from './HostContext.js';
+import { ManagedBuiltin } from './ManagedBuiltin.js';
+import { BreakGlass } from './BreakGlass.js';
+import { SurfaceMount } from './SurfaceMount.js';
+import { RoutedContent } from './routing/RoutePage.js';
+import { mergePreparedBuiltins } from './prepare-builtins.js';
+import type { BrowserDistribution } from './distribution.js';
 
 type Startup =
   | { state: 'BOOTSTRAPPING' }
@@ -75,7 +75,7 @@ export function BrowserHost({ distribution }: { readonly distribution: BrowserDi
           installed,
         });
         if (disposed) return;
-        const browser = await import('@nexus/plugin-runtime/browser');
+        const browser = await import('@feforgejs/plugin-runtime/browser');
         if (disposed) return;
         const audit: HostServices['audit'][number][] = [];
         const appendAudit = (entry: HostServices['audit'][number]) => {

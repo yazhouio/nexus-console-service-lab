@@ -6,7 +6,7 @@ import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 
 const require = createRequire(import.meta.url);
-const sdkVersion = require('@nexus/plugin-runtime/package.json').version;
+const sdkVersion = require('@feforgejs/plugin-runtime/package.json').version;
 const pins = JSON.parse(process.env.NEXUS_BUILTIN_PINS ?? '[]');
 
 const routing = routingBuildSettings(process.env);
@@ -34,7 +34,7 @@ export default defineConfig({
           .end()
           .type('javascript/auto')
           .use('artifact-css')
-          .loader(require.resolve('@nexus/plugin-build/artifact-css-loader'))
+          .loader(require.resolve('@feforgejs/plugin-build/artifact-css-loader'))
           .options({ namespace, allowFixed });
       }
       chain.module
@@ -44,7 +44,7 @@ export default defineConfig({
         .exclude.add(resolve(import.meta.dirname, '../../packages/design-tokens'))
         .end()
         .use('reject-unmanaged')
-        .loader(require.resolve('@nexus/plugin-build/reject-unmanaged-css'));
+        .loader(require.resolve('@feforgejs/plugin-build/reject-unmanaged-css'));
     },
   },
   output: { assetPrefix: '/', distPath: { root: routing.output } },

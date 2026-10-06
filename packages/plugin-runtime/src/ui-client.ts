@@ -1,8 +1,8 @@
-import type { ActionRuntime, ActionOutcome } from './action-runtime';
-import type { ExtensionPointRef, ContributionRef } from './ui/definitions';
-import type { JsonValue } from './contribution';
+import type { ActionRuntime, ActionOutcome } from './action-runtime.js';
+import type { ExtensionPointRef, ContributionRef } from './ui/definitions.js';
+import type { JsonValue } from './contribution.js';
 import { assertUiJson } from './ui/schema.js';
-import type { ContextSnapshot, OverlaySnapshot, SlotInput, UiObservation } from './ui/runtime';
+import type { ContextSnapshot, OverlaySnapshot, SlotInput, UiObservation } from './ui/runtime.js';
 export type {
   ContextSnapshot,
   OverlaySnapshot,
@@ -10,7 +10,7 @@ export type {
   SlotObservation,
   UiObservation,
   UiSizing,
-} from './ui/runtime';
+} from './ui/runtime.js';
 export interface UiPort {
   postMessage(value: unknown): void;
   addEventListener(type: 'message', listener: (event: MessageEvent) => void): void;
@@ -375,7 +375,7 @@ export async function connectUiHost(hostWindow: Window = window): Promise<UiClie
 
 /** Action-only entry point. It connects once and never creates a Surface or UI Scope. */
 export async function connectActionHost(
-  handler: import('./action-runtime').ActionHandler,
+  handler: import('./action-runtime.js').ActionHandler,
   hostWindow: Window = window,
 ): Promise<() => void> {
   const props = (

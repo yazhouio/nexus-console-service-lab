@@ -161,7 +161,7 @@ Restricted 入口用 `connectUiHost()` 创建唯一控制连接，再用 `UiProv
 
 ## Console Core 作者接口（contract version 3）
 
-Feature 从 `@nexus/console-core-api` 获取 Point ID、Profile 和贡献构造器，从自己的领域 API 获取 Ref Contract。不要导入 `@nexus/console-core` 实现、`@nexus/browser-host` 或 Runtime 私有源码。Distribution 在 `apps/console/src/distribution.ts` 汇集契约并提供两类独立授权：`contributor → point@major` 的静态 grant，以及 Capability 的 permission grant。
+Feature 从 `@feforgejs/console-core-api` 获取 Point ID、Profile 和贡献构造器，从自己的领域 API 获取 Ref Contract。不要导入 `@feforgejs/console-core` 实现、`@feforgejs/browser-host` 或 Runtime 私有源码。Distribution 在 `apps/console/src/distribution.ts` 汇集契约并提供两类独立授权：`contributor → point@major` 的静态 grant，以及 Capability 的 permission grant。
 
 所有 Route/Navigation 都指向版本化 Point。父节点通过 `childPoint` 发布自己拥有的子接纳点；`acceptsChildren` 不能替代 Point 或 grant。Builtin Layout 使用 `RouteOutlet/useRouteContext`，链接用 Route ID 和参数；Restricted 调用 `routes.navigate@1/navigate`，输入 `{ routeId, params }`。它不能提交 URL、search 或 history 操作。
 
@@ -194,7 +194,7 @@ Manifest 可以声明 `surfaces: []` 和 `actions: [{ id: "check" }]`。贡献�
 Restricted 入口使用 SDK；每次执行都有独立 Session，不维护常驻 plugin-wide 连接：
 
 ```ts
-import { connectActionHost } from '@nexus/plugin-runtime/client';
+import { connectActionHost } from '@feforgejs/plugin-runtime/client';
 await connectActionHost(async ({ invocationId, actionId, context, payload, signal, capabilities }) => {
   // context / payload 已复制并冻结；能力、权限和结果校验与 Surface 相同。
   return capabilities.invoke('routes.query@1', 'current', null);
@@ -230,6 +230,6 @@ V1 约束适用范围：`group/order` 适用于各 Kind。`cardinality` 对 Surf
 
 Builtin 由 Distribution 关联构建生成的完整 CSS URL 数组；首次 UI 执行会等待 CSS，就绪后才渲染，最后一个消费者卸载后回收。不要在插件 JS 中使用会向 Host 全局注入 CSS 的普通副作用 import；本仓库的 `?artifact` 编译路径保留 CSS Modules 默认 class 映射，并提供具名 `css` 数组供 Distribution 组装。异步 UI 的 CSS 也须进入这份静态闭包，纯 Action 不触发 UI CSS 加载。
 
-Restricted 由自己的 HTML 引入内部 CSS，自行声明字体、背景及 reset，并继承 Host Token。集成产物不携带同名平台默认变量，也不另设主题 Bridge。独立预览可以加载 `@nexus/design-tokens/theme.css`；示例的 `dev:preview` 与集成开发端口分开。
+Restricted 由自己的 HTML 引入内部 CSS，自行声明字体、背景及 reset，并继承 Host Token。集成产物不携带同名平台默认变量，也不另设主题 Bridge。独立预览可以加载 `@feforgejs/design-tokens/theme.css`；示例的 `dev:preview` 与集成开发端口分开。
 
 `RouteLink` 可传 `className`；`ActionMenu`、`Tabs` 可传 `classNames` 为它们自身的 root/button/status/result 指定私有类名。这些是本地 React 呈现参数，不改变 Point 或 Surface 契约。构建及验收细节见[插件样式实施记录](./maintainers/plugin-styling-implementation.md)。

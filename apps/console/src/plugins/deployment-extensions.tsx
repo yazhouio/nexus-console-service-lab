@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useSurfaceContext } from '@nexus/plugin-runtime/react';
-import type { JsonValue, PluginDefinition } from '@nexus/plugin-runtime';
+import { useSurfaceContext } from '@feforgejs/plugin-runtime/react';
+import type { JsonValue, PluginDefinition } from '@feforgejs/plugin-runtime';
 import {
   deploymentHpaDescriptor,
   deploymentVpaDescriptor,
@@ -8,7 +8,7 @@ import {
   deploymentNetworkDescriptor,
   deploymentExtensions,
 } from './deployment-data';
-import { type ResourceRef } from '@nexus/cluster-api';
+import { type ResourceRef } from '@feforgejs/cluster-api';
 import { findDeployment, updateDeployment, useDeployments } from './deployment-mock';
 
 function resource(context: JsonValue | undefined): ResourceRef | undefined {

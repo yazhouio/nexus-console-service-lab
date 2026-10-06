@@ -1,11 +1,11 @@
-import { assertUiJson, matchesContext, type ContextSchema } from '../ui/schema';
-import { frozenCopy } from '../immutable';
-import { admitContribution, comparePointContributions } from '../ui/admission';
+import { assertUiJson, matchesContext, type ContextSchema } from '../ui/schema.js';
+import { frozenCopy } from '../immutable.js';
+import { admitContribution, comparePointContributions } from '../ui/admission.js';
 import {
   uiKey,
   type CompiledExtensionPointDefinition,
   type ExtensionPointRef,
-} from '../ui/definitions';
+} from '../ui/definitions.js';
 import { matchRoutes, type RouteObject } from 'react-router';
 import type {
   ContributionDiagnostic,
@@ -16,14 +16,14 @@ import type {
   OwnedContribution,
   RouteContext,
   RouteContribution,
-} from '../index';
-import { makePath, parsePath, relationship, type PathSpace } from './path-space';
+} from '../index.js';
+import { makePath, parsePath, relationship, type PathSpace } from './path-space.js';
 
 export type {
   HostContributionPolicyRequest as ContributionPolicyRequest,
   HostContributionPolicy,
-} from '../index';
-import type { HostContributionPolicy } from '../index';
+} from '../index.js';
+import type { HostContributionPolicy } from '../index.js';
 export interface ResolvedRoute extends OwnedContribution<RouteContribution> {
   state: ContributionState;
   diagnostics: ContributionDiagnostic[];

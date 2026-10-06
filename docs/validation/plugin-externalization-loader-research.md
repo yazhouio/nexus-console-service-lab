@@ -16,9 +16,9 @@
 | --- | --- |
 | `pnpm-workspace.yaml` 和 lockfile 固定 `@rsbuild/core` / `@rspack/core` 2.2.2、React / React DOM 19.2.8、Wujie 2.1.0。 | 不能套用旧版 Rsbuild “打开配置无需 runtime 依赖”的教程。见 [workspace 配置](../../pnpm-workspace.yaml)。 |
 | Host 使用 Rsbuild；入口直接导入 React DOM `createRoot` 和 `BrowserHost`，没有 import map，也没有 MF 配置。 | Host 当前只有 bundler 模块图，浏览器原生模块图不能自动复用其中的 React。见 [入口](../../apps/console/src/main.tsx)、[构建配置](../../apps/console/rsbuild.config.ts)。 |
-| `@nexus/plugin-runtime/react` 的 `ui-react.tsx` 含模块级 `ClientContext`、`RoutePresentation`、`RouteLinks`。Builtin 直接使用 `useUiClient` / `Slot` / `RouteLink` / `useRouteContext` 等。 | 单共享 React 不够：此 SDK 子路径的 Provider 与 Hook 必须使用同一模块实例。见 [SDK React 入口](../../packages/plugin-runtime/src/ui-react.tsx)、[Cluster 插件](../../apps/console/src/plugins/cluster.tsx)。 |
+| `@feforgejs/plugin-runtime/react` 的 `ui-react.tsx` 含模块级 `ClientContext`、`RoutePresentation`、`RouteLinks`。Builtin 直接使用 `useUiClient` / `Slot` / `RouteLink` / `useRouteContext` 等。 | 单共享 React 不够：此 SDK 子路径的 Provider 与 Hook 必须使用同一模块实例。见 [SDK React 入口](../../packages/plugin-runtime/src/ui-react.tsx)、[Cluster 插件](../../apps/console/src/plugins/cluster.tsx)。 |
 | 当前 Builtin 没有自行 `createRoot`；Host renderer 负责渲染，当前 Builtin 也没有直接导入 React DOM。 | 不应为了外部加载改成 Remote 自挂载应用，或预先要求所有插件导入 `react-dom/client`。 |
-| `@nexus/design-tokens` 仅发布两个 CSS 入口；当前没有独立 JS Design System 包。 | CSS tokens 的共享是既有主题/样式策略问题，不是当前新增 MF singleton 的依据。见 [包定义](../../packages/design-tokens/package.json)。 |
+| `@feforgejs/design-tokens` 仅发布两个 CSS 入口；当前没有独立 JS Design System 包。 | CSS tokens 的共享是既有主题/样式策略问题，不是当前新增 MF singleton 的依据。见 [包定义](../../packages/design-tokens/package.json)。 |
 | `PluginDefinition` 是 descriptor + `activate(context)`。 | Remote expose 应返回此现有定义，不应把 MF `get/init`、SystemJS 或 ESM 传进 Plugin ABI。见 [PluginDefinition](../../packages/plugin-runtime/src/plugin.ts)。 |
 | CSS 的 `?artifact` loader 发射 CSS/资源文件并导出 URL 数组及类名；`builtinCss` 已送给 UI Host。 | 模块加载器不能另行注入或管理插件样式。见 [artifact loader](../../scripts/artifact-css-loader.cjs)、[Host 组装](../../packages/browser-host/src/App.tsx)。 |
 | `ArtifactCssClosure` 用当前 `distribution.ts` 作为 CSS 闭包检查的固定源文件，且 loader/config 引用主仓脚本。 | 独立构建需复用这套闭包语义，把检查根换成 Remote 暴露入口；不能要求 Host 构建读取远程仓源文件。见 [闭包检查](../../apps/console/artifact-css-closure.ts)。 |
@@ -60,9 +60,9 @@ Federation 支持以 `remoteEntry.js` 或 `mf-manifest.json` 为入口，后者�
 
 ### 3.3 Shared 清单必须按真实 module specifier 制定
 
-- 当前 Builtin 的最低集合：`react`、自动 JSX 对应的 `react/jsx-runtime`、`@nexus/plugin-runtime/react`。开发产物另核验 `react/jsx-dev-runtime`。
+- 当前 Builtin 的最低集合：`react`、自动 JSX 对应的 `react/jsx-runtime`、`@feforgejs/plugin-runtime/react`。开发产物另核验 `react/jsx-dev-runtime`。
 - 当前 Builtin 未直接导入 `react-dom` / `react-dom/client`；后续实际使用 Portal 或组件库时，登记其真正使用的 React DOM 入口。`react-dom/client` 当前是 Host 责任，不因 externalization 自动开放另一个 Remote root。
-- 不把所有 `@nexus/*` 或所有 dependencies 自动 shared。纯类型导入不形成运行时实例要求；静态 Contract JSON/常量也不天然需要 singleton。
+- 不把所有 `@feforgejs/*` 或所有 dependencies 自动 shared。纯类型导入不形成运行时实例要求；静态 Contract JSON/常量也不天然需要 singleton。
 - 如果引入带 Theme/Config Context 的 Design System，须验证它的 Context 模块也统一；只共享 React 仍然不够。当前 CSS tokens 继续按现有规则发布。
 
 MF 的精确名称配置仅拦截对应 import，包名根不会自动涵盖 subpaths；前缀匹配虽可用，但会扩大共享面。PoC 优先显式列出当前实际入口，并检查构建输出中是否仍混入 SDK 或 React 副本。[Federation shared：request / subpaths](https://module-federation.io/configure/shared.html)

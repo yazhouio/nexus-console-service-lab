@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useUiClient } from '@nexus/plugin-runtime/react';
-import type { RuntimeSnapshot } from '@nexus/plugin-runtime';
+import { useUiClient } from '@feforgejs/plugin-runtime/react';
+import type { RuntimeSnapshot } from '@feforgejs/plugin-runtime';
 
 export function RuntimeInspector() {
   const client = useUiClient();

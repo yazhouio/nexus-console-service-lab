@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { useUiClient } from '@nexus/plugin-runtime/react';
+import { useUiClient } from '@feforgejs/plugin-runtime/react';
 import classes from './lazy.module.css?artifact';
 export const reactDomCreatePortal = createPortal;
 export function LazyView() {

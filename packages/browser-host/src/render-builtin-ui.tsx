@@ -1,10 +1,10 @@
-import { SurfaceBoundary } from './SurfaceBoundary';
+import { SurfaceBoundary } from './SurfaceBoundary.js';
 import { useLayoutEffect, type ComponentType } from 'react';
-import { renderInTree } from './ManagedBuiltin';
+import { renderInTree } from './ManagedBuiltin.js';
 import { createRoot } from 'react-dom/client';
-import { UiProvider } from '@nexus/plugin-runtime/react';
-import type { UiClient } from '@nexus/plugin-runtime/client';
-import type { UiMounted } from '@nexus/plugin-runtime';
+import { UiProvider } from '@feforgejs/plugin-runtime/react';
+import type { UiClient } from '@feforgejs/plugin-runtime/client';
+import type { UiMounted } from '@feforgejs/plugin-runtime';
 
 /** A Builtin Surface enters ready after React commits and uses the same failure core. */
 export function renderBuiltinUi(

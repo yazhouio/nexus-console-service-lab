@@ -1,5 +1,5 @@
-import { isCapabilityId } from './identifiers';
-import type { CapabilityId, PluginId } from './identifiers';
+import { isCapabilityId } from './identifiers.js';
+import type { CapabilityId, PluginId } from './identifiers.js';
 import {
   PluginResolutionError,
   type DependencyEdge,
@@ -9,7 +9,7 @@ import {
   type ResolutionErrorCode,
   type ResolutionIssue,
   type ResolutionValidationStage,
-} from './plugin';
+} from './plugin.js';
 
 interface IssueInput {
   readonly code: ResolutionErrorCode;

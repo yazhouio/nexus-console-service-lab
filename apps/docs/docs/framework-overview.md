@@ -6,9 +6,9 @@
 
 | 包 | 职责 |
 | --- | --- |
-| `@nexus/plugin-runtime` | 插件声明、依赖解析、路由与贡献接纳、能力调用、Surface/Action 生命周期，以及 Wujie Bridge |
-| `@nexus/browser-host` | 浏览器启动、历史路由、根呈现、恢复入口，以及 Distribution 组装接口 |
-| `@nexus/plugin-build` | 构建时的 CSS artifact 处理与闭包校验；不进入浏览器运行时代码 |
+| `@feforgejs/plugin-runtime` | 插件声明、依赖解析、路由与贡献接纳、能力调用、Surface/Action 生命周期，以及 Wujie Bridge |
+| `@feforgejs/browser-host` | 浏览器启动、历史路由、根呈现、恢复入口，以及 Distribution 组装接口 |
+| `@feforgejs/plugin-build` | 构建时的 CSS artifact 处理与闭包校验；不进入浏览器运行时代码 |
 
 框架定义如何声明 Point、Profile、Capability 和插件，不规定产品必须有集群、Tenant、服务目录或某种侧边栏。其公共接口通过版本演进；发布边界不意味着实现被冻结。npm 包承载 SDK 和构建工具，插件浏览器制品仍需由宿主可访问的地址交付。
 

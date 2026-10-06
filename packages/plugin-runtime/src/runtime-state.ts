@@ -1,4 +1,4 @@
-import type { CapabilityId, PluginId } from './identifiers';
+import type { CapabilityId, PluginId } from './identifiers.js';
 
 export type PluginRuntimeErrorCode =
   | 'ACTIVATION_SCOPE_INACTIVE'

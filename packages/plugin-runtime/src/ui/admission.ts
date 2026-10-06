@@ -3,7 +3,7 @@ import type {
   ExtensionKind,
   HostContributionPolicy,
   PointContributionMetadata,
-} from './definitions';
+} from './definitions.js';
 
 /** A Point alone selects the contract; assertions can only reject that selection. */
 export function admitContribution(

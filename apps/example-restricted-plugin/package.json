@@ -1,5 +1,5 @@
 {
-  "name": "@nexus/example-restricted-plugin",
+  "name": "@feforgejs/example-restricted-plugin",
   "private": true,
   "type": "module",
   "exports": {
@@ -13,14 +13,14 @@
     "dev:preview": "NEXUS_STANDALONE_PREVIEW=true rspack serve --mode development"
   },
   "dependencies": {
-    "@nexus/cluster-api": "workspace:*",
-    "@nexus/console-core-api": "workspace:*",
-    "@nexus/plugin-runtime": "workspace:*",
+    "@feforgejs/cluster-api": "workspace:*",
+    "@feforgejs/console-core-api": "workspace:*",
+    "@feforgejs/plugin-runtime": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@nexus/design-tokens": "workspace:*",
+    "@feforgejs/design-tokens": "workspace:*",
     "@rspack/cli": "catalog:",
     "@rspack/core": "catalog:",
     "@rspack/dev-server": "catalog:",

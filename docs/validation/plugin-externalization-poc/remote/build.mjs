@@ -17,7 +17,7 @@ const shared = {
   'react-dom': share(variant === 'lazybad' ? '^18.0.0' : '19.2.8'),
   ...(variant === 'duplicatesdk'
     ? {}
-    : { '@nexus/plugin-runtime/react': share(variant === 'badsdk' ? '^9.0.0' : '0.1.0') }),
+    : { '@feforgejs/plugin-runtime/react': share(variant === 'badsdk' ? '^9.0.0' : '0.1.0') }),
 };
 const build = await createRsbuild({
   cwd: import.meta.dirname,

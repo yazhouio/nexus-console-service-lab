@@ -1,6 +1,6 @@
-import type { PluginId } from './identifiers';
-import type { ContributionRegistry, SandboxSurfaceDefinition } from './contribution';
-import { uiKey } from './ui/definitions';
+import type { PluginId } from './identifiers.js';
+import type { ContributionRegistry, SandboxSurfaceDefinition } from './contribution.js';
+import { uiKey } from './ui/definitions.js';
 
 export interface SurfaceDefinitionRecord {
   readonly pluginId: PluginId;

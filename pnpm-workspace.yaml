@@ -16,6 +16,7 @@ catalog:
   '@rspack/plugin-react-refresh': 2.0.2
   '@rspress/core': 2.0.21
   '@types/node': 22.20.1
+  '@vitest/coverage-v8': 4.1.11
   '@types/react': 19.2.18
   '@types/react-dom': 19.2.5
   react: 19.2.8
